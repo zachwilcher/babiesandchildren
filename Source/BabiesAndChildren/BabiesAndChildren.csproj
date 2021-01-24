@@ -51,19 +51,12 @@
     <FileAlignment>4096</FileAlignment>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="babygear\BabyApparelProperties.cs" />
-    <None Include="babygear\CompBabyGear.cs" />
-    <None Include="babygear\CompProperties_BabyGear.cs" />
     <Compile Include="Components\Growing_Comp.cs" />
     <Compile Include="Harmony\EquipToyBabyCloth.cs" />
     <Compile Include="Harmony\FacialAnimationPatches.cs" />
     <Compile Include="Harmony\FoodUtilityPatches.cs" />
     <Compile Include="Harmony\GenerateBodyType.cs" />
     <Compile Include="Harmony\AlienRacePatches.cs" />
-    <None Include="Harmony\(obsolete)PawnRendering_backup.cs" />
-    <None Include="Harmony\(obsolete)PawnRendering_Old.cs" />
-    <None Include="Harmony\(obsolete)RenderPawnInternal_AlienRace.cs" />
-    <None Include="Harmony\ChildrenHarmony.cs" />
     <Compile Include="Harmony\HealthAIUtilityPatches.cs" />
     <Compile Include="Harmony\MiscPatches.cs" />
     <Compile Include="Harmony\NeedsPatches.cs" />
@@ -94,21 +87,17 @@
     <Compile Include="Jobs\Driver_DisciplineChild.cs" />
     <Compile Include="Jobs\Driver_HugFriend.cs" />
     <Compile Include="Jobs\Driver_ScoldChild.cs" />
-    <None Include="Jobs\Driver_PlayWithBaby_Old.cs" />
     <Compile Include="Hediffs\Hediff_UnhappyBaby.cs" />
     <Compile Include="Thoughts\ThoughtWorker_CryingBaby.cs" />
     <Compile Include="Children_Core.cs" />
     <None Include="packages.config" />
-    <None Include="Tools\AcquirableTrait.cs" />
     <Compile Include="Thoughts\ThoughtWorker_CarryingToy.cs" />
     <Compile Include="Tools\AssociatedHediff.cs" />
     <Compile Include="Tools\ChildrenUtility.cs" />
     <Compile Include="Tools\CLog.cs" />
-    <None Include="Tools\GenMilestoneTrait.cs" />
     <Compile Include="Tools\GraphicTools.cs" />
     <Compile Include="Tools\PregnancyUtility.cs" />
     <Compile Include="Tools\Tweaks.cs" />
-    <None Include="Tools\TraitPool.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
