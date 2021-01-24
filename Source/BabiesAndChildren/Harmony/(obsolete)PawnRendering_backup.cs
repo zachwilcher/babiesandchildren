@@ -11,24 +11,6 @@ using Verse;
 namespace RimWorldChildren.Harmony
 {
 
-    [HarmonyPatch(typeof(PawnGraphicSet), "ResolveAllGraphics")]
-    public static class PawnGraphicSet_ResolveAllGraphics_Patch
-    {
-        [HarmonyPostfix]
-        internal static void ResolveAllGraphics_Patch(ref PawnGraphicSet __instance)
-        {
-            Pawn pawn = __instance.pawn;
-            PawnGraphicSet _this = __instance;
-            if (pawn.RaceProps.Humanlike)
-            {
-                Children_Drawing.ResolveAgeGraphics(__instance);
-                LongEventHandler.ExecuteWhenFinished(delegate
-                {
-                    _this.ResolveApparelGraphics();
-                });
-            }
-        }
-    }
 
     [HarmonyPatch(typeof(PawnGraphicSet), "ResolveApparelGraphics")]
     public static class PawnGraphicSet_ResolveApparelGraphics_Patch

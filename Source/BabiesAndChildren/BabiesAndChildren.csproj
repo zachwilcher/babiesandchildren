@@ -55,7 +55,6 @@
     <None Include="babygear\CompBabyGear.cs" />
     <None Include="babygear\CompProperties_BabyGear.cs" />
     <Compile Include="Components\Growing_Comp.cs" />
-    <Compile Include="Harmony\AlertPatches.cs" />
     <Compile Include="Harmony\EquipToyBabyCloth.cs" />
     <Compile Include="Harmony\FacialAnimationPatches.cs" />
     <Compile Include="Harmony\FoodUtilityPatches.cs" />
@@ -66,6 +65,7 @@
     <None Include="Harmony\(obsolete)RenderPawnInternal_AlienRace.cs" />
     <None Include="Harmony\ChildrenHarmony.cs" />
     <Compile Include="Harmony\HealthAIUtilityPatches.cs" />
+    <Compile Include="Harmony\MiscPatches.cs" />
     <Compile Include="Harmony\NeedsPatches.cs" />
     <Compile Include="Harmony\PackFood.cs" />
     <Compile Include="Harmony\PawnGraphicSetPatches.cs" />
@@ -73,10 +73,11 @@
     <Compile Include="Harmony\PawnRendering_Reworked.cs" />
     <Compile Include="Harmony\RestUtilityPatches.cs" />
     <Compile Include="Harmony\Thoughts.cs" />
+    <Compile Include="Hediffs\Hediff_Baby.cs" />
+    <Compile Include="Hediffs\Hediff_NoFlag.cs" />
     <Compile Include="Jobs\Driver_FeedBaby.cs" />
     <Compile Include="Jobs\Driver_BabyNuzzle.cs" />
     <Compile Include="Jobs\Driver_PlayWithBaby_Reworked.cs" />
-    <Compile Include="RJW_Pregnancy.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="Defs\ChildDefOf.cs" />
     <Compile Include="Jobs\MoveBabyToCrib.cs" />
@@ -86,6 +87,7 @@
     <Compile Include="Settings\BnCSettings.cs" />
     <Compile Include="Settings\SettingsController.cs" />
     <Compile Include="Settings\Settings.cs" />
+    <Compile Include="Tools\BabyTools.cs" />
     <Compile Include="Tools\DebugTools.cs" />
     <Compile Include="Thoughts\NewbornDeaths.cs" />
     <Compile Include="Thoughts\Child_Thoughts.cs" />

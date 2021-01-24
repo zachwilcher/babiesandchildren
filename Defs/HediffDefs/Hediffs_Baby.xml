@@ -85,7 +85,7 @@
   <HediffDef>
     <defName>NoManipulationFlag</defName>
     <description>No Manipulation.</description>
-    <hediffClass>BabiesAndChildren.NoFlag</hediffClass>
+    <hediffClass>BabiesAndChildren.Hediff_NoFlag</hediffClass>
     <label>disable manipulation</label>
     <initialSeverity>0.001</initialSeverity>
     <comps>

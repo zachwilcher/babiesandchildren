@@ -523,7 +523,7 @@ namespace BabiesAndChildren
                                 if (mother != null)
                                 {
                                     ChildrenUtility.Fixed_Rand rand = new ChildrenUtility.Fixed_Rand((int)mother.ageTracker.AgeBiologicalTicks);
-                                    NewBaby.SetBabySkillsAndPassions(pawn, mother, father, rand);
+                                    BabyTools.SetBabySkillsAndPassions(pawn, mother, father, rand);
                                     List<SkillDef> allDefsListForReading = DefDatabase<SkillDef>.AllDefsListForReading;
                                     for (int i = 0; i < allDefsListForReading.Count; i++)
                                     {

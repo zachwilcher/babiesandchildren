@@ -1,93 +1,13 @@
-﻿using HarmonyLib;
-using RimWorld;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using HarmonyLib;
+using RimWorld;
 using Verse;
 using Verse.Sound;
 
 namespace BabiesAndChildren
 {
-    public class Hediff_Baby : HediffWithComps
-    {
-        public override void PostMake()
-        {
-            //if (!pawn.RaceProps.Humanlike) return;
-            //if (pawn.def.defName != "Human")
-            //{
-            //    pawn.def.defName = "Human";
-            //}
-
-            //if (pawn.TryGetComp<Growing_Comp>() != null)
-            //{
-            //    NewBaby.BabyProcess(pawn);
-
-            //    //pawn.story.traits.allTraits.RemoveRange(0, (pawn.story.traits.allTraits.Count));
-            //    Growing_Comp comp = pawn.TryGetComp<Growing_Comp>();
-            //    comp.Props.ColonyBorn = true;
-            //    //comp.Props.geneticTraits = traitpool;
-            //    comp.Initialize(true);
-            //    //comp.ApplyGeneticTraits();
-            //}
-
-            base.PostMake();
-        }
-
-        public override void PostRemoved()
-        {
-            if (pawn.TryGetComp<Growing_Comp>() != null)
-            {
-                Pawn mother = pawn.GetMother();
-                Pawn father = pawn.GetFather();
-                if (mother != null)
-                {
-                    ChildrenUtility.Fixed_Rand rand = new ChildrenUtility.Fixed_Rand((int)mother.ageTracker.AgeBiologicalTicks);
-                    mother.ageTracker.AgeBiologicalTicks += 2; // for twins
-                    mother.ageTracker.AgeChronologicalTicks += 2;
-                    if (rand.Fixed_RandChance(BnCSettings.STILLBORN_CHANCE))
-                    {
-                        NewBaby.Miscarry(pawn, mother, father);
-                        return;
-                    }
-                    NewBaby.BabyProcess(pawn, mother, father, rand);
-                    //pawn.story.traits.allTraits.RemoveRange(0, (pawn.story.traits.allTraits.Count));
-                    Growing_Comp comp = pawn.TryGetComp<Growing_Comp>();
-                    comp.Props.ColonyBorn = true;
-                    //comp.Props.geneticTraits = traitpool;
-                    comp.Initialize(true);
-                    //comp.ApplyGeneticTraits();
-                    pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtDef.Named("JustBorn"));
-                }
-            }
-        }
-    }
-    public class NoFlag : HediffWithComps
-    {
-        public override void PostRemoved()
-        {
-            List<SkillDef> allDefsListForReading = DefDatabase<SkillDef>.AllDefsListForReading;
-            for (int i = 0; i < allDefsListForReading.Count; i++)
-            {
-                SkillDef skillDef = allDefsListForReading[i];
-                pawn.skills.Learn(skillDef, 100, true);
-                CLog.DevMessage("Showbaby skill>> " + pawn.Name + "'s " + skillDef.defName + " Skills set =" + pawn.skills.GetSkill(skillDef));
-            }
-            if (pawn.story.traits.HasTrait(ChildTraitDefOf.Newtype))
-            {
-                pawn.skills.GetSkill(SkillDefOf.Shooting).Level += 5;
-                pawn.skills.GetSkill(SkillDefOf.Melee).Level += 5;
-            }
-            if (pawn.story.traits.HasTrait(TraitDefOf.Brawler))
-            {
-                pawn.skills.GetSkill(SkillDefOf.Shooting).Level -= 4;
-                pawn.skills.GetSkill(SkillDefOf.Melee).Level += 4;
-            }
-            //pawn.Notify_DisabledWorkTypesChanged();
-            //pawn.skills.Notify_SkillDisablesChanged();
-            //MeditationFocusTypeAvailabilityCache.ClearFor(pawn);
-            base.PostRemoved();
-        }
-    }
-    public static class NewBaby
+    public static class BabyTools
     {
         public static void BabyProcess(Pawn pawn, Pawn mother, Pawn father, ChildrenUtility.Fixed_Rand rand)
         {
