@@ -49,7 +49,7 @@
 
   <ThoughtDef>
     <defName>CryingBaby</defName>
-    <workerClass>RimWorldChildren.ThoughtWorker_CryingBaby</workerClass>
+    <workerClass>BabiesAndChildren.ThoughtWorker_CryingBaby</workerClass>
     <stages>
       <li>
         <label>crying baby</label>

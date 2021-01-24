@@ -70,7 +70,7 @@
   <HediffDef>
     <defName>BabyState</defName>
     <description>This child is still growing. Encourage them to perform activities that help them develop.</description>
-    <hediffClass>RimWorldChildren.Hediff_Baby</hediffClass>
+    <hediffClass>BabiesAndChildren.Hediff_Baby</hediffClass>
     <label>BabyState</label>
     <initialSeverity>0.001</initialSeverity>
     <comps>
@@ -85,7 +85,7 @@
   <HediffDef>
     <defName>NoManipulationFlag</defName>
     <description>No Manipulation.</description>
-    <hediffClass>RimWorldChildren.NoFlag</hediffClass>
+    <hediffClass>BabiesAndChildren.NoFlag</hediffClass>
     <label>disable manipulation</label>
     <initialSeverity>0.001</initialSeverity>
     <comps>
@@ -100,7 +100,7 @@
   <HediffDef>
     <defName>UnhappyBaby</defName>
     <description>Baby is unhappy and needs attention</description>
-    <hediffClass>RimWorldChildren.Hediff_UnhappyBaby</hediffClass>
+    <hediffClass>BabiesAndChildren.Hediff_UnhappyBaby</hediffClass>
     <label>unhappy baby</label>
   </HediffDef>
 </Defs>

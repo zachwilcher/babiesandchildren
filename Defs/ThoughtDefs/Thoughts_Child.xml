@@ -3,7 +3,7 @@
   
   <ThoughtDef>
     <defName>NearParent</defName>
-    <workerClass>RimWorldChildren.ThoughtWorker_NearParents</workerClass>
+    <workerClass>BabiesAndChildren.ThoughtWorker_NearParents</workerClass>
     <stages>
       <li>
         <label>near mom</label>
@@ -25,7 +25,7 @@
   
   <ThoughtDef>
     <defName>ScaredOfTheDark</defName>
-    <workerClass>RimWorldChildren.ThoughtWorker_ScaredOfTheDark</workerClass>
+    <workerClass>BabiesAndChildren.ThoughtWorker_ScaredOfTheDark</workerClass>
     <nullifyingTraits>
       <li>Psychopath</li>
       <li>Undergrounder</li>

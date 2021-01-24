@@ -9,12 +9,12 @@
       <subNodes>
         <li Class="ThinkNode_ConditionalHasFaction">
           <subNodes>
-            <li Class="RimWorldChildren.ThinkNode_ChancePerHour_BabyNuzzle">
+            <li Class="BabiesAndChildren.ThinkNode_ChancePerHour_BabyNuzzle">
               <subNodes>
                 <li Class="ThinkNode_Tagger">
                   <tagToGive>Misc</tagToGive>
                   <subNodes>
-                    <li Class="RimWorldChildren.JobGiver_BabyNuzzle" />
+                    <li Class="BabiesAndChildren.JobGiver_BabyNuzzle" />
                   </subNodes>
                 </li>
               </subNodes>
@@ -27,7 +27,7 @@
   
   <JobDef>
     <defName>BabyNuzzle</defName>
-    <driverClass>RimWorldChildren.JobDriver_BabyNuzzle</driverClass>
+    <driverClass>BabiesAndChildren.JobDriver_BabyNuzzle</driverClass>
     <reportString>acting cute TargetA.</reportString>
     <allowOpportunisticPrefix>true</allowOpportunisticPrefix>
   </JobDef>
@@ -37,7 +37,7 @@
     <label>babynuzzle</label>
     <interactionMote>Mote_Thought</interactionMote>
     <symbol>Things/Motes/SpeechSymbols/BabyNuzzle</symbol>
-    <workerClass>RimWorldChildren.InteractionWorker_BabyNuzzle</workerClass>
+    <workerClass>BabiesAndChildren.InteractionWorker_BabyNuzzle</workerClass>
     <logRulesInitiator>
       <rulesStrings>
         <li>r_logentry(p=2)->[INITIATOR_nameDef] [nuzzleadverb] [nuzzled] [RECIPIENT_nameDef].</li>

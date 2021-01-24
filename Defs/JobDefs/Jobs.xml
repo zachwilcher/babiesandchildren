@@ -3,19 +3,19 @@
   
   <JobDef>
 	<defName>DisciplineChild</defName>
-	<driverClass>RimWorldChildren.JobDriver_DisciplineChild</driverClass>
+	<driverClass>BabiesAndChildren.JobDriver_DisciplineChild</driverClass>
 	<reportString>Disciplining TargetA.</reportString>
   </JobDef> 
   
   <JobDef>
 	<defName>ScoldChild</defName>
-	<driverClass>RimWorldChildren.JobDriver_ScoldChild</driverClass>
+	<driverClass>BabiesAndChildren.JobDriver_ScoldChild</driverClass>
 	<reportString>Scolding TargetA.</reportString>
   </JobDef>
   
   <JobDef>
 	<defName>BreastfeedBaby</defName>
-	<driverClass>RimWorldChildren.JobDriver_BreastfeedBaby</driverClass>
+	<driverClass>BabiesAndChildren.JobDriver_BreastfeedBaby</driverClass>
 	<reportString>Breastfeeding TargetA.</reportString>
   </JobDef>
 
@@ -27,7 +27,7 @@
   
   <JobDef>
 	<defName>TakeBabyToBedAndFeed</defName>
-	<driverClass>RimWorldChildren.JobDriver_TakeBabyToBedAndFeed</driverClass>
+	<driverClass>BabiesAndChildren.JobDriver_TakeBabyToBedAndFeed</driverClass>
 	<reportString>Taking TargetB to crib to feed TargetA.</reportString>
   </JobDef>
 	
@@ -39,7 +39,7 @@
 
   <JobDef>
 	<defName>PlayWithBaby</defName>
-	<driverClass>RimWorldChildren.JobDriver_PlayWithBaby</driverClass>
+	<driverClass>BabiesAndChildren.JobDriver_PlayWithBaby</driverClass>
 	<reportString>Playing with TargetA.</reportString>
 	<joyDuration>1500</joyDuration>
 	<joyGainRate>1</joyGainRate>

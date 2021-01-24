@@ -68,7 +68,7 @@
     </colorGenerator>
     <generateAllowChance>0</generateAllowChance>
     <!--<comps>
-      <li Class="RimWorldChildren.babygear.CompProperties_BabyGear">
+      <li Class="BabiesAndChildren.babygear.CompProperties_BabyGear">
         <isBabyGear>true</isBabyGear>
       </li>
     </comps>-->

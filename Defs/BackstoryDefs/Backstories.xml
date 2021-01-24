@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Defs>
 
-  <RimWorldChildren.BackstoryDef>
+  <BabiesAndChildren.BackstoryDef>
     <defName>NA_Childhood_Disabled</defName>
     <title>Baby</title>
     <titleShort>Baby</titleShort>
@@ -28,9 +28,9 @@
       <li>Civil</li>
     </spawnCategories>
     <shuffleable>false</shuffleable>
-  </RimWorldChildren.BackstoryDef>
+  </BabiesAndChildren.BackstoryDef>
   
-  <RimWorldChildren.BackstoryDef>
+  <BabiesAndChildren.BackstoryDef>
     <defName>NA_Childhood</defName>
     <title>Child</title>
     <titleShort>Child</titleShort>
@@ -41,9 +41,9 @@
       <li>Civil</li>
     </spawnCategories>
     <shuffleable>false</shuffleable>
-  </RimWorldChildren.BackstoryDef>
+  </BabiesAndChildren.BackstoryDef>
   
-  <RimWorldChildren.BackstoryDef>
+  <BabiesAndChildren.BackstoryDef>
     <defName>NA_Adulthood</defName>
     <title>N/A</title>
     <titleShort>N/A</titleShort>
@@ -54,9 +54,9 @@
       <li>Civil</li>
     </spawnCategories>
     <shuffleable>false</shuffleable>
-  </RimWorldChildren.BackstoryDef>
+  </BabiesAndChildren.BackstoryDef>
   
-  <RimWorldChildren.BackstoryDef>
+  <BabiesAndChildren.BackstoryDef>
     <defName>Rimchild</defName>
     <title>Rimworld child</title>
     <titleShort>Rimchild</titleShort>
@@ -67,6 +67,6 @@
       <li>Civil</li>
     </spawnCategories>
     <shuffleable>false</shuffleable>
-  </RimWorldChildren.BackstoryDef>
+  </BabiesAndChildren.BackstoryDef>
 
 </Defs>

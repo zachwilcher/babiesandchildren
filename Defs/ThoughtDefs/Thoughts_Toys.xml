@@ -2,7 +2,7 @@
 <Defs>
   <ThoughtDef>
     <defName>ChildWithToys</defName>
-    <workerClass>RimWorldChildren.ThoughtWorker_CarryingToy</workerClass>
+    <workerClass>BabiesAndChildren.ThoughtWorker_CarryingToy</workerClass>
     <validWhileDespawned>true</validWhileDespawned>
     <stages>
       <!-- 인형이 없는아이 : 보통 -->

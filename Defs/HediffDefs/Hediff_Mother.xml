@@ -50,10 +50,10 @@
 
   <HediffDef ParentName="pregnancy_base">
     <defName>HumanPregnancy</defName>
-    <hediffClass>RimWorldChildren.Hediff_HumanPregnancy</hediffClass>
+    <hediffClass>BabiesAndChildren.Hediff_HumanPregnancy</hediffClass>
 
     <comps>
-      <li Class="RimWorldChildren.CompProperties_Miscarriable">
+      <li Class="BabiesAndChildren.CompProperties_Miscarriable">
         <woundsCauseMiscarriage>true</woundsCauseMiscarriage>
         <starvationCauseMiscarriage>true</starvationCauseMiscarriage>
         <hediffsCauseMiscarriage>
@@ -63,7 +63,7 @@
           </li>
         </hediffsCauseMiscarriage>
       </li>
-      <li Class="RimWorldChildren.CompProperties_Abortable">
+      <li Class="BabiesAndChildren.CompProperties_Abortable">
         <maxSeverity>0.3</maxSeverity>
       </li>
     </comps>
