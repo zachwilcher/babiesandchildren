@@ -89,7 +89,7 @@ namespace BabiesAndChildren
         {
             Pawn pawn = (Pawn)parent;
             if (pawn.needs.food != null && (pawn.needs.food.CurLevelPercentage < pawn.needs.food.PercentageThreshHungry ||
-                    pawn.needs.joy?.CurLevelPercentage < 0.1f) || pawn.health.HasHediffsNeedingTend() && !pawn.health.hediffSet.HasHediff(ChildHediffDefOf.UnhappyBaby))
+                                            pawn.needs.joy?.CurLevelPercentage < 0.1f) || pawn.health.HasHediffsNeedingTend() && !pawn.health.hediffSet.HasHediff(ChildHediffDefOf.UnhappyBaby))
             {
                 pawn.health.AddHediff(ChildHediffDefOf.UnhappyBaby, null, null);
             }
@@ -113,7 +113,16 @@ namespace BabiesAndChildren
         public void Destroy()
         {
             DestroyHediffs();
-            if (this != null) parent.AllComps.Remove(this);
+            if (this != null)
+            {
+                parent.AllComps.Remove(this);
+                //By removing this comp from AllComps
+                //JecTools causes an out of bounds exception
+                //Fixed this by adding a component that does nothing
+                //allowing AllComps.Count to stay the same
+                //... At least that's what I think is happening
+                parent.AllComps.Add(new DummyComp());
+            }
         }
 
         /// <summary>
@@ -209,6 +218,7 @@ namespace BabiesAndChildren
                 {
                     ChildrenUtility.ChangeBodyType(pawn, false, false);
                 }
+                CLog.Message("Destroying Growing_Comp for: " + pawn.LabelShort + " since they are fully grown.");
                 Destroy();
             }
         }

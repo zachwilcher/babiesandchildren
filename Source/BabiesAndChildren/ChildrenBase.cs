@@ -1,8 +1,4 @@
-﻿using HarmonyLib;
-using HugsLib;
-using RimWorld;
-using System;
-using System.Collections.Generic;
+﻿using HugsLib;
 using Verse;
 
 namespace BabiesAndChildren
@@ -10,17 +6,32 @@ namespace BabiesAndChildren
     public class ChildrenBase : ModBase
     {
         public static ChildrenBase Instance { get; private set; }
+        
         public override string ModIdentifier
         {
             get { return "Babies_and_Children"; }
         }
 
-
         public static bool ModCSL_ON = false;
         public static bool ModRJW_ON = false;
         public static bool ModWIP_ON = false;
 
-        public ChildrenBase() { Instance = this; }
+        private ChildrenBase()
+        {
+            Instance = this;
+        }
+
+        public override void DefsLoaded()
+        {
+            foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefs)
+            {
+                if (thingDef.race != null && thingDef.race.Humanlike && thingDef.race.lifeStageAges.Count == 5)
+                {
+                    thingDef.comps.Add(new CompProperties_Growing());         
+                }
+            }
+
+        }
 
         public override void MapLoaded(Map map)
         {
@@ -67,24 +78,4 @@ namespace BabiesAndChildren
         public const int Adult = 4;
     }
 
-    internal static class TranspilerHelper
-    {
-        internal static List<ThingStuffPair> FilterChildWeapons(Pawn pawn, List<ThingStuffPair> weapons)
-        {
-            var weapons_out = new List<ThingStuffPair>();
-            if (weapons.Count > 0)
-                foreach (ThingStuffPair weapon in weapons)
-                {
-                    if (weapon.thing.BaseMass < ChildrenUtility.ChildMaxWeaponMass(pawn))
-                    {
-                        weapons_out.Add(weapon);
-                    }
-                }
-            return weapons_out;
-        }
-
-    }
-
-
 }
-

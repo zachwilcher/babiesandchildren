@@ -98,32 +98,6 @@ namespace BabiesAndChildren
             {
                 b.workDisables = WorkTags.None;
             }
-            //Dictionary<string, int> skGains = skillGains.ToDictionary(i => i.defName, i => i.amount);
-
-            //foreach (KeyValuePair<string, int> current in skGains)
-            //{
-            //    b.skillGainsResolved.Add(DefDatabase<SkillDef>.GetNamed(current.Key, true), current.Value);
-            //}
-
-            //if (forcedTraits.Count > 0)
-            //{
-            //    b.forcedTraits = new List<TraitEntry>();
-            //    foreach (var trait in forcedTraits)
-            //    {
-            //        var newTrait = new TraitEntry(trait.def, trait.degree);
-            //        b.forcedTraits.Add(newTrait);
-            //    }
-            //}
-
-            //if (disallowedTraits.Count > 0)
-            //{
-            //    b.disallowedTraits = new List<TraitEntry>();
-            //    foreach (var trait in disallowedTraits)
-            //    {
-            //        var newTrait = new TraitEntry(trait.def, trait.degree);
-            //        b.disallowedTraits.Add(newTrait);
-            //    }
-            //}
 
             b.ResolveReferences();
             b.PostLoad();

@@ -51,27 +51,23 @@
     <FileAlignment>4096</FileAlignment>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Components\DummyComp.cs" />
     <Compile Include="Components\Growing_Comp.cs" />
-    <Compile Include="Harmony\EquipToyBabyCloth.cs" />
     <Compile Include="Harmony\FacialAnimationPatches.cs" />
-    <Compile Include="Harmony\FoodUtilityPatches.cs" />
-    <Compile Include="Harmony\GenerateBodyType.cs" />
+    <Compile Include="Harmony\JobGiverPatches.cs" />
+    <Compile Include="Harmony\PawnGeneratorPatches.cs" />
     <Compile Include="Harmony\AlienRacePatches.cs" />
-    <Compile Include="Harmony\HealthAIUtilityPatches.cs" />
     <Compile Include="Harmony\MiscPatches.cs" />
-    <Compile Include="Harmony\NeedsPatches.cs" />
-    <Compile Include="Harmony\PackFood.cs" />
+    <Compile Include="Harmony\NeedPatches.cs" />
     <Compile Include="Harmony\PawnGraphicSetPatches.cs" />
     <Compile Include="Harmony\PawnRendererPatches.cs" />
-    <Compile Include="Harmony\PawnRendering_Reworked.cs" />
     <Compile Include="Harmony\RestUtilityPatches.cs" />
-    <Compile Include="Harmony\Thoughts.cs" />
     <Compile Include="Hediffs\Hediff_Baby.cs" />
     <Compile Include="Hediffs\Hediff_NoFlag.cs" />
+    <Compile Include="Initializer.cs" />
     <Compile Include="Jobs\Driver_FeedBaby.cs" />
     <Compile Include="Jobs\Driver_BabyNuzzle.cs" />
     <Compile Include="Jobs\Driver_PlayWithBaby_Reworked.cs" />
-    <Compile Include="Initializer.cs" />
     <Compile Include="Defs\ChildDefOf.cs" />
     <Compile Include="Jobs\MoveBabyToCrib.cs" />
     <Compile Include="Jobs\MoveBabyToCribAndFeed.cs" />
@@ -89,12 +85,11 @@
     <Compile Include="Jobs\Driver_ScoldChild.cs" />
     <Compile Include="Hediffs\Hediff_UnhappyBaby.cs" />
     <Compile Include="Thoughts\ThoughtWorker_CryingBaby.cs" />
-    <Compile Include="Children_Core.cs" />
+    <Compile Include="ChildrenBase.cs" />
     <None Include="packages.config" />
     <Compile Include="Thoughts\ThoughtWorker_CarryingToy.cs" />
-    <Compile Include="Tools\AssociatedHediff.cs" />
     <Compile Include="Tools\ChildrenUtility.cs" />
-    <Compile Include="Tools\CLog.cs" />
+    <Compile Include="Tools\BnCLog.cs" />
     <Compile Include="Tools\GraphicTools.cs" />
     <Compile Include="Tools\PregnancyUtility.cs" />
     <Compile Include="Tools\Tweaks.cs" />

@@ -117,14 +117,14 @@ namespace BabiesAndChildren
             if (listingStandard.ButtonText(t.Translate()))
             {
                 Find.WindowStack.Add(new FloatMenu(new List<FloatMenuOption>()
-                    {
-                      new FloatMenuOption("BabyInheritPercentage_Desc_None".Translate(), (() => baby_Inherit_percentage = BabyInheritPercentageHandleEnum._None)),
-                      new FloatMenuOption("BabyInheritPercentage_Desc_25".Translate(), (() => baby_Inherit_percentage = BabyInheritPercentageHandleEnum._25)),
-                      new FloatMenuOption("BabyInheritPercentage_Desc_50".Translate(), (() => baby_Inherit_percentage = BabyInheritPercentageHandleEnum._50)),
-                      new FloatMenuOption("BabyInheritPercentage_Desc_75".Translate(), (() => baby_Inherit_percentage = BabyInheritPercentageHandleEnum._75)),
-                      new FloatMenuOption("BabyInheritPercentage_Desc_90".Translate(), (() => baby_Inherit_percentage = BabyInheritPercentageHandleEnum._90)),
-                      new FloatMenuOption("BabyInheritPercentage_Desc_Random".Translate(), (() => baby_Inherit_percentage = BabyInheritPercentageHandleEnum._Random)),
-                    }));
+                {
+                    new FloatMenuOption("BabyInheritPercentage_Desc_None".Translate(), (() => baby_Inherit_percentage = BabyInheritPercentageHandleEnum._None)),
+                    new FloatMenuOption("BabyInheritPercentage_Desc_25".Translate(), (() => baby_Inherit_percentage = BabyInheritPercentageHandleEnum._25)),
+                    new FloatMenuOption("BabyInheritPercentage_Desc_50".Translate(), (() => baby_Inherit_percentage = BabyInheritPercentageHandleEnum._50)),
+                    new FloatMenuOption("BabyInheritPercentage_Desc_75".Translate(), (() => baby_Inherit_percentage = BabyInheritPercentageHandleEnum._75)),
+                    new FloatMenuOption("BabyInheritPercentage_Desc_90".Translate(), (() => baby_Inherit_percentage = BabyInheritPercentageHandleEnum._90)),
+                    new FloatMenuOption("BabyInheritPercentage_Desc_Random".Translate(), (() => baby_Inherit_percentage = BabyInheritPercentageHandleEnum._Random)),
+                }));
             }
 
 

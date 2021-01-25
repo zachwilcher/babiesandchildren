@@ -46,7 +46,7 @@ namespace BabiesAndChildren
             if (a == null || b == null) return false;
 
             return (a.GetRoom() == b.GetRoom() && 
-                a.Position.DistanceTo(b.Position) < maxDist);
+                    a.Position.DistanceTo(b.Position) < maxDist);
         }
     }
 }

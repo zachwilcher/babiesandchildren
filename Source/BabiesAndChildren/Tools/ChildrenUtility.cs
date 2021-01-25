@@ -3,8 +3,10 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Verse;
 using Verse.AI;
+using Random = System.Random;
 
 namespace BabiesAndChildren
 {
@@ -225,7 +227,7 @@ namespace BabiesAndChildren
         /// </summary>
         public class Fixed_Rand
         {
-            private System.Random rand;
+            private Random rand;
             private int nextindex;
             public Fixed_Rand(int seed)
             {
@@ -269,11 +271,12 @@ namespace BabiesAndChildren
         {
             foreach (ModMetaData modMetaData in ModLister.AllInstalledMods)
             {
-                if (modMetaData.Active && modMetaData.Name.ToLower().StartsWith(modName.ToLower()))
+                if ((modMetaData != null) && (modMetaData.enabled) && (modMetaData.Name.StartsWith(modName)))
                 {
                     return true;
                 }
             }
+
             return false;
         }
 
@@ -543,63 +546,92 @@ namespace BabiesAndChildren
         } 
         
         //Modified version of Children.PawnRenderer_RenderPawnInternal_Patch:GetBodysizeScaling
-        public static float GetBodySizeScaling(Pawn pawn)
+        public static float GetHairSize(float n, Pawn pawn)
         {
-				float num = 1f;
-				float num2 = 1f;
-                Pawn_AgeTracker ageTracker = pawn.ageTracker;
-               
-                Func<float, float> roundFloat = x => (float) Math.Round((double) x, 2);
-                
-				try
-				{
-					int curLifeStageIndex = pawn.ageTracker.CurLifeStageIndex;
-					int lastLifeStageIndex = pawn.RaceProps.lifeStageAges.Count - 1;
-                   
-					LifeStageAge curLifeStageAge = pawn.RaceProps.lifeStageAges[curLifeStageIndex];
-                    float curBodySizeFactor = curLifeStageAge.def.bodySizeFactor;
-                    float currLifeStageProgression = ageTracker.AgeBiologicalYearsFloat - curLifeStageAge.minAge;
+            if (pawn.ageTracker.CurLifeStageIndex > AgeStage.Child) return 1f;
+            if (n != 0)
+            {
+                if (pawn.def.defName == "Human")
+                {
+                    return BnCSettings.HumanHairSize * BnCSettings.ShowHairSize * AgeFactor(pawn);
+                }
+                else return BnCSettings.AlienHairSize * BnCSettings.ShowHairSize * AgeFactor(pawn);
+            }
 
-                    num = curBodySizeFactor;
-                    
-                    //at the last lifestage and the last lifestage is not the first
-					if ((lastLifeStageIndex == curLifeStageIndex) && (curLifeStageIndex != 0) && (curBodySizeFactor != 1f))
-					{
-						LifeStageAge prevLifeStageAge = pawn.RaceProps.lifeStageAges[curLifeStageIndex - 1];
-                        float prevBodySizeFactor = prevLifeStageAge.def.bodySizeFactor;
-                        float prevLifeStageDuration = curLifeStageAge.minAge - prevLifeStageAge.minAge;
-                        
-                        num = prevBodySizeFactor + roundFloat(
-                            (curBodySizeFactor - prevBodySizeFactor) /
-                            (curLifeStageAge.minAge - prevLifeStageAge.minAge) *
-                            (currLifeStageProgression + prevLifeStageDuration));
-                    } 
-                    else if (pawn.RaceProps.lifeStageAges.Count <= 1)
-                    {
-                        num = pawn.RaceProps.baseBodySize;
-                    }
-					else 
-					{
-						LifeStageAge nextLifeStageAge = pawn.RaceProps.lifeStageAges[curLifeStageIndex + 1];
-                        float nextBodySizeFactor = nextLifeStageAge.def.bodySizeFactor;
-                        float currLifeStageDuration = nextLifeStageAge.minAge - curLifeStageAge.minAge;
-                        
-                        num = curLifeStageAge.def.bodySizeFactor + roundFloat((nextBodySizeFactor - curBodySizeFactor) /
-                            currLifeStageDuration * currLifeStageProgression);
-                    }
-					if (pawn.RaceProps.baseBodySize > 0f)
-					{
-						num2 = pawn.RaceProps.baseBodySize;
-					}
-				}
-				catch
-				{
-				}
-				return num * num2;
-            
+            if (pawn.def.defName == "Human")
+            {
+                return BnCSettings.HumanHairSize * AgeFactor(pawn);
+            }
+            else return BnCSettings.AlienHairSize * AgeFactor(pawn);
         }
 
-        
+        public static float GetHeadSize(Pawn pawn)
+        {
+            if (pawn.def.defName == "Human")
+            {
+                return BnCSettings.HumanHeadSize * AgeFactor(pawn);
+            }
+            else
+            {
+                if (BnCSettings.human_like_head_enabled && ChildrenUtility.HumanFaceRaces(pawn)) return BnCSettings.AlienHeadSizeB * AgeFactor(pawn);
+                else return BnCSettings.AlienHeadSizeA * AgeFactor(pawn);
+            }
+        }
+
+        public static float GetBodySize(Pawn pawn)
+        {
+            if (pawn.def.defName == "Human")
+            {
+                return BnCSettings.HumanBodySize * AgeFactor(pawn);
+            }
+            else return BnCSettings.AlienBodySize * AgeFactor(pawn);
+        }
+
+        public static Vector3 ModifiedHairLoc(Vector3 pos, Pawn pawn)
+        {
+            Vector3 newPos = new Vector3(pos.x, pos.y, pos.z);
+            if (pawn.ageTracker.CurLifeStageIndex != AgeStage.Child) return newPos;
+            newPos.y += BnCSettings.ShowHairLocY;
+
+            if (pawn.def.defName == "Human")
+            {
+                newPos.z += BnCSettings.ShowHairHumanLocZ * AgeFactor(pawn);
+            }
+            else
+            {
+                if (BnCSettings.human_like_head_enabled && ChildrenUtility.HumanFaceRaces(pawn))
+                {
+                    newPos.z += BnCSettings.ShowHairAlienHFLocZ * AgeFactor(pawn);
+                }
+                else
+                {
+                    newPos.z += BnCSettings.ShowHairAlienLocZ * AgeFactor(pawn);
+                }
+            }
+            return newPos;
+        }
+
+        public static float AgeFactor(Pawn pawn)
+        {
+            if (pawn.ageTracker.CurLifeStageIndex < AgeStage.Child) return 1f;
+            float agechild = pawn.def.race.lifeStageAges[AgeStage.Child].minAge;
+            float ageteen = pawn.def.race.lifeStageAges[AgeStage.Teenager].minAge;
+            float now = pawn.ageTracker.AgeBiologicalYearsFloat + 0.1f; // prevent 0 + 0.1f
+
+            float agefac = 0.8f + (0.3f * (now - agechild) / (ageteen - agechild));
+            //if (agefac < 0.7f) return 0.7f;
+            return agefac;
+        }
+
+        /// <summary>
+        /// Get the most appropriate bed list for a pawn. Child pawns will recieve 
+        /// a bed list sorted to prioritize cribs
+        /// </summary>
+        /// <param name="pawn">The pawn being evaluated</param>
+        /// <returns>Sorted list of beds </returns>
+        public static List<ThingDef> GetSortedBeds_RestEffectiveness(Pawn pawn) {
+            return (ChildrenUtility.ShouldUseCrib(pawn)) ? ChildrenUtility.AllBedDefBestToWorstCribRest : RestUtility.AllBedDefBestToWorst;
+        }
     }
 }
 

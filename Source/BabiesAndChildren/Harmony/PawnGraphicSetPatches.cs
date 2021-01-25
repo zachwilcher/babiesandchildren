@@ -3,14 +3,11 @@ using Verse;
 
 namespace BabiesAndChildren.Harmony
 {
-    [HarmonyPatch]
-    public static class PawnGraphicSetPatches
-    {
     [HarmonyPatch(typeof(PawnGraphicSet), "ResolveAllGraphics")]
-    public static class ResolveAllGraphics
+    internal static class PawnGraphicSet_ResolveAllGraphics_Patch
     {
         [HarmonyPostfix]
-        internal static void Postfix(ref PawnGraphicSet __instance)
+        static void Postfix(ref PawnGraphicSet __instance)
         {
             Pawn pawn = __instance.pawn;
             PawnGraphicSet _this = __instance;
@@ -23,7 +20,5 @@ namespace BabiesAndChildren.Harmony
                 });
             }
         }
-    }
-        
     }
 }

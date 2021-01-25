@@ -1,3 +1,4 @@
+using System;
 using RimWorld;
 using BabiesAndChildren.Harmony;
 using UnityEngine;
@@ -7,7 +8,7 @@ namespace BabiesAndChildren
 {
     public static class GraphicTools
     {
-        internal static void ResolveAgeGraphics(PawnGraphicSet graphics)
+        public static void ResolveAgeGraphics(PawnGraphicSet graphics)
         {
             LongEventHandler.ExecuteWhenFinished(delegate
             {
@@ -60,7 +61,7 @@ namespace BabiesAndChildren
             });
         }
 
-        internal static Graphic GetChildHeadGraphics(Shader shader, Color skinColor)
+        public static Graphic GetChildHeadGraphics(Shader shader, Color skinColor)
         {
             Graphic_Multi graphic = null;
             string str = "Male_Child";
@@ -102,6 +103,62 @@ namespace BabiesAndChildren
 
             }
             return newPos;
+        }
+
+        public static float GetBodySizeScaling(Pawn pawn)
+        {
+            float num = 1f;
+            float num2 = 1f;
+            Pawn_AgeTracker ageTracker = pawn.ageTracker;
+               
+            Func<float, float> roundFloat = x => (float) Math.Round((double) x, 2);
+                
+            try
+            {
+                int curLifeStageIndex = pawn.ageTracker.CurLifeStageIndex;
+                int lastLifeStageIndex = pawn.RaceProps.lifeStageAges.Count - 1;
+                   
+                LifeStageAge curLifeStageAge = pawn.RaceProps.lifeStageAges[curLifeStageIndex];
+                float curBodySizeFactor = curLifeStageAge.def.bodySizeFactor;
+                float currLifeStageProgression = ageTracker.AgeBiologicalYearsFloat - curLifeStageAge.minAge;
+
+                num = curBodySizeFactor;
+                    
+                //at the last lifestage and the last lifestage is not the first
+                if ((lastLifeStageIndex == curLifeStageIndex) && (curLifeStageIndex != 0) && (curBodySizeFactor != 1f))
+                {
+                    LifeStageAge prevLifeStageAge = pawn.RaceProps.lifeStageAges[curLifeStageIndex - 1];
+                    float prevBodySizeFactor = prevLifeStageAge.def.bodySizeFactor;
+                    float prevLifeStageDuration = curLifeStageAge.minAge - prevLifeStageAge.minAge;
+                        
+                    num = prevBodySizeFactor + roundFloat(
+                        (curBodySizeFactor - prevBodySizeFactor) /
+                        (curLifeStageAge.minAge - prevLifeStageAge.minAge) *
+                        (currLifeStageProgression + prevLifeStageDuration));
+                } 
+                else if (pawn.RaceProps.lifeStageAges.Count <= 1)
+                {
+                    num = pawn.RaceProps.baseBodySize;
+                }
+                else 
+                {
+                    LifeStageAge nextLifeStageAge = pawn.RaceProps.lifeStageAges[curLifeStageIndex + 1];
+                    float nextBodySizeFactor = nextLifeStageAge.def.bodySizeFactor;
+                    float currLifeStageDuration = nextLifeStageAge.minAge - curLifeStageAge.minAge;
+                        
+                    num = curLifeStageAge.def.bodySizeFactor + roundFloat((nextBodySizeFactor - curBodySizeFactor) /
+                        currLifeStageDuration * currLifeStageProgression);
+                }
+                if (pawn.RaceProps.baseBodySize > 0f)
+                {
+                    num2 = pawn.RaceProps.baseBodySize;
+                }
+            }
+            catch
+            {
+            }
+            return num * num2;
+            
         }
     }
 }

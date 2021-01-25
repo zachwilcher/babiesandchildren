@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
-using Verse;
 
 namespace BabiesAndChildren.Harmony
 {
-    public class FacialAnimationPatches
+    public static class FacialAnimationPatches
     {
-
+        
         private static Type drawFaceGraphicsCompType;
         public static void Patch()
         {
-            
-            HarmonyLib.Harmony harmony = new HarmonyLib.Harmony("RimWorld.babies.and.children.BabiesAndChildren");
+            HarmonyLib.Harmony harmony = new HarmonyLib.Harmony("RimWorld.babies.and.children.FacialAnimationPatches");
             
             drawFaceGraphicsCompType = AccessTools.TypeByName("FacialAnimation.DrawFaceGraphicsComp");
             
@@ -60,7 +58,7 @@ namespace BabiesAndChildren.Harmony
             //ldfld        class ['Assembly-CSharp']Verse.Pawn FacialAnimation.DrawFaceGraphicsComp::pawn
             CodeInstruction loadPawn = CodeInstruction.LoadField(drawFaceGraphicsCompType, "pawn");
             CodeInstruction callGetBodySizeScaling =
-                CodeInstruction.Call(typeof(ChildrenUtility), "GetBodySizeScaling");
+                CodeInstruction.Call(typeof(GraphicTools), "GetBodySizeScaling");
             list.InsertRange(index, new[] {loadThis, loadPawn, callGetBodySizeScaling});
             
             return (IEnumerable<CodeInstruction>) list;

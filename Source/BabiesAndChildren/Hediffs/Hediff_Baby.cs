@@ -5,29 +5,6 @@ namespace BabiesAndChildren
 {
     public class Hediff_Baby : HediffWithComps
     {
-        public override void PostMake()
-        {
-            //if (!pawn.RaceProps.Humanlike) return;
-            //if (pawn.def.defName != "Human")
-            //{
-            //    pawn.def.defName = "Human";
-            //}
-
-            //if (pawn.TryGetComp<Growing_Comp>() != null)
-            //{
-            //    NewBaby.BabyProcess(pawn);
-
-            //    //pawn.story.traits.allTraits.RemoveRange(0, (pawn.story.traits.allTraits.Count));
-            //    Growing_Comp comp = pawn.TryGetComp<Growing_Comp>();
-            //    comp.Props.ColonyBorn = true;
-            //    //comp.Props.geneticTraits = traitpool;
-            //    comp.Initialize(true);
-            //    //comp.ApplyGeneticTraits();
-            //}
-
-            base.PostMake();
-        }
-
         public override void PostRemoved()
         {
             if (pawn.TryGetComp<Growing_Comp>() != null)

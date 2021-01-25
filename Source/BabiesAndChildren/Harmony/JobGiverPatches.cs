@@ -1,4 +1,3 @@
-﻿using System.Collections.Generic;
 using HarmonyLib;
 using RimWorld;
 using Verse;
@@ -6,42 +5,20 @@ using Verse.AI;
 
 namespace BabiesAndChildren.Harmony
 {
-    // Creates a blacklist of thoughts Toddlers cannot have
-    [HarmonyPatch(typeof(ThoughtUtility), "CanGetThought")]
-    public static class ThoughtUtility_CanGetThought_Patch{
-        [HarmonyPostfix]
-        internal static void CanGetThought_Patch(ref Pawn pawn, ref ThoughtDef def, ref bool __result)
-        {
-            // Toddlers and younger can't get these thoughts
-            if (ChildrenUtility.GetAgeStage(pawn) <= AgeStage.Toddler && ChildrenUtility.RaceUsesChildren(pawn)) {
-                List<ThoughtDef> thoughtlist = new List<ThoughtDef>{
-                    ThoughtDefOf.AteWithoutTable,
-                    ThoughtDefOf.KnowPrisonerDiedInnocent,
-                    ThoughtDefOf.KnowPrisonerSold,
-                    ThoughtDefOf.Naked,
-                    ThoughtDefOf.SleepDisturbed,
-                    ThoughtDefOf.SleptOnGround,
-                    ThoughtDef.Named("NeedOutdoors"),
-                    ThoughtDef.Named("SleptInBarracks"),
-                    ThoughtDef.Named("Expectations")
-                };
-                __result = __result && !thoughtlist.Contains(def);
-                
-            }
-        }
-    }
-
-    // Reroutes social fighting to account for children
     [HarmonyPatch(typeof(JobGiver_SocialFighting), "TryGiveJob")]
-    public static class JobGiver_SocialFighting_TryGiveJob_Patch
+    internal static class JobGiver_SocialFighting_TryGiveJob_Patch
     {
         [HarmonyPostfix]
-        internal static void TryGiveJob_Postfix(ref Pawn pawn, ref Job __result){
+        static void Postfix(ref Pawn pawn, ref Job __result){
             Pawn other = ((MentalState_SocialFighting)pawn.MentalState).otherPawn;
             if (__result != null) {
+                if (ChildrenUtility.GetAgeStage(pawn) < AgeStage.Child && ChildrenUtility.RaceUsesChildren(pawn))
+                {
+                    __result = null;
+                }
                 // Make sure kids don't start social fights with adults
                 if (ChildrenUtility.GetAgeStage(other) > 2 && ChildrenUtility.GetAgeStage(pawn) <= 2) {
-                    Log.Message ("Debug: Child starting social fight with adult");
+                    CLog.DevMessage("Debug: Child starting social fight with adult");
                     // Adult will "start" the fight, following the code below
                     other.interactions.StartSocialFight (pawn);
                     __result = null;
@@ -70,4 +47,3 @@ namespace BabiesAndChildren.Harmony
         }
     }
 }
-

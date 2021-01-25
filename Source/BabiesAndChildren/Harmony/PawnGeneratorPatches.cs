@@ -3,11 +3,12 @@ using Verse;
 
 namespace BabiesAndChildren.Harmony
 {
+
     [HarmonyPatch(typeof(PawnGenerator), "GenerateBodyType")]
-    internal static class BodyTypePost
+    internal static class PawnGenerator_GenerateBodyType_Patch
     {
         [HarmonyPostfix]
-        public static void GenerateBodyTypePost(ref Pawn pawn)
+        static void Postfix(ref Pawn pawn)
         {
             if (ChildrenUtility.RaceUsesChildren(pawn) && ChildrenUtility.GetAgeStage(pawn) < AgeStage.Teenager)
             {
@@ -16,4 +17,3 @@ namespace BabiesAndChildren.Harmony
         }
     }
 }
-
