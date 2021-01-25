@@ -49,7 +49,7 @@ namespace BabiesAndChildren
                     {               
                         graphics.headGraphic = GetChildHeadGraphics(ShaderDatabase.CutoutSkin, graphics.pawn.story.SkinColor);
                     }
-                    else if (BnCSettings.human_like_head_enabled && ChildrenUtility.HumanFaceRaces(graphics.pawn))
+                    else if (BnCSettings.human_like_head_enabled && ModTools.HumanFaceRaces(graphics.pawn))
                     {
                         graphics.headGraphic = GetChildHeadGraphics(ShaderDatabase.CutoutSkin, graphics.pawn.story.SkinColor);
                     }

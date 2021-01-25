@@ -91,6 +91,7 @@
     <Compile Include="Tools\ChildrenUtility.cs" />
     <Compile Include="Tools\BnCLog.cs" />
     <Compile Include="Tools\GraphicTools.cs" />
+    <Compile Include="Tools\ModTools.cs" />
     <Compile Include="Tools\PregnancyUtility.cs" />
     <Compile Include="Tools\Tweaks.cs" />
   </ItemGroup>

@@ -15,7 +15,7 @@ namespace BabiesAndChildren
         public static bool ModCSL_ON = false;
         public static bool ModRJW_ON = false;
         public static bool ModWIP_ON = false;
-
+        public static bool ModAT_ON = false;
         private ChildrenBase()
         {
             Instance = this;

@@ -7,6 +7,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using Random = System.Random;
+using StatDefOf = RimWorld.StatDefOf;
 
 namespace BabiesAndChildren
 {
@@ -114,7 +115,7 @@ namespace BabiesAndChildren
         public static bool ShouldUseCrib(Pawn pawn)
         {
             //Probably ought to change this based on size at some point, age stages are unreliable
-            return GetAgeStage(pawn) <= AgeStage.Toddler;
+            return !ModTools.IsRobot(pawn) && (GetAgeStage(pawn) <= AgeStage.Toddler);
         }
 
         // Returns the maximum possible mass of a weapon the specified child can use
@@ -172,13 +173,12 @@ namespace BabiesAndChildren
         // Returns whether a race can become pregnant/have kids etc.
         public static bool RaceUsesChildren(Pawn pawn)
         {
-            // This will eventually be changed to allow alien races to have children
-            //if (pawn.def.defName == "Human")
-            //    return true;
-            if (pawn.RaceProps.Humanlike && pawn.RaceProps.lifeStageAges.Count == 5)
 
-                return true;
-            return false;
+            return !ModTools.IsRobot(pawn) &&
+                   pawn.RaceProps.Humanlike &&
+                   pawn.RaceProps.lifeStageAges.Count == 5;
+
+
         }
 
         /// <summary>
@@ -267,31 +267,6 @@ namespace BabiesAndChildren
             }
         }
 
-        public static bool IsModOn(string modName)
-        {
-            foreach (ModMetaData modMetaData in ModLister.AllInstalledMods)
-            {
-                if ((modMetaData != null) && (modMetaData.enabled) && (modMetaData.Name.StartsWith(modName)))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public static bool HumanFaceRaces(Pawn pawn)
-        {
-            if (
-                   pawn.def.defName == "Kurin_Race"
-                || pawn.def.defName == "Ratkin"
-                )
-            {
-                return true;
-            }
-            return false;
-        }
-
         public static bool ToddlerIsUpright(Pawn pawn)
         {
             float a = pawn.def.race.lifeStageAges[AgeStage.Toddler].minAge + ((pawn.def.race.lifeStageAges[AgeStage.Child].minAge - pawn.def.race.lifeStageAges[AgeStage.Toddler].minAge) / 2);
@@ -329,76 +304,6 @@ namespace BabiesAndChildren
                 if (toy != null && ChildrenUtility.SetMakerTagCheck(toy, "Toy"))
                 {
                     pawn.equipment.TryDropEquipment(toy, out ThingWithComps thingWithComps, pawn.Position, false);
-                }
-            }
-        }
-
-        public static Hediff GetVag(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.def.defName.ToLower().Contains("vagina"));
-        public static Hediff GetPen(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.def.defName.ToLower().Contains("penis"));
-        public static Hediff GetBre(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.def.defName.ToLower().Contains("breasts"));
-        public static Hediff GetAnu(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.def.defName.ToLower().Contains("anus"));
-
-        public static void ChangeSize(Pawn pawn, float Maxsize, bool Is_SizeInit)
-        {
-            if (ChildrenBase.ModRJW_ON)
-            {
-                Hediff bodypart = GetAnu(pawn);
-                if (bodypart == null) return;
-                float size = (float)Rand.Range(0.01f, Maxsize);
-                float cursize = bodypart.Severity;
-                if (Is_SizeInit)
-                {
-                    bodypart.Severity = size;
-                }
-                else
-                {
-                    bodypart.Severity = ((cursize > size) ? cursize : size);
-                }
-
-                if (pawn.gender == Gender.Male)
-                {
-                    bodypart = GetPen(pawn);
-                    if (bodypart == null) return;
-                    size = (float)Rand.Range(0.01f, Maxsize);
-                    cursize = bodypart.Severity;
-                    if (Is_SizeInit)
-                    {
-                        bodypart.Severity = size;
-                    }
-                    else
-                    {
-                        bodypart.Severity = ((cursize > size) ? cursize : size);
-                    }
-                }
-                else if (pawn.gender == Gender.Female)
-                {
-                    bodypart = GetVag(pawn);
-                    if (bodypart == null) return;
-                    Maxsize = ((Maxsize < 0.35f) ? 0.35f : Maxsize);
-                    size = (float)Rand.Range(0.02f, Maxsize);
-                    cursize = bodypart.Severity;
-                    if (Is_SizeInit)
-                    {
-                        bodypart.Severity = size;
-                    }
-                    else
-                    {
-                        bodypart.Severity = ((cursize > size) ? cursize : size);
-                    }
-
-                    bodypart = GetBre(pawn);
-                    if (bodypart == null) return;
-                    if (GetAgeStage(pawn) < AgeStage.Teenager && Maxsize > 0.07f) Maxsize = 0.07f;
-                    size = (float)Rand.Range(0.01f, Maxsize);
-                    cursize = bodypart.Severity;
-                    if (Is_SizeInit)
-                    {
-                        bodypart.Severity = size;
-                    }
-                    else
-                    {
-                        bodypart.Severity = ((cursize > size) ? cursize : size);
-                    }
                 }
             }
         }
@@ -478,7 +383,7 @@ namespace BabiesAndChildren
                     goto default;
 
                 default:
-                    if (!Is_ChangeSize_Skip) ChangeSize(pawn, size, Is_SizeInit);
+                    if (!Is_ChangeSize_Skip) ModTools.ChangeSize(pawn, size, Is_SizeInit);
                     break;
             }
         }
@@ -573,7 +478,7 @@ namespace BabiesAndChildren
             }
             else
             {
-                if (BnCSettings.human_like_head_enabled && ChildrenUtility.HumanFaceRaces(pawn)) return BnCSettings.AlienHeadSizeB * AgeFactor(pawn);
+                if (BnCSettings.human_like_head_enabled && ModTools.HumanFaceRaces(pawn)) return BnCSettings.AlienHeadSizeB * AgeFactor(pawn);
                 else return BnCSettings.AlienHeadSizeA * AgeFactor(pawn);
             }
         }
@@ -599,7 +504,7 @@ namespace BabiesAndChildren
             }
             else
             {
-                if (BnCSettings.human_like_head_enabled && ChildrenUtility.HumanFaceRaces(pawn))
+                if (BnCSettings.human_like_head_enabled && ModTools.HumanFaceRaces(pawn))
                 {
                     newPos.z += BnCSettings.ShowHairAlienHFLocZ * AgeFactor(pawn);
                 }

@@ -234,7 +234,7 @@ namespace BabiesAndChildren.Harmony
                         {
                             AlienPartGenerator.BodyAddon ba = addons[index: i];
                             if (!ba.CanDrawAddon(pawn: pawn)) continue;
-                            if (BnCSettings.human_like_head_enabled && ChildrenUtility.HumanFaceRaces(pawn) && ba.bodyPart.Contains("Head")) continue;
+                            if (BnCSettings.human_like_head_enabled && ModTools.HumanFaceRaces(pawn) && ba.bodyPart.Contains("Head")) continue;
 
                             AlienPartGenerator.RotationOffset offset = rotation == Rot4.South ?
                                 ba.offsets.south :

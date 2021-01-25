@@ -161,9 +161,10 @@ namespace BabiesAndChildren
         public override float RandomSelectionWeight(Pawn initiator, Pawn recipient)
         {
             //Toddlers can play babygames with each other casually, otherwise interaction can only be done with baby
+
             if (ChildrenUtility.GetAgeStage(initiator) == AgeStage.Toddler && ChildrenUtility.GetAgeStage(recipient) == AgeStage.Toddler)
                 return 1f;
-            if (ChildrenUtility.GetAgeStage(recipient) > AgeStage.Baby)
+            if (ModTools.IsRobot(recipient) || (ChildrenUtility.GetAgeStage(recipient) > AgeStage.Baby))
                 return 0;
             return 1f;
         }
