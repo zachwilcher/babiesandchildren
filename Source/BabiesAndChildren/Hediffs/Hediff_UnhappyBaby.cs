@@ -1,8 +1,6 @@
 ﻿using RimWorld;
 using Verse;
 using Verse.Sound;
-using Verse.AI;
-using System.Collections.Generic;
 
 namespace BabiesAndChildren
 {

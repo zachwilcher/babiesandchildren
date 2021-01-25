@@ -12,10 +12,15 @@ namespace BabiesAndChildren
             get { return "Babies_and_Children"; }
         }
 
+        //Children School and Learning
         public static bool ModCSL_ON = false;
+        //RimJobWorld
         public static bool ModRJW_ON = false;
+        //Facial Animation - WIP
         public static bool ModWIP_ON = false;
+        //Android tiers
         public static bool ModAT_ON = false;
+        
         private ChildrenBase()
         {
             Instance = this;
@@ -67,7 +72,6 @@ namespace BabiesAndChildren
             }
         }
     }
-
     // Handy for more readable code when age-checking
     public static class AgeStage
     {
@@ -77,5 +81,6 @@ namespace BabiesAndChildren
         public const int Teenager = 3;
         public const int Adult = 4;
     }
+
 
 }

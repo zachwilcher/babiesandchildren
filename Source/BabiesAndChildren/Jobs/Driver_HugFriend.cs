@@ -1,10 +1,5 @@
-﻿using System;
-using RimWorld;
+﻿using RimWorld;
 using Verse;
-using Verse.AI;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Collections;
 
 namespace BabiesAndChildren
 {
