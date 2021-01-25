@@ -2,6 +2,7 @@
 <ModMetaData>
   <name>Babies and Children</name>
   <author>Thirite, Cheran, Jarry1250, lellel, Kori, Zach</author>
+	<url>https://gitgud.io/CentAtMoney/babiesandchildren</url>
   <packageId>babies.and.children</packageId>
   <supportedVersions>
 	<li>1.2</li>
@@ -30,11 +31,6 @@
 		<li>Abraxas.RJW.RaceSupport</li>
 	</loadAfter>
 
-	<description>[Babies and Children for 1.2] 
-		Adds babies and children in game.
-		And Alien children too!!
-		This mod makes children and babies grow fast.
-		(caution)There is no pregnancy function in this mod. Use with another mod such as rimjob or CSL.
-		This is a modified version of the forked version of Children And Prognancy by lellel. Reworked by Zach.</description>
+	<description>[Babies and Children for 1.2]\nAdds babies and children in game.\nAnd Alien children too!!\nThis mod makes children and babies grow fast.\n(caution) There is no pregnancy function in this mod. Use with another mod such as rimjob or CSL.\nThis is a modified version of the forked version of Children And Pregnancy by lellel.\nReworked by Zach.\ngit repository: https://gitgud.io/CentAtMoney/babiesandchildren\n</description>
 	
 </ModMetaData>
