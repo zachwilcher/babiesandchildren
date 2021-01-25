@@ -28,6 +28,7 @@ namespace BabiesAndChildren
 
         public override void DefsLoaded()
         {
+            CLog.Message("Adding CompProperties_Growing to races.");
             foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefs)
             {
                 if (thingDef.race != null && thingDef.race.Humanlike && thingDef.race.lifeStageAges.Count == 5)
@@ -44,7 +45,7 @@ namespace BabiesAndChildren
             {
                 if (!BnCSettings.OncePerGame)
                 {
-                    //Log.Message("=============BNC Once Per Game=============");
+                    CLog.Message("Changing Body types of all children.");
                     foreach (Map tmap in Current.Game.Maps)
                     {
                         foreach (Pawn pawn in tmap.mapPawns.AllPawnsSpawned)

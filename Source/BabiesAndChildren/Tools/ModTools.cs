@@ -8,12 +8,11 @@ namespace BabiesAndChildren
         {
             foreach (ModMetaData modMetaData in ModLister.AllInstalledMods)
             {
-                if ((modMetaData != null) && (modMetaData.enabled) && (modMetaData.Name.StartsWith(modName)))
+                if ((modMetaData != null) && (modMetaData.Active) && (modMetaData.Name.ToLower().StartsWith(modName.ToLower())))
                 {
                     return true;
                 }
             }
-
             return false;
         }
         public static bool IsRobot(Pawn pawn)

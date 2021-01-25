@@ -44,7 +44,7 @@ namespace BabiesAndChildren.Harmony
             //didn't find the call
             if (index == -1)
             {
-                CLog.Error("call to FacialAnimation.GraphicHelper:DrawMeshNowOrLaterWithScale not found");
+                CLog.Warning("call to FacialAnimation.GraphicHelper:DrawMeshNowOrLaterWithScale not found");
                 return null;
             }
             //remove instruction to load scale 

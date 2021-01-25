@@ -50,7 +50,7 @@ namespace BabiesAndChildren
         /// </summary>
         public void Initialize(bool reinitialize)
         {
-            CLog.Message("Executing GrowingComp Initialize: reinit = " + reinitialize);
+            CLog.DevMessage("Executing GrowingComp Initialize: reinit = " + reinitialize);
             if (!initialized || reinitialize)
             {
                 Pawn pawn = (Pawn)parent;
@@ -218,7 +218,7 @@ namespace BabiesAndChildren
                 {
                     ChildrenUtility.ChangeBodyType(pawn, false, false);
                 }
-                CLog.Message("Destroying Growing_Comp for: " + pawn.LabelShort + " since they are fully grown.");
+                CLog.DevMessage("Destroying Growing_Comp for: " + pawn.LabelShort + " since they are fully grown.");
                 Destroy();
             }
         }

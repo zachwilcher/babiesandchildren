@@ -18,7 +18,7 @@ namespace BabiesAndChildren.Harmony
                 }
                 // Make sure kids don't start social fights with adults
                 if (ChildrenUtility.GetAgeStage(other) > 2 && ChildrenUtility.GetAgeStage(pawn) <= 2) {
-                    CLog.DevMessage("Debug: Child starting social fight with adult");
+                    CLog.DevMessage("Child starting social fight with adult");
                     // Adult will "start" the fight, following the code below
                     other.interactions.StartSocialFight (pawn);
                     __result = null;
@@ -26,7 +26,7 @@ namespace BabiesAndChildren.Harmony
 
                 // Make sure adults don't start social fights with kids (unless psychopaths)
                 if (ChildrenUtility.GetAgeStage(other) <= 2 && ChildrenUtility.GetAgeStage(pawn) > 2 && !pawn.story.traits.HasTrait (TraitDefOf.Psychopath)) {
-                    //Log.Message ("Debug: Adult starting social fight with child");
+                    CLog.DevMessage("Adult starting social fight with child");
                     // If the pawn is not in a bad mood or is kind, they'll just tell them off
                     if (pawn.story.traits.HasTrait (TraitDefOf.Kind) || pawn.needs.mood.CurInstantLevel > 0.45f || pawn.WorkTagIsDisabled(WorkTags.Violent)) {
                         //Log.Message ("Debug: Adult has decided to tell off the child");

@@ -8,7 +8,6 @@ namespace BabiesAndChildren
     {
         static Initializer()
         {
-
             ChildrenBase.ModWIP_ON = ModTools.IsModOn("[NL] Facial Animation - WIP");
             ChildrenBase.ModCSL_ON = ModTools.IsModOn("Children, school and learning");
             ChildrenBase.ModRJW_ON = ModTools.IsModOn("RimJobWorld");

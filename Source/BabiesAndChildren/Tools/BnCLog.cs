@@ -15,6 +15,10 @@ namespace BabiesAndChildren {
             }
         }
 
+        public static void Info(string message)
+        {
+            Log.Message(LogPrefix + message);
+        }
         public static void Message(string message)
         {
             if (BnCSettings.debug_and_gsetting)
