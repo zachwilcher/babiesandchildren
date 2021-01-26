@@ -68,19 +68,6 @@ namespace BabiesAndChildren
 
         }
 
-        /// <summary>
-        /// Returns a random non-birthable AcquirableTrait
-        /// </summary>
-        /// <param name="pawn">The pawn that the traits will be applied to</param>
-        //private AcquirableTrait GetRandomTrait(Pawn pawn)
-        //{
-        //    //Get a list of all genetic traits that aren't already in the baby's list
-        //    IEnumerable<TraitDef> geneticdefs = geneticTraits.Select(a => a.TraitDef);
-        //    IEnumerable<TraitDef> birthableTraits = PregnancyUtility.GetGeneticTraits().Where(def => !geneticdefs.Contains(def));
-        //    //Select a random trait and return it
-        //    TraitDef select = birthableTraits.RandomElement();
-        //    return new AcquirableTrait(select, select.degreeDatas.RandomElement().degree, Rand.Range(0.5f, 1));
-        //}
 
         /// <summary>
         /// This method will update an infant pawn's mood/hediff based on predetermined criteria
@@ -218,7 +205,6 @@ namespace BabiesAndChildren
                 {
                     ChildrenUtility.ChangeBodyType(pawn, false, false);
                 }
-                CLog.DevMessage("Destroying Growing_Comp for: " + pawn.LabelShort + " since they are fully grown.");
                 Destroy();
             }
         }

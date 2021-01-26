@@ -9,37 +9,34 @@ namespace BabiesAndChildren
 {
     public static class BabyTools
     {
-        public static void BabyProcess(Pawn pawn, Pawn mother, Pawn father, ChildrenUtility.Fixed_Rand rand)
+        public static void BabyProcess(Pawn pawn, Pawn mother, Pawn father, MathTools.Fixed_Rand rand)
         {
-            if (mother != null)
+            if (mother == null) return;
+            mother.health.AddHediff(HediffDef.Named("PostPregnancy"), null, null);
+            mother.health.AddHediff(HediffDef.Named("Lactating"), mother.RaceProps.body.AllParts.Find(x => x.def.defName == "Torso"), null);
+            if (ChildrenBase.ModRJW_ON && BnCSettings.enable_postpartum)
             {
-                mother.health.AddHediff(HediffDef.Named("PostPregnancy"), null, null);
-                mother.health.AddHediff(HediffDef.Named("Lactating"), mother.RaceProps.body.AllParts.Find(x => x.def.defName == "Torso"), null);
-                if (ChildrenBase.ModRJW_ON && BnCSettings.enable_postpartum)
-                {
-                    mother.health.AddHediff(HediffDef.Named("BnC_RJW_PostPregnancy"), null, null);
-                }
+                mother.health.AddHediff(HediffDef.Named("BnC_RJW_PostPregnancy"), null, null);
+            }
 
-                //Make crying sound when baby is born
-                SoundInfo info = SoundInfo.InMap(new TargetInfo(pawn.PositionHeld, pawn.MapHeld));
-                SoundDef.Named("Pawn_BabyCry").PlayOneShot(info);
+            //Make crying sound when baby is born
+            SoundInfo info = SoundInfo.InMap(new TargetInfo(pawn.PositionHeld, pawn.MapHeld));
+            SoundDef.Named("Pawn_BabyCry").PlayOneShot(info);
 
-                ChildrenUtility.ChangeBodyType(pawn, true, false);
-                ChildrenUtility.ClearImplantAndAddiction(pawn);
-                ChildrenUtility.RenamePawn(pawn, mother, father);
+            ChildrenUtility.ChangeBodyType(pawn, true, false);
+            ChildrenUtility.ClearImplantAndAddiction(pawn);
+            ChildrenUtility.RenamePawn(pawn, mother, father);
 
-                //For rabbie
-                if (pawn.def.defName == "Rabbie")
-                {
-                    pawn.health.AddHediff(HediffDef.Named("PlanetariumAddiction"), null, null);
-                }
+            //For rabbie
+            if (pawn.def.defName == "Rabbie")
+            {
+                pawn.health.AddHediff(HediffDef.Named("PlanetariumAddiction"), null, null);
+            }
 
-                if (!ChildrenBase.ModCSL_ON)
-                {
-                    
-                    SetBabyTraits(pawn, mother, father, rand);
-                    SetBabySkillsAndPassions(pawn, mother, father, rand);
-                }
+            if (!ChildrenBase.ModCSL_ON)
+            {
+                SetBabyTraits(pawn, mother, father, rand);
+                SetBabySkillsAndPassions(pawn, mother, father, rand);
             }
         }
 
@@ -60,371 +57,379 @@ namespace BabiesAndChildren
             DeadBabyThoughts.RemoveChildDiedThought(mother, baby);
             Find.LetterStack.ReceiveLetter("WordStillborn".Translate(), TranslatorFormattedStringExtensions.Translate("MessageStillborn", mother.LabelIndefinite()), LetterDefOf.Death, mother);
         }
-
-        public static void SetBabySkillsAndPassions(Pawn pawn, Pawn mother, Pawn father, ChildrenUtility.Fixed_Rand rand)
+        /// <summary>
+        /// Verse.PawnGenerator:GenerateSkills
+        /// Effectively generates random skills and passions
+        /// </summary>
+        /// <param name="pawn">pawn whose skills will be set</param>
+        public static void PawnGenerator_GenerateSkills(Pawn pawn)
         {
             try
             {
-                if (mother != null)
-                {
-                    List<SkillDef> allDefsListForReading = DefDatabase<SkillDef>.AllDefsListForReading;
-
-                    //all skill to zero
-                    //for (int i = 0; i < allDefsListForReading.Count; i++)
-                    //{
-                    //    SkillDef skillDef = allDefsListForReading[i];
-                    //    SkillRecord skill = pawn.skills.GetSkill(skillDef);
-                    //    //skill.Level = 0;
-                    //    //skill.passion = Passion.None;
-                    //}
-
-                    if (BnCSettings.baby_Inherit_percentage == BnCSettings.BabyInheritPercentageHandleEnum._Random)
-                    {
-                        CLog.DevMessage(": Skills set random [GenerateSkills]");
-                        try
-                        {
-                            Traverse.CreateWithType("PawnGenerator").Method("GenerateSkills", new object[]
-                            {
-                                pawn
-                            }).GetValue();
-                        }
-                        catch
-                        {
-                        }
-                        return;
-                    }
-
-                    for (int i = 0; i < allDefsListForReading.Count; i++)
-                    {
-                        SkillDef skillDef = allDefsListForReading[i];
-
-                        int babyskill_level = 0;
-                        int motherskill = mother.skills.GetSkill(skillDef).Level;
-                        int fatherskill = 0;
-                        CLog.DevMessage("mother's " + skillDef.defName + " Skills level =" + motherskill);
-
-                        if (father != null)
-                        {
-                            fatherskill = father.skills.GetSkill(skillDef).Level;
-                            CLog.DevMessage("father's " + skillDef.defName + " Skills level =" + fatherskill);
-                            babyskill_level = (int)Math.Ceiling((double)(motherskill + fatherskill / 2));
-                        }
-
-                        switch (BnCSettings.baby_Inherit_percentage)
-                        {
-                            case BnCSettings.BabyInheritPercentageHandleEnum._None:
-                                break;
-
-                            case BnCSettings.BabyInheritPercentageHandleEnum._25:
-                                babyskill_level = (int)Math.Floor((double)babyskill_level * 0.25);
-                                break;
-
-                            case BnCSettings.BabyInheritPercentageHandleEnum._50:
-                                babyskill_level = (int)Math.Floor((double)babyskill_level * 0.5);
-                                break;
-
-                            case BnCSettings.BabyInheritPercentageHandleEnum._75:
-                                babyskill_level = (int)Math.Floor((double)babyskill_level * 0.75);
-                                break;
-
-                            case BnCSettings.BabyInheritPercentageHandleEnum._90:
-                                babyskill_level = (int)Math.Floor((double)babyskill_level * 0.90);
-                                break;
-                            case BnCSettings.BabyInheritPercentageHandleEnum._Random:
-
-                            default:
-                                break;
-                        }
-
-                        babyskill_level = (int)Math.Floor((double)babyskill_level * rand.Fixed_RandDouble(0.7, 1.1));
-                        SkillRecord babyskill1 = pawn.skills.GetSkill(skillDef);
-                        //babyskill1.Level = babyskill_level;
-                        float sk_xp = 0;
-                        for (int j = 1; j <= babyskill_level; j++)
-                        {
-                            sk_xp += j * 1000;
-                        }
-                        babyskill1.xpSinceLastLevel = sk_xp;
-
-                        CLog.DevMessage("" + pawn.Name + "'s " + skillDef.defName + " Skills set =" + pawn.skills.GetSkill(skillDef));
-
-
-                        if (pawn.story.traits.HasTrait(ChildTraitDefOf.Newtype))
-                        {
-                            if (skillDef == SkillDefOf.Shooting)
-                            {
-                                babyskill_level += 5;
-                            }
-
-                            if (skillDef == SkillDefOf.Melee)
-                            {
-                                babyskill_level += 5;
-                            }
-                        }
-
-                        if (pawn.story.traits.HasTrait(TraitDefOf.Brawler))
-                        {
-                            if (skillDef == SkillDefOf.Shooting)
-                            {
-                                babyskill_level -= 4;
-                            }
-
-                            if (skillDef == SkillDefOf.Melee)
-                            {
-                                babyskill_level += 4;
-                            }
-                        }
-
-                        if (!babyskill1.TotallyDisabled)
-                        {
-
-                            bool isconflictingPassion = false;
-                            bool isforcedPassion = false;
-                            foreach (Trait trait in pawn.story.traits.allTraits)
-                            {
-                                if (trait.def.ConflictsWithPassion(skillDef))
-                                {
-                                    isconflictingPassion = true;
-                                    isforcedPassion = false;
-                                    break;
-                                }
-                                if (trait.def.RequiresPassion(skillDef))
-                                {
-                                    isforcedPassion = true;
-                                }
-                            }
-                            double num3 = (double)babyskill_level * 0.077;  //0.11 orginal
-                            double passionChance = rand.Fixed_RandDouble(0, 1);
-                            if (isforcedPassion || passionChance < num3 && !isconflictingPassion)
-                            {
-                                babyskill1.passion = ((passionChance >= num3 * 0.200000002980232) ? Passion.Minor : Passion.Major);
-                            }
-                            babyskill1.xpSinceLastLevel += (float)rand.Fixed_RandDouble(babyskill1.XpRequiredForLevelUp * 0.1, babyskill1.XpRequiredForLevelUp * 0.9);
-
-                        }
-                    }
-
-                }
-                else
-                {
-                    CLog.DevMessage(": No mother!");
-                }
-
+                Traverse.CreateWithType("PawnGenerator").Method("GenerateSkills", pawn).GetValue();
+                CLog.DevMessage("Skills for: " + pawn.Name.ToStringShort + " randomly generated.");
             }
-            catch (Exception ex)
+            catch
             {
-                CLog.Error(": Skill set error: " + ex.Message);
+                CLog.DevMessage("Skills for: " + pawn.Name.ToStringShort + " failed to randomly generate.");
             }
         }
 
-        public static void SetBabyTraits(Pawn pawn, Pawn mother, Pawn father, ChildrenUtility.Fixed_Rand rand)
+        /// <summary>
+        /// Verse.PawnGenerator:GenerateTraits
+        /// Effectively generates random traits
+        /// </summary>
+        /// <param name="pawn">pawn whose traits will be set</param>
+        public static void PawnGenerator_GenerateTraits(Pawn pawn)
         {
             try
             {
-                if (mother != null)
-                {
-                    //Fixed seed random variable
-                    //ChildrenUtility.Fixed_Rand rand = new ChildrenUtility.Fixed_Rand(mother);
-                    pawn.story.traits.allTraits.Clear();
-                    if (BnCSettings.baby_Inherit_percentage == BnCSettings.BabyInheritPercentageHandleEnum._Random)
-                    {
-
-                        try
-                        {
-                            PawnGenerationRequest request = new PawnGenerationRequest(pawn.kindDef, pawn.Faction);
-                            Traverse.CreateWithType("PawnGenerator").Method("GenerateTraits", new object[]
-                            { pawn,request }).GetValue();
-                        }
-                        catch
-                        {
-                        }
-                        return;
-                    }
-                    if (BnCSettings.baby_Inherit_percentage != BnCSettings.BabyInheritPercentageHandleEnum._None)
-                    {
-                        //add newtype and sexuality
-                        GetNewtypeAndSexuality(pawn, rand);
-                        int father_trait_count = father.story.traits.allTraits.Count;
-                        CLog.DevMessage("Traits cleared for parent inherit");
-
-                        List<Trait> father_trait_list = new List<Trait>();
-                        if (father != null && father_trait_count > 0)
-                        {
-                            for (int i = 0; i < father_trait_count; i++)
-                            {
-                                father_trait_list.Add(father.story.traits.allTraits[i]);
-                                CLog.DevMessage("Father trait[" + i + "]: " + father_trait_list[i].def);
-                            }
-                        }
-                        else
-                        {
-                            CLog.DevMessage("Birth: Father is null or has no traits!");
-                        }
-
-                        int mother_trait_count = mother.story.traits.allTraits.Count;
-                        List<Trait> mother_trait_list = new List<Trait>();
-                        if (mother_trait_count > 0)
-                        {
-                            for (int i = 0; i < mother_trait_count; i++)
-                            {
-                                mother_trait_list.Add(mother.story.traits.allTraits[i]);
-                                CLog.DevMessage("Mother trait[" + i + "]: " + mother_trait_list[i].def);
-                            }
-                        }
-
-                        int maxt = BnCSettings.MAX_TRAIT_COUNT;
-                        double inhertChance = 1;
-                        switch (BnCSettings.baby_Inherit_percentage)
-                        {
-
-                            case BnCSettings.BabyInheritPercentageHandleEnum._90:
-                                inhertChance = 0.9 + 0.1;
-                                goto default;
-                            case BnCSettings.BabyInheritPercentageHandleEnum._75:
-                                inhertChance = 0.75 + 0.1;
-                                goto default;
-                            case BnCSettings.BabyInheritPercentageHandleEnum._50:
-                                inhertChance = 0.5 + 0.1;
-                                maxt -= 1;
-                                goto default;
-
-                            case BnCSettings.BabyInheritPercentageHandleEnum._25:
-                                inhertChance = 0.25 + 0.1;
-                                maxt -= 2;
-                                goto default;
-
-                            default:
-                                Trait to_give_trait;
-                                int got_countnow;
-                                int to_get_trait_num;
-                                int gotcountall = 0;
-
-                                if (pawn.story.traits.allTraits.Count < BnCSettings.MAX_TRAIT_COUNT)
-                                {
-                                    if (mother_trait_count > 0)
-                                    {
-                                        got_countnow = 0;
-                                        to_get_trait_num = rand.Fixed_RandInt(1, 2);
-
-                                        for (int i = 0; (gotcountall < maxt) && got_countnow < to_get_trait_num && i < mother_trait_count; i++)
-                                        {
-                                            to_give_trait = mother_trait_list[rand.Fixed_RandInt(0, mother_trait_count--)];
-                                            if (ApplyTraitToPawn(pawn, to_give_trait, rand, inhertChance))
-                                            {
-                                                got_countnow++;
-                                                gotcountall++;
-                                            }
-                                        }
-                                    }
-
-                                    if (father_trait_count > 0 && pawn.story.traits.allTraits.Count < BnCSettings.MAX_TRAIT_COUNT)
-                                    {
-                                        got_countnow = 0;
-                                        to_get_trait_num = rand.Fixed_RandInt(1, 2);
-
-                                        for (int i = 0; (gotcountall < maxt) && (got_countnow < to_get_trait_num) && (i < father_trait_count); i++)
-                                        {
-                                            to_give_trait = father_trait_list[rand.Fixed_RandInt(0, father_trait_count--)];
-                                            if (ApplyTraitToPawn(pawn, to_give_trait, rand, inhertChance + 0.2))
-                                            {
-                                                got_countnow++;
-                                                gotcountall++;
-                                            }
-                                        }
-
-                                    }
-                                }
-                                break;
-                        }
-
-                        // give random trait
-                        if (pawn.story.traits.allTraits.Count == 2)
-                        {
-                            if (rand.Fixed_RandChance(0.15)) GiveARandomTrait(pawn, rand);
-                        }
-                        else if (pawn.story.traits.allTraits.Count <= 1)
-                        {
-                            if (rand.Fixed_RandChance(0.4)) GiveARandomTrait(pawn, rand);
-                            if (rand.Fixed_RandChance(0.15)) GiveARandomTrait(pawn, rand);
-                        }
-                    }
-                    else
-                    {
-                        //add newtype and sexuality
-                        GetNewtypeAndSexuality(pawn, rand);
-                    }
-                }
-
+                PawnGenerationRequest request = new PawnGenerationRequest(pawn.kindDef, pawn.Faction);
+                Traverse.CreateWithType("PawnGenerator").Method("GenerateTraits", pawn, request).GetValue();
+                CLog.DevMessage("Traits for: " + pawn.Name.ToStringShort + " randomly generated.");
             }
-            catch (Exception ex3)
+            catch 
             {
-                CLog.Error("Birth: Traits set error: " + ex3.Message);
+                CLog.DevMessage("Traits for: " + pawn.Name.ToStringShort + " failed to randomly generate.");
             }
         }
 
-        public static void GiveARandomTrait(Pawn pawn, ChildrenUtility.Fixed_Rand rand)
+        /// <summary>
+        /// Sets a SkillRecord passion in similar fashion to vanilla
+        /// </summary>
+        /// <param name="skillRecord"></param>
+        /// <param name="rand"></param>
+        /// <param name="always">Whether a passion should always be enabled</param>
+        public static void SetPassion(SkillRecord skillRecord, MathTools.Fixed_Rand rand, bool always = false)
         {
-            List<TraitDef> traitpool = PregnancyUtility.GetGeneticTraits();
-            TraitDef to_give_trait;
-            for (int i = 0; i < traitpool.Count; i++)
+            double threshold =  skillRecord.Level * 0.11;
+            double randomDouble = rand.Fixed_RandDouble(0, 1);
+            if (always || (randomDouble < threshold))
+                skillRecord.passion = randomDouble >=  threshold * 0.2 ? Passion.Minor : Passion.Major;
+            else
+                skillRecord.passion = Passion.None;
+
+        }
+        
+        /// <summary>
+        /// Sets a pawn's skills and passions based on:
+        /// 1. mother and father's skills
+        /// 2. pawn's current traits
+        /// </summary>
+        /// <param name="pawn">pawn whose skills and passions will be set</param>
+        /// <param name="mother">pawn's mother</param>
+        /// <param name="father">pawn's father</param>
+        /// <param name="rand">random number generator</param>
+        public static void SetBabySkillsAndPassions(Pawn pawn, Pawn mother, Pawn father, MathTools.Fixed_Rand rand)
+        {
+
+            if (father == null || mother == null)
             {
-                to_give_trait = traitpool[rand.Fixed_RandInt(0, traitpool.Count - 1)];
-                int degree = PawnGenerator.RandomTraitDegree(to_give_trait);
-                Trait trait2 = new Trait(to_give_trait, degree, false);
-                if (ApplyTraitToPawn(pawn, trait2,rand, 1)) return;                
-            }           
+                CLog.Warning("Father or Mother is null. Randomly generating skills.");
+                PawnGenerator_GenerateSkills(pawn);
+                return;
+            }
+
+
+            if (BnCSettings.baby_Inherit_percentage == BnCSettings.BabyInheritPercentageHandleEnum._Random)
+            {
+                PawnGenerator_GenerateSkills(pawn);
+                return;
+            }
+            
+            //change skills and passions based on mommy and daddy
+            foreach (var skillDef in DefDatabase<SkillDef>.AllDefsListForReading)
+            {
+                    
+                int motherSkillLevel = mother.skills.GetSkill(skillDef).Level;
+                CLog.DevMessage("mother's " + skillDef.defName + " Skills level =" + motherSkillLevel);
+
+                int fatherSkillLevel = father.skills.GetSkill(skillDef).Level;
+                CLog.DevMessage("father's " + skillDef.defName + " Skills level =" + fatherSkillLevel);
+
+                SkillRecord babySkillRecord = pawn.skills.GetSkill(skillDef);
+                
+                if (babySkillRecord.TotallyDisabled)
+                    continue;
+                
+                //baby's skill level is genetic
+                int babySkillLevel = MathTools.Avg(fatherSkillLevel, motherSkillLevel);
+                    
+                //TODO have setting be variable instead of a dropdown
+                switch (BnCSettings.baby_Inherit_percentage)
+                {
+                    case BnCSettings.BabyInheritPercentageHandleEnum._None:
+                        break;
+
+                    case BnCSettings.BabyInheritPercentageHandleEnum._25:
+                        babySkillLevel = (int)Math.Floor(babySkillLevel * 0.25);
+                        break;
+
+                    case BnCSettings.BabyInheritPercentageHandleEnum._50:
+                        babySkillLevel = (int)Math.Floor(babySkillLevel * 0.5);
+                        break;
+
+                    case BnCSettings.BabyInheritPercentageHandleEnum._75:
+                        babySkillLevel = (int)Math.Floor(babySkillLevel * 0.75);
+                        break;
+
+                    case BnCSettings.BabyInheritPercentageHandleEnum._90:
+                        babySkillLevel = (int)Math.Floor(babySkillLevel * 0.90);
+                        break;
+
+                }
+                
+                //randomize the final level a bit               
+                babySkillLevel = (int) (babySkillLevel * rand.Fixed_RandDouble(0.7, 1.1));
+               
+                //level up
+                babySkillRecord.EnsureMinLevelWithMargin(babySkillLevel);
+
+                //add between 10 and 90% of xp required for next level up
+                babySkillRecord.xpSinceLastLevel += (float)rand.Fixed_RandDouble(babySkillRecord.XpRequiredForLevelUp * 0.1, babySkillRecord.XpRequiredForLevelUp * 0.9);
+               
+                SetPassion(babySkillRecord, rand);
+                
+                CLog.DevMessage("" + pawn.Name + "'s " + skillDef.defName + " Skills set =" + pawn.skills.GetSkill(skillDef));
+
+            }
+            //change skills and passions based on pawn's current traits
+            foreach(Trait trait in pawn.story.traits.allTraits) 
+            {
+                //enable forced passions
+                foreach (SkillDef skillDef in trait.def.forcedPassions)
+                {
+                    SetPassion(pawn.skills.GetSkill(skillDef), rand, true);
+                }
+                
+                //disable conflicting passions
+                foreach (SkillDef skillDef in trait.def.conflictingPassions)
+                {
+                    pawn.skills.GetSkill(skillDef).passion = Passion.None;
+                }
+
+                if (trait.CurrentData?.skillGains == null)
+                    continue;
+                
+                //add levels based on trait's skillGains
+                foreach (var  kvp in trait.CurrentData.skillGains)
+                {
+                    
+                    SkillRecord babySkillRecord = pawn.skills.GetSkill(kvp.Key);
+                    babySkillRecord.Level += kvp.Value;
+                }
+
+
+            }
+            
+        }
+        /// <summary>
+        /// Sets the babies traits either randomly or based on mother and father
+        /// depending on mod settings and luck
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <param name="mother"></param>
+        /// <param name="father"></param>
+        /// <param name="rand"></param>
+        public static void SetBabyTraits(Pawn pawn, Pawn mother, Pawn father, MathTools.Fixed_Rand rand)
+        {
+            //clear traits
+            pawn.story.traits.allTraits.Clear();
+            CLog.DevMessage("Traits cleared for parent inherit");
+            
+            if (mother == null || father == null)
+            {
+                CLog.Warning("Mother or father of: " + pawn.Name.ToStringShort + " is null, generating random traits.");
+                PawnGenerator_GenerateTraits(pawn);
+                return;
+            }
+
+            if (BnCSettings.baby_Inherit_percentage == BnCSettings.BabyInheritPercentageHandleEnum._Random)
+            {
+                PawnGenerator_GenerateTraits(pawn);
+                return;
+            }
+
+            //add new type and sexuality
+            GetNewTypeAndSexuality(pawn, rand);
+            
+            if (BnCSettings.baby_Inherit_percentage == BnCSettings.BabyInheritPercentageHandleEnum._None)
+                return;
+
+            int fatherTraitCount = father.story.traits.allTraits.Count;
+            List<Trait> fatherTraitList = father.story.traits.allTraits;
+            
+            if (fatherTraitCount <= 0)
+                CLog.DevMessage("Father has no traits!");
+
+            int motherTraitCount = mother.story.traits.allTraits.Count;
+            List<Trait> motherTraitList = mother.story.traits.allTraits;
+            if (motherTraitCount <= 0)
+                CLog.DevMessage("Mother has no traits!");
+
+            if (BnCSettings.debug_and_gsetting)
+            {
+                foreach (var trait in fatherTraitList)
+                {
+                    CLog.DevMessage("Father trait: " + trait.def.defName);
+                }
+
+                foreach (var trait in motherTraitList)
+                {
+                    CLog.DevMessage("Mother trait: " + trait.def.defName);
+                }
+            }
+
+            double inheritChance = 1;
+            switch (BnCSettings.baby_Inherit_percentage)
+            {
+                case BnCSettings.BabyInheritPercentageHandleEnum._90:
+                    inheritChance = 0.9 + 0.1;
+                    break;
+                case BnCSettings.BabyInheritPercentageHandleEnum._75:
+                    inheritChance = 0.75 + 0.1;
+                    break;
+                case BnCSettings.BabyInheritPercentageHandleEnum._50:
+                    inheritChance = 0.5 + 0.1;
+                    break;
+                case BnCSettings.BabyInheritPercentageHandleEnum._25:
+                    inheritChance = 0.25 + 0.1;
+                    break;
+            }
+
+
+            InheritTraits(pawn, mother, rand, inheritChance);
+            InheritTraits(pawn, father, rand, inheritChance + 0.2);
+
+            //Add more traits for some reason
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            if (BnCSettings.MAX_TRAIT_COUNT > 2)
+            {
+                // give random trait
+                if (pawn.story.traits.allTraits.Count == 2)
+                {
+                    if (rand.Fixed_RandChance(0.15)) GiveARandomTrait(pawn, rand);
+                }
+                else if (pawn.story.traits.allTraits.Count <= 1)
+                {
+                    if (rand.Fixed_RandChance(0.4)) GiveARandomTrait(pawn, rand);
+                    if (rand.Fixed_RandChance(0.15)) GiveARandomTrait(pawn, rand);
+                }
+            }
+            
+        }
+        /// <summary>
+        /// Adds traits from parent to child based on inheritChance, mod settings, and luck.
+        /// </summary>
+        /// <param name="child"></param>
+        /// <param name="parent"></param>
+        /// <param name="rand"></param>
+        /// <param name="inheritChance"></param>
+        public static void InheritTraits(Pawn child, Pawn parent, MathTools.Fixed_Rand rand, double inheritChance)
+        {
+            if (child == null || parent == null)
+                return;
+            
+            List<Trait> parentTraits = parent.story.traits.allTraits;
+            
+            if (parentTraits.Count <= 0 || child.story.traits.allTraits.Count > BnCSettings.MAX_TRAIT_COUNT)
+                return;
+
+            int traitsToGive = rand.Fixed_RandInt(1, 2);
+            int traitsAdded = 0;
+            
+            int attempts = 0;
+            int maxAttempts = parentTraits.Count;
+            
+            while ((traitsAdded < BnCSettings.MAX_TRAIT_COUNT) &&
+                   (traitsAdded < traitsToGive) &&
+                   (attempts++ < maxAttempts))
+            {
+                var traitToGive = (Trait) rand.Fixed_RandElement(parentTraits);
+                if (ApplyTraitToPawn(child, traitToGive, rand, inheritChance))
+                {
+                    traitsAdded++;
+                }
+
+            }
+
+        }
+        /// <summary>
+        /// Tries to apply a random trait from PregnancyUtility.GetGeneticTraits()
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <param name="rand"></param>
+        /// <returns>whether a trait was added</returns>
+        public static bool GiveARandomTrait(Pawn pawn, MathTools.Fixed_Rand rand)
+        {
+            List<TraitDef> geneticTraits = PregnancyUtility.GetGeneticTraits();
+
+            int attempts = 0;
+            int maxAttempts = geneticTraits.Count;
+            
+            while(attempts++ < maxAttempts)
+            {
+                TraitDef def = (TraitDef) rand.Fixed_RandElement(geneticTraits);
+                Trait trait2 = new Trait(def, PawnGenerator.RandomTraitDegree(def), false);
+                if (ApplyTraitToPawn(pawn, trait2,rand, 1)) 
+                    return true;                
+            }
+
+            return false;
         }
 
         /// <summary>
         /// This method will check trait conflict, already exist
         /// and no conflict will apply pawn trait
         /// </summary>
-        public static bool ApplyTraitToPawn(Pawn pawn, Trait trait_to_give, ChildrenUtility.Fixed_Rand rand, double chance)
+        /// <param name="pawn"></param>
+        /// <param name="traitToGive"></param>
+        /// <param name="rand"></param>
+        /// <param name="chance"></param>
+        /// <returns>Whether the trait was applied</returns>
+        public static bool ApplyTraitToPawn(Pawn pawn, Trait traitToGive, MathTools.Fixed_Rand rand, double chance)
         {
-            if (rand.Fixed_RandDouble(0, 1) > chance) return false;
+            if ((traitToGive == null) || (rand.Fixed_RandDouble(0, 1) > chance) ||  pawn.story.traits.HasTrait(traitToGive.def)) 
+                return false;
 
-            if (trait_to_give != null && !pawn.story.traits.HasTrait(trait_to_give.def))
+            foreach (Trait itrait in pawn.story.traits.allTraits)
             {
-                foreach (Trait itrait in pawn.story.traits.allTraits)
-                {
-                    if (trait_to_give.def.ConflictsWith(itrait))
-                    {
-                        return false;
-                    }
-                }
-                pawn.story.traits.GainTrait(trait_to_give);
-                return true;
+                if (traitToGive.def.ConflictsWith(itrait))
+                    return false;
             }
-            else return false;
+
+            pawn.story.traits.GainTrait(traitToGive);
+            return true;
         }
 
         /// <summary>
         /// This method will roll for a chance to make the pawn Asexual, Bisexual, or Gay
         /// </summary>
         /// <param name="pawn">The pawn to be analyzed</param>
+        /// <param name="rand">fixed random number generator</param>
         /// <returns>An AcquirableTrait for sexuality</returns>
-        public static void GetNewtypeAndSexuality(Pawn pawn, ChildrenUtility.Fixed_Rand rand)
+        public static void GetNewTypeAndSexuality(Pawn pawn, MathTools.Fixed_Rand rand)
         {
-            int traitcount = pawn.story.traits.allTraits.Count;
-            if (traitcount < BnCSettings.MAX_TRAIT_COUNT)
+            int traitsCount = pawn.story.traits.allTraits.Count;
+            if (traitsCount >= BnCSettings.MAX_TRAIT_COUNT) return;
+            
+            if (rand.Fixed_RandChance(BnCSettings.GET_NEW_TYPE_CHANCE))
             {
+                pawn.story.traits.GainTrait(new Trait(ChildTraitDefOf.Newtype, 0, true));
+                Find.LetterStack.ReceiveLetter("Newtype".Translate(), 
+                    "MessageNewtype".Translate(pawn.LabelIndefinite()), 
+                    LetterDefOf.PositiveEvent, pawn);
+            }
 
-                if (rand.Fixed_RandChance(BnCSettings.GET_NEW_TYPE_CHANCE))
-                {
-                    pawn.story.traits.GainTrait(new Trait(ChildTraitDefOf.Newtype, 0, true));
-                    Find.LetterStack.ReceiveLetter("Newtype".Translate(), TranslatorFormattedStringExtensions.Translate("MessageNewtype", pawn.LabelIndefinite()), LetterDefOf.PositiveEvent, pawn);
-                }
-
-                if (rand.Fixed_RandChance(BnCSettings.GET_SPECIFIC_SEXUALITY) && (traitcount < BnCSettings.MAX_TRAIT_COUNT))
-                {
-                    if (rand.Fixed_RandBool()) pawn.story.traits.GainTrait(new Trait(TraitDefOf.Asexual, 0, true));
-                    else pawn.story.traits.GainTrait(new Trait(TraitDefOf.Bisexual, 0, true));
-
-                }
-                else if (rand.Fixed_RandChance(BnCSettings.GET_GAY_SEXUALITY) && (traitcount < BnCSettings.MAX_TRAIT_COUNT))
-                {
-                    pawn.story.traits.GainTrait(new Trait(TraitDefOf.Gay, 0, true));
-                }
+            if (rand.Fixed_RandChance(BnCSettings.GET_SPECIFIC_SEXUALITY))
+            {
+                pawn.story.traits.GainTrait(rand.Fixed_RandBool()
+                    ? new Trait(TraitDefOf.Asexual, 0, true)
+                    : new Trait(TraitDefOf.Bisexual, 0, true));
+            }
+            else if (rand.Fixed_RandChance(BnCSettings.GET_GAY_SEXUALITY))
+            {
+                pawn.story.traits.GainTrait(new Trait(TraitDefOf.Gay, 0, true));
             }
         }
 

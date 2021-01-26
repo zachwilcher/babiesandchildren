@@ -52,7 +52,7 @@ namespace BabiesAndChildren
             {
                 Hediff bodypart = GetAnu(pawn);
                 if (bodypart == null) return;
-                float size = (float)Rand.Range(0.01f, Maxsize);
+                float size = Rand.Range(0.01f, Maxsize);
                 float cursize = bodypart.Severity;
                 if (Is_SizeInit)
                 {
@@ -67,7 +67,7 @@ namespace BabiesAndChildren
                 {
                     bodypart = GetPen(pawn);
                     if (bodypart == null) return;
-                    size = (float)Rand.Range(0.01f, Maxsize);
+                    size = Rand.Range(0.01f, Maxsize);
                     cursize = bodypart.Severity;
                     if (Is_SizeInit)
                     {
@@ -83,7 +83,7 @@ namespace BabiesAndChildren
                     bodypart = ModTools.GetVag(pawn);
                     if (bodypart == null) return;
                     Maxsize = ((Maxsize < 0.35f) ? 0.35f : Maxsize);
-                    size = (float)Rand.Range(0.02f, Maxsize);
+                    size = Rand.Range(0.02f, Maxsize);
                     cursize = bodypart.Severity;
                     if (Is_SizeInit)
                     {
@@ -97,7 +97,7 @@ namespace BabiesAndChildren
                     bodypart = GetBre(pawn);
                     if (bodypart == null) return;
                     if (ChildrenUtility.GetAgeStage(pawn) < AgeStage.Teenager && Maxsize > 0.07f) Maxsize = 0.07f;
-                    size = (float)Rand.Range(0.01f, Maxsize);
+                    size = Rand.Range(0.01f, Maxsize);
                     cursize = bodypart.Severity;
                     if (Is_SizeInit)
                     {

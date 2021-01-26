@@ -6,12 +6,11 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 using Verse.AI;
-using Random = System.Random;
 using StatDefOf = RimWorld.StatDefOf;
 
 namespace BabiesAndChildren
 {
-    public static class ChildrenUtility
+    public static partial class ChildrenUtility
     {
         private static List<ThingDef> bedDefsBestToWorst_CribRestEffectiveness;
 
@@ -29,7 +28,9 @@ namespace BabiesAndChildren
                 }
                 else
                 {
-                    bedDefsBestToWorst_CribRestEffectiveness = DefDatabase<ThingDef>.AllDefs.Where(def => def.IsBed).OrderByDescending(def => IsBedCrib(def)).ThenByDescending(d => d.GetStatValueAbstract(StatDefOf.BedRestEffectiveness, null)).ToList();
+                    bedDefsBestToWorst_CribRestEffectiveness = DefDatabase<ThingDef>.AllDefs.Where(def => def.IsBed).
+                        OrderByDescending(def => IsBedCrib(def)).
+                        ThenByDescending(d => d.GetStatValueAbstract(StatDefOf.BedRestEffectiveness, null)).ToList();
                     return bedDefsBestToWorst_CribRestEffectiveness;
                 }
             }
@@ -118,7 +119,9 @@ namespace BabiesAndChildren
             return !ModTools.IsRobot(pawn) && (GetAgeStage(pawn) <= AgeStage.Toddler);
         }
 
-        // Returns the maximum possible mass of a weapon the specified child can use
+        /// <summary>
+        /// Returns the maximum possible mass of a weapon the specified child can use
+        /// </summary>
         public static float ChildMaxWeaponMass(Pawn pawn)
         {
             if (ChildrenUtility.GetAgeStage(pawn) >= AgeStage.Teenager)
@@ -127,12 +130,22 @@ namespace BabiesAndChildren
             //return (pawn.skills.GetSkill(SkillDefOf.Shooting).Level * 0.1f) + baseMass;
             return (pawn.ageTracker.AgeBiologicalYearsFloat * 0.1f) + BnCSettings.option_child_max_weapon_mass;
         }
-        // Determines if a pawn is capable of currently breastfeeding
+
+        /// <summary>
+        /// Determines if a pawn is capable of currently breastfeeding
+        /// </summary>
         public static bool CanBreastfeed(Pawn pawn)
         {
             return pawn.health.hediffSet.HasHediff(HediffDef.Named("Lactating"));
         }
 
+        
+        /// <summary>
+        /// Finds a bed for a pawn prioritizing cribs over normal beds.
+        /// </summary>
+        /// <param name="baby"></param>
+        /// <param name="traveler"></param>
+        /// <returns></returns>
         public static Building_Bed FindCribFor(Pawn baby, Pawn traveler)
         {
             Building_Bed crib = null;
@@ -152,7 +165,14 @@ namespace BabiesAndChildren
                 {
                     if (RestUtility.CanUseBedEver(baby, thingDef) && thingDef.building.bed_maxBodySize <= 0.6f)
                     {
-                        Building_Bed find_crib = (Building_Bed)GenClosest.ClosestThingReachable(baby.Position, baby.Map, ThingRequest.ForDef(thingDef), PathEndMode.OnCell, TraverseParms.For(traveler), 9999f, (Thing b) => (RestUtility.IsValidBedFor(b, baby, traveler, false, false)), null);
+                        Building_Bed find_crib = (Building_Bed)GenClosest.ClosestThingReachable(
+                            baby.Position, 
+                            baby.Map, 
+                            ThingRequest.ForDef(thingDef), 
+                            PathEndMode.OnCell, 
+                            TraverseParms.For(traveler), 
+                            9999f, 
+                            (Thing b) => (RestUtility.IsValidBedFor(b, baby, traveler, false, false)), null);
                         if (find_crib != null) crib = find_crib;
                     }
                 }
@@ -162,7 +182,7 @@ namespace BabiesAndChildren
 
         public static bool IsBedCrib(Building_Bed bed)
         {
-            return (bed.def.building.bed_humanlike && bed.def.building.bed_maxBodySize <= 0.6f);
+            return IsBedCrib(bed.def);
         }
 
         public static bool IsBedCrib(ThingDef bed)
@@ -170,7 +190,7 @@ namespace BabiesAndChildren
             return (bed.building.bed_humanlike && bed.building.bed_maxBodySize <= 0.6f);
         }
 
-        // Returns whether a race can become pregnant/have kids etc.
+        ///<summary> Returns whether a race can become pregnant/have kids etc.</summary>
         public static bool RaceUsesChildren(Pawn pawn)
         {
 
@@ -220,53 +240,6 @@ namespace BabiesAndChildren
             return pawn.RaceProps.body.AllParts.FindAll(x => x.def == DefDatabase<BodyPartDef>.GetNamed(bodyPart, true));
         }
 
-
-        /// <summary>
-        /// Seed fixed Random fuction
-        /// seed = pawn.ageTracker.AgeBiologicalTicks
-        /// </summary>
-        public class Fixed_Rand
-        {
-            private Random rand;
-            private int nextindex;
-            public Fixed_Rand(int seed)
-            {
-                rand = new Random(seed);
-                nextindex = 0;
-                CLog.DevMessage("   Seed = " + seed);
-            }
-
-            public bool Fixed_RandChance(double chance)
-            {
-                double t = rand.NextDouble();
-                nextindex++;
-                //CLog.DevMessage("  rand[" + nextindex + "] = " + t);
-                if (t < chance) return true;
-                else return false;
-            }
-            public bool Fixed_RandBool()
-            {
-                bool t = (rand.Next(0, 2) == 1);
-                nextindex++;
-                //CLog.DevMessage("  rand[" + nextindex + "] = " + t);
-                return t;
-            }
-            public double Fixed_RandDouble(Double a, Double b)
-            {
-                double t = a + ((b - a) * rand.NextDouble());
-                nextindex++;
-                //CLog.DevMessage("  rand[" + nextindex + "] = " + t);
-                return t;
-            }
-            public int Fixed_RandInt(int a, int b)
-            {
-                int t = rand.Next(a, b++);
-                nextindex++;
-                //CLog.DevMessage("   rand[" + nextindex + "] = " + t);
-                return t;
-            }
-        }
-
         public static bool ToddlerIsUpright(Pawn pawn)
         {
             float a = pawn.def.race.lifeStageAges[AgeStage.Toddler].minAge + ((pawn.def.race.lifeStageAges[AgeStage.Child].minAge - pawn.def.race.lifeStageAges[AgeStage.Toddler].minAge) / 2);
@@ -276,6 +249,7 @@ namespace BabiesAndChildren
             }
             return false;
         }
+
         public static bool SetMakerTagCheck(Thing thing, string tag)
         {
             if (thing.def.thingSetMakerTags != null)
@@ -285,6 +259,11 @@ namespace BabiesAndChildren
             return false;
         }
 
+        /// <summary>
+        /// Try's to drop pawn's toy or baby gear if they are too old for it
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <param name="tag">tag of thing to be dropped (BabyGear or Toy)</param>
         public static void TryDrop(Pawn pawn, string tag)
         {
             if (tag == "BabyGear")
@@ -294,7 +273,7 @@ namespace BabiesAndChildren
                 {
                     if (ChildrenUtility.SetMakerTagCheck(wornApparel[i], "BabyGear"))
                     {
-                        pawn.apparel.TryDrop(wornApparel[i], out Apparel resultingAp, pawn.Position, false);
+                        pawn.apparel.TryDrop(wornApparel[i], out _, pawn.Position, false);
                     }
                 }
             }
@@ -303,16 +282,19 @@ namespace BabiesAndChildren
                 ThingWithComps toy = pawn.equipment.Primary;
                 if (toy != null && ChildrenUtility.SetMakerTagCheck(toy, "Toy"))
                 {
-                    pawn.equipment.TryDropEquipment(toy, out ThingWithComps thingWithComps, pawn.Position, false);
+                    pawn.equipment.TryDropEquipment(toy, out _, pawn.Position, false);
                 }
             }
         }
-
+        
+        /// <summary>
+        /// Searches for a comp in pawn with matching class name
+        /// </summary>
         public static ThingComp GetCompByClassName(Pawn pawn, string compClassName)
         {
             foreach (ThingComp comp in pawn.AllComps)
             {
-                if ((comp == null) || (comp.props == null) || (comp.props.compClass == null))
+                if (comp?.props == null || (comp.props.compClass == null))
                 {
                     continue;
                 }
@@ -324,6 +306,13 @@ namespace BabiesAndChildren
             }
             return null;
         }
+
+        /// <summary>
+        /// Changes pawn's body type based on it's AgeStage
+        /// </summary>
+        /// <param name="pawn">pawn to be altered</param>
+        /// <param name="Is_SizeInit">Whether to randomly initialize the size (if appropriate) of the pawn's heDiffs</param>
+        /// <param name="Is_ChangeSize_Skip">Whether to change the size (if appropriate) of the pawn's heDiffs</param>
         public static void ChangeBodyType(Pawn pawn, bool Is_SizeInit, bool Is_ChangeSize_Skip)
         {
             float size = 0.01f;
@@ -355,8 +344,9 @@ namespace BabiesAndChildren
                     }
                     else
                     {
-                        ThingDef_AlienRace thingDef_AlienRace = pawn.def as ThingDef_AlienRace;
-                        if (thingDef_AlienRace != null && !thingDef_AlienRace.alienRace.generalSettings.alienPartGenerator.alienbodytypes.NullOrEmpty<BodyTypeDef>() && !thingDef_AlienRace.alienRace.generalSettings.alienPartGenerator.alienbodytypes.Contains(pawn.story.bodyType))
+                        if (pawn.def is ThingDef_AlienRace thingDef_AlienRace && 
+                            !thingDef_AlienRace.alienRace.generalSettings.alienPartGenerator.alienbodytypes.NullOrEmpty<BodyTypeDef>() &&
+                            !thingDef_AlienRace.alienRace.generalSettings.alienPartGenerator.alienbodytypes.Contains(pawn.story.bodyType))
                         {
                             pawn.story.bodyType = thingDef_AlienRace.alienRace.generalSettings.alienPartGenerator.alienbodytypes.RandomElement<BodyTypeDef>();
                         }
@@ -388,6 +378,10 @@ namespace BabiesAndChildren
             }
         }
 
+        /// <summary>
+        /// Removes hediffs of types: Hediff_Implant, Hediff_Addiction, and Hediff_MissingPart
+        /// </summary>
+        /// <param name="pawn">Pawn to be altered</param>
         public static void ClearImplantAndAddiction(Pawn pawn)
         {
             List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
@@ -401,14 +395,21 @@ namespace BabiesAndChildren
             pawn.health.Notify_HediffChanged(null);
         }
 
+        /// <summary>
+        /// Sets a pawn's name to a new random name with Last time as father's or if
+        /// father is null, the mothers.
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <param name="mother"></param>
+        /// <param name="father"></param>
         public static void RenamePawn(Pawn pawn, Pawn mother, Pawn father)
         {
-            NameTriple NameTriple = (NameTriple)mother.Name;
+            NameTriple NameTriple = null;
+            if (mother != null)
+                NameTriple = (NameTriple) mother.Name;
             if (father != null)
-            {
                 NameTriple = (NameTriple)father.Name;
-            }
-            pawn.Name = PawnBioAndNameGenerator.GeneratePawnName(pawn, NameStyle.Full, NameTriple.Last);
+            pawn.Name = PawnBioAndNameGenerator.GeneratePawnName(pawn, NameStyle.Full, NameTriple?.Last);
         }
 
         public static void ChangeChildBackstory(Pawn pawn)
@@ -430,12 +431,11 @@ namespace BabiesAndChildren
                                 Pawn father = pawn.GetFather();
                                 if (mother != null)
                                 {
-                                    ChildrenUtility.Fixed_Rand rand = new ChildrenUtility.Fixed_Rand((int)mother.ageTracker.AgeBiologicalTicks);
+                                    MathTools.Fixed_Rand rand = new MathTools.Fixed_Rand((int)mother.ageTracker.AgeBiologicalTicks);
                                     BabyTools.SetBabySkillsAndPassions(pawn, mother, father, rand);
                                     List<SkillDef> allDefsListForReading = DefDatabase<SkillDef>.AllDefsListForReading;
-                                    for (int i = 0; i < allDefsListForReading.Count; i++)
+                                    foreach (var skillDef in allDefsListForReading)
                                     {
-                                        SkillDef skillDef = allDefsListForReading[i];
                                         pawn.skills.Learn(skillDef, 100, true);
                                         CLog.DevMessage("Showbaby skill>> " + pawn.Name + "'s " + skillDef.defName + " Skills set =" + pawn.skills.GetSkill(skillDef));
                                     }
@@ -448,8 +448,8 @@ namespace BabiesAndChildren
                     }
                     //else Messages.Message("Choose a child (Not baby)", MessageTypeDefOf.NeutralEvent);
                 }            
-        } 
-        
+        }
+
         //Modified version of Children.PawnRenderer_RenderPawnInternal_Patch:GetBodysizeScaling
         public static float GetHairSize(float n, Pawn pawn)
         {
