@@ -12,7 +12,7 @@ namespace BabiesAndChildren.Harmony
         private static Type drawFaceGraphicsCompType;
         public static void Patch()
         {
-            HarmonyLib.Harmony harmony = new HarmonyLib.Harmony("RimWorld.babies.and.children.FacialAnimationPatches");
+            HarmonyLib.Harmony harmony = new HarmonyLib.Harmony("RimWorld.babies.and.children." + nameof(FacialAnimationPatches));
             
             drawFaceGraphicsCompType = AccessTools.TypeByName("FacialAnimation.DrawFaceGraphicsComp");
             

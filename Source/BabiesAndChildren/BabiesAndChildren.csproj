@@ -54,6 +54,7 @@
     <Compile Include="api\PregnancyUtility.cs" />
     <Compile Include="Components\DummyComp.cs" />
     <Compile Include="Components\Growing_Comp.cs" />
+    <Compile Include="Harmony\DressPatientsPatches.cs" />
     <Compile Include="Harmony\FacialAnimationPatches.cs" />
     <Compile Include="Harmony\JobGiverPatches.cs" />
     <Compile Include="Harmony\PawnGeneratorPatches.cs" />

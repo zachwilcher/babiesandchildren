@@ -33,7 +33,7 @@ namespace BabiesAndChildren.Harmony
                     return false;
                 }
                 // prevent not a toddler equip babysuit
-                else if (thing.def.thingSetMakerTags.Contains("BabyGear") && ChildrenUtility.GetAgeStage(pawn) != AgeStage.Toddler)
+                else if (thing.def.thingSetMakerTags.Contains("BabyGear") && ChildrenUtility.GetAgeStage(pawn) <= AgeStage.Toddler)
                 {
                     cantReason = "OnlyForUprightToddler".Translate();
                     __result = false;

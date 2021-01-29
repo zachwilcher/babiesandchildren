@@ -20,6 +20,8 @@ namespace BabiesAndChildren
         public static bool ModWIP_ON = false;
         //Android tiers
         public static bool ModAT_ON = false;
+        //Dress Patients
+        public static bool ModDressPatients_ON = false;
         
         private ChildrenBase()
         {

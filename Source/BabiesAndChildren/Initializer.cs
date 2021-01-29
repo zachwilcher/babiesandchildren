@@ -12,11 +12,18 @@ namespace BabiesAndChildren
             ChildrenBase.ModCSL_ON = ModTools.IsModOn("Children, school and learning");
             ChildrenBase.ModRJW_ON = ModTools.IsModOn("RimJobWorld");
             ChildrenBase.ModAT_ON = ModTools.IsModOn("Android tiers");
+            ChildrenBase.ModDressPatients_ON = ModTools.IsModOn("Dress Patients");
             
             if (ChildrenBase.ModWIP_ON)
             {
                 CLog.Message("Patching Facial Animation");
                 FacialAnimationPatches.Patch();
+            }
+
+            if (ChildrenBase.ModDressPatients_ON)
+            {
+                CLog.Message("Patching Dress Patients");
+                DressPatientsPatches.Patch();
             }
         }
     }
