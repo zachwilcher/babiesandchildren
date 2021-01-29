@@ -3,34 +3,55 @@ using Verse;
 
 namespace BabiesAndChildren
 {
+    /// <summary>
+    /// class for BabyState HediffDef
+    /// Added by Growing_Comp if pawn is a little baby
+    /// </summary>
     public class Hediff_Baby : HediffWithComps
     {
         public override void PostRemoved()
         {
-            if (pawn.TryGetComp<Growing_Comp>() == null)
-                return;
+            var comp = pawn.TryGetComp<Growing_Comp>();
+            if (comp == null) return;
+            
             
             Pawn mother = pawn.GetMother();
             Pawn father = pawn.GetFather();
+            MathTools.Fixed_Rand rand;
             if (mother != null)
             {
-                MathTools.Fixed_Rand rand = new MathTools.Fixed_Rand((int)mother.ageTracker.AgeBiologicalTicks);
-                mother.ageTracker.AgeBiologicalTicks += 2; // for twins
+                
+                rand = new MathTools.Fixed_Rand((int) mother.ageTracker.AgeBiologicalTicks);
+                mother.ageTracker.AgeBiologicalTicks += 2; 
                 mother.ageTracker.AgeChronologicalTicks += 2;
-                if (rand.Fixed_RandChance(BnCSettings.STILLBORN_CHANCE))
-                {
-                    BabyTools.Miscarry(pawn, mother, father);
-                    return;
-                }
-                BabyTools.BabyProcess(pawn, mother, father, rand);
-                //pawn.story.traits.allTraits.RemoveRange(0, (pawn.story.traits.allTraits.Count));
-                Growing_Comp comp = pawn.TryGetComp<Growing_Comp>();
-                comp.Props.ColonyBorn = true;
-                //comp.Props.geneticTraits = traitpool;
-                comp.Initialize(true);
-                //comp.ApplyGeneticTraits();
-                pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtDef.Named("JustBorn"));
+                
             }
+            else if (father != null)
+            {
+                rand = new MathTools.Fixed_Rand((int) father.ageTracker.AgeBiologicalTicks);
+                father.ageTracker.AgeBiologicalTicks += 2;
+                father.ageTracker.AgeBiologicalTicks += 2;
+            }
+            else
+            {
+                rand = new MathTools.Fixed_Rand((int) pawn.ageTracker.AgeBiologicalTicks);
+            }
+            
+            if (rand.Fixed_RandChance(BnCSettings.STILLBORN_CHANCE))
+            {
+                BabyTools.Miscarry(pawn, mother, father);
+                return;
+            }
+            
+            
+            BabyTools.BabyProcess(pawn, mother, father, rand);
+            comp.Props.ColonyBorn = true;
+            
+            //CLog.DevMessage("Calling Growing_Comp:Initialize from Hediff_Baby");
+            //comp.Initialize(true);
+            
+            pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtDef.Named("JustBorn"));
         }
+
     }
 }

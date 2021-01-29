@@ -10,7 +10,7 @@ using StatDefOf = RimWorld.StatDefOf;
 
 namespace BabiesAndChildren
 {
-    public static partial class ChildrenUtility
+    public static class ChildrenUtility
     {
         private static List<ThingDef> bedDefsBestToWorst_CribRestEffectiveness;
 
@@ -35,6 +35,7 @@ namespace BabiesAndChildren
                 }
             }
         }
+
 
         public static bool ShouldBeFed(Pawn p)
         {
@@ -313,7 +314,7 @@ namespace BabiesAndChildren
         /// <param name="pawn">pawn to be altered</param>
         /// <param name="Is_SizeInit">Whether to randomly initialize the size (if appropriate) of the pawn's heDiffs</param>
         /// <param name="Is_ChangeSize_Skip">Whether to change the size (if appropriate) of the pawn's heDiffs</param>
-        public static void ChangeBodyType(Pawn pawn, bool Is_SizeInit, bool Is_ChangeSize_Skip)
+        public static void ChangeBodyType(Pawn pawn, bool Is_SizeInit = false, bool Is_ChangeSize_Skip = true)
         {
             float size = 0.01f;
             switch (GetAgeStage(pawn))

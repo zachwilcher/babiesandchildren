@@ -17,13 +17,11 @@ namespace BabiesAndChildren
 
         protected override ThoughtState CurrentStateInternal(Pawn pawn)
         {
-            if (pawn.ageTracker.CurLifeStageIndex != AgeStage.Child)
-                return false;
-            if (pawn.story.traits.HasTrait(TraitDefOf.Psychopath))
-                return false;
-            if (pawn.WorkTagIsDisabled(WorkTags.Violent))
-                return false;
-            if (!pawn.Faction.IsPlayer)
+            if (!ChildrenUtility.RaceUsesChildren(pawn) || 
+            pawn.ageTracker.CurLifeStageIndex != AgeStage.Child ||
+            pawn.story.traits.HasTrait(TraitDefOf.Psychopath) || 
+            pawn.WorkTagIsDisabled(WorkTags.Violent) ||
+            !pawn.Faction.IsPlayer)
                 return false;
             ThingWithComps toy = pawn.equipment.Primary;
             if (toy != null && ChildrenUtility.SetMakerTagCheck(toy,"Toy"))

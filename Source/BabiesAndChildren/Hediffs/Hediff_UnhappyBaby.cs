@@ -57,10 +57,20 @@ namespace BabiesAndChildren
         }
 
         // Hide the hediff
-        public override bool Visible {
-            get {
+        public override bool Visible => false;
+
+        /// <summary>
+        /// checks if a pawn satisfies the requirements for this hediff
+        /// </summary>
+        /// <returns>whether the pawn meets the requirements for this hediff</returns>
+        public static bool CheckUnhappy(Pawn pawn)
+        {
+            if (pawn == null || pawn.needs.food == null || pawn.needs.joy == null)
                 return false;
-            }
+            return
+                (pawn.needs.food.CurLevelPercentage < pawn.needs.food.PercentageThreshHungry) ||
+                (pawn.needs.joy.CurLevelPercentage < 0.1f) ||
+                pawn.health.HasHediffsNeedingTend();
         }
     }
 }

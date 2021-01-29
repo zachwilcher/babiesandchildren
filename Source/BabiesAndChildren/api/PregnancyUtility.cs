@@ -1,7 +1,7 @@
-﻿using RimWorld;
 using System.Collections.Generic;
+using RimWorld;
 
-namespace BabiesAndChildren {
+namespace BabiesAndChildren.api {
     /// <summary>
     /// Static utility methods for pregnancy related operations.
     /// </summary>

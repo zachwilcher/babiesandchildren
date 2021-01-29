@@ -11,6 +11,7 @@ namespace BabiesAndChildren
     {
         public static HediffDef UnhappyBaby;
         public static HediffDef BabyState0;
+        public static HediffDef NoManipulationFlag;
 
 
         static ChildHediffDefOf()

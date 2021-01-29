@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using BabiesAndChildren.api;
 using HarmonyLib;
 using RimWorld;
 using Verse;
@@ -11,26 +13,27 @@ namespace BabiesAndChildren
     {
         public static void BabyProcess(Pawn pawn, Pawn mother, Pawn father, MathTools.Fixed_Rand rand)
         {
-            if (mother == null) return;
-            mother.health.AddHediff(HediffDef.Named("PostPregnancy"), null, null);
-            mother.health.AddHediff(HediffDef.Named("Lactating"), mother.RaceProps.body.AllParts.Find(x => x.def.defName == "Torso"), null);
+            TryAddHediff(mother, HediffDef.Named("PostPregnancy"));
+            TryAddHediff(mother, HediffDef.Named("Lactating"), mother.RaceProps.body.AllParts.Find(x => x.def.defName == "Torso"));
+            
             if (ChildrenBase.ModRJW_ON && BnCSettings.enable_postpartum)
             {
-                mother.health.AddHediff(HediffDef.Named("BnC_RJW_PostPregnancy"), null, null);
+                TryAddHediff(mother, HediffDef.Named("BnC_RJW_PostPregnancy"));
             }
+            
 
             //Make crying sound when baby is born
             SoundInfo info = SoundInfo.InMap(new TargetInfo(pawn.PositionHeld, pawn.MapHeld));
             SoundDef.Named("Pawn_BabyCry").PlayOneShot(info);
 
-            ChildrenUtility.ChangeBodyType(pawn, true, false);
+            //ChildrenUtility.ChangeBodyType(pawn, true, false);
             ChildrenUtility.ClearImplantAndAddiction(pawn);
             ChildrenUtility.RenamePawn(pawn, mother, father);
 
             //For rabbie
             if (pawn.def.defName == "Rabbie")
             {
-                pawn.health.AddHediff(HediffDef.Named("PlanetariumAddiction"), null, null);
+                TryAddHediff(pawn, HediffDef.Named("PlanetariumAddiction"));
             }
 
             if (!ChildrenBase.ModCSL_ON)
@@ -39,23 +42,36 @@ namespace BabiesAndChildren
                 SetBabySkillsAndPassions(pawn, mother, father, rand);
             }
         }
+    
+        public static void TryAddHediff(Pawn pawn, HediffDef hediffDef, BodyPartRecord part = null, DamageInfo? damageInfo = null, bool force = false)
+        {
+            if (pawn == null )
+                return;
+
+            if (pawn.health.hediffSet.HasHediff(hediffDef) && !force)
+                return;
+
+            pawn.health.AddHediff(hediffDef, part, damageInfo);
+        }
 
         public static void Miscarry(Pawn baby, Pawn mother, Pawn father)
         {
-            //baby.health.hediffSet.Clear();
-            TaggedString t = "Unnamed".Translate();
-            baby.Name = new NameSingle(t, false);
+            baby.Name = new NameSingle("Unnamed".Translate(), false);
             baby.SetFaction(null, null);
             baby.health.AddHediff(HediffDef.Named("DefectStillborn"));
 
             if (father != null)
             {
                 father.needs.mood.thoughts.memories.TryGainMemory(ThoughtDef.Named("BabyStillborn"), baby);
-                DeadBabyThoughts.RemoveChildDiedThought(father, baby);
+                RemoveChildDiedThought(father, baby);
             }
-            mother.needs.mood.thoughts.memories.TryGainMemory(ThoughtDef.Named("BabyStillborn"), baby);
-            DeadBabyThoughts.RemoveChildDiedThought(mother, baby);
-            Find.LetterStack.ReceiveLetter("WordStillborn".Translate(), TranslatorFormattedStringExtensions.Translate("MessageStillborn", mother.LabelIndefinite()), LetterDefOf.Death, mother);
+
+            if (mother != null)
+            {
+                mother.needs.mood.thoughts.memories.TryGainMemory(ThoughtDef.Named("BabyStillborn"), baby);
+                RemoveChildDiedThought(mother, baby);
+                Find.LetterStack.ReceiveLetter("WordStillborn".Translate(), TranslatorFormattedStringExtensions.Translate("MessageStillborn", mother.LabelIndefinite()), LetterDefOf.Death, mother);
+            }
         }
         /// <summary>
         /// Verse.PawnGenerator:GenerateSkills
@@ -185,7 +201,7 @@ namespace BabiesAndChildren
                 //level up
                 babySkillRecord.EnsureMinLevelWithMargin(babySkillLevel);
 
-                //add between 10 and 90% of xp required for next level up
+                //add between 10% and 90% of xp required for next level up
                 babySkillRecord.xpSinceLastLevel += (float)rand.Fixed_RandDouble(babySkillRecord.XpRequiredForLevelUp * 0.1, babySkillRecord.XpRequiredForLevelUp * 0.9);
                
                 SetPassion(babySkillRecord, rand);
@@ -318,6 +334,7 @@ namespace BabiesAndChildren
             }
             
         }
+
         /// <summary>
         /// Adds traits from parent to child based on inheritChance, mod settings, and luck.
         /// </summary>
@@ -329,11 +346,22 @@ namespace BabiesAndChildren
         {
             if (child == null || parent == null)
                 return;
-            
-            List<Trait> parentTraits = parent.story.traits.allTraits;
-            
-            if (parentTraits.Count <= 0 || child.story.traits.allTraits.Count > BnCSettings.MAX_TRAIT_COUNT)
+
+            if (parent.story.traits.allTraits.Count <= 0 || child.story.traits.allTraits.Count > BnCSettings.MAX_TRAIT_COUNT)
                 return;
+            
+            List<Trait> parentTraits = new List<Trait>();
+
+            foreach (Trait trait in parent.story.traits.allTraits)
+            {
+                if (PregnancyUtility.IsGeneticTrait(trait.def))
+                {
+                    parentTraits.Add(trait);
+                }
+            }
+            
+            if(parentTraits.Count <= 0) return;
+            
 
             int traitsToGive = rand.Fixed_RandInt(1, 2);
             int traitsAdded = 0;
@@ -434,6 +462,33 @@ namespace BabiesAndChildren
         }
 
 
+        public static void RemoveChildDiedThought(Pawn pawn, Pawn child)
+        {
+            // Does the pawn have a "my child died thought"?
+            MemoryThoughtHandler mems = pawn.needs.mood.thoughts.memories;
+            if (mems.NumMemoriesOfDef(ThoughtDef.Named("MySonDied")) > 0 || mems.NumMemoriesOfDef(ThoughtDef.Named("MyDaughterDied")) > 0)
+            {
+                // Let's look through the list of memories
+                foreach (Thought_Memory thought in mems.Memories.ToList())
+                {
+                    // Check if it's one of the right defs
+                    if (thought.def == ThoughtDef.Named("MySonDied") || thought.def == ThoughtDef.Named("MyDaughterDied") || thought.def == ThoughtDef.Named("PawnWithGoodOpinionDied"))
+                    {
+                        // We found the thought
+                        if (thought.otherPawn == child)
+                        {
+                            // Let's remove it
+                            mems.Memories.Remove(thought);
+                        }
+                    }
+                    if (thought.def == ThoughtDef.Named("WitnessedDeathFamily") || thought.def == ThoughtDef.Named("WitnessedDeathNonAlly"))
+                    {
+                        // Let's remove it
+                        mems.Memories.Remove(thought);
+                    }
+                }
+            }
+        }
     }
 
 }

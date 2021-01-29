@@ -81,6 +81,11 @@ namespace BabiesAndChildren
         public const int Child = 2;
         public const int Teenager = 3;
         public const int Adult = 4;
+
+        public static bool Valid(int ageStage)
+        {
+            return (ageStage <= Adult) && (ageStage >= Baby);
+        }
     }
 
 
