@@ -49,7 +49,6 @@ namespace BabiesAndChildren
                 CLog.DevMessage("Initializing: " + pawn.Name.ToStringShort);
             }
             
-            GrowToStage(ChildrenUtility.GetAgeStage(pawn));
             
             if (pawn.ageTracker.AgeBiologicalTicks < 10000 && !pawn.health.hediffSet.HasHediff(HediffDef.Named("BabyState")))
             {
