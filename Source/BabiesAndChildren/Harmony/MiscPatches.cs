@@ -64,7 +64,7 @@ namespace BabiesAndChildren.Harmony
         /// to a hospital bed. 
         /// </summary>
         [HarmonyPrefix]
-        static bool Prefix(Pawn pawn, bool __result)
+        static bool Prefix(Pawn pawn, ref bool __result)
         {
             if (!ChildrenUtility.ShouldUseCrib(pawn))
             {
