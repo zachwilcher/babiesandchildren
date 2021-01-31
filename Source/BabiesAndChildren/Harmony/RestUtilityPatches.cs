@@ -13,7 +13,7 @@ namespace BabiesAndChildren.Harmony {
     internal static class RestUtility_WakeThreshold_Patch {
         [HarmonyPostfix]
         static void Postfix(ref float __result, ref Pawn p) {
-            if (ChildrenUtility.GetAgeStage(p) < AgeStage.Child && p.health.hediffSet.HasHediff(ChildHediffDefOf.UnhappyBaby)) {
+            if (AgeStage.IsYoungerThan(p, AgeStage.Child) && p.health.hediffSet.HasHediff(ChildHediffDefOf.UnhappyBaby)) {
                 __result = 0.15f;
             }
             // Adults nearby wake up too
@@ -37,17 +37,15 @@ namespace BabiesAndChildren.Harmony {
         }
     }
 
-    [HarmonyPatch(typeof(RestUtility), "FindBedFor", new[]
+    [HarmonyPatch(typeof(RestUtility), "FindBedFor", 
+        typeof(Pawn), 
+        typeof(Pawn), 
+        typeof(bool), 
+        typeof(bool), 
+        typeof(bool))]
+    internal static class RestUtility_FindBedFor_Patch
     {
-        typeof(Pawn), 
-        typeof(Pawn), 
-        typeof(bool), 
-        typeof(bool), 
-        typeof(bool)
-    })]
-    internal static class RestUtility_FindBedFor_Patch {
-            
-        static MethodInfo GetSortedBeds_MethodInfo = AccessTools.Method(typeof(ChildrenUtility), "GetSortedBeds_RestEffectiveness");
+        private static MethodInfo GetSortedBeds_MethodInfo = AccessTools.Method(typeof(ChildrenUtility), "GetSortedBeds_RestEffectiveness");
             
         /// <summary>
         /// Modify FindBedFor to pass in a different order for bedDefs when looking

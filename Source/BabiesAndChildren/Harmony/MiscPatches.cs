@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
 using HarmonyLib;
 using RimWorld;
 using Verse;
@@ -26,14 +28,14 @@ namespace BabiesAndChildren.Harmony
             if (thing.def.thingSetMakerTags != null)
             {
                 // prevent not a child equip toy
-                if (thing.def.thingSetMakerTags.Contains("Toy") && ChildrenUtility.GetAgeStage(pawn) != AgeStage.Child)
+                if (thing.def.thingSetMakerTags.Contains("Toy") && !AgeStage.IsAgeStage(pawn, AgeStage.Child))
                 {
                     cantReason = "OnlyChildrenCanEquip".Translate();
                     __result = false;
                     return false;
                 }
                 // prevent not a toddler equip babysuit
-                else if (thing.def.thingSetMakerTags.Contains("BabyGear") && ChildrenUtility.GetAgeStage(pawn) <= AgeStage.Toddler)
+                else if (thing.def.thingSetMakerTags.Contains("BabyGear") && !AgeStage.IsOlderThan(pawn, AgeStage.Toddler) )
                 {
                     cantReason = "OnlyForUprightToddler".Translate();
                     __result = false;
@@ -42,7 +44,7 @@ namespace BabiesAndChildren.Harmony
                 }
             }
             // prevent a toddler equip adultsuit
-            if (ChildrenUtility.GetAgeStage(pawn) < AgeStage.Child && pawn.RaceProps.lifeStageAges.Count == 5)
+            if (RaceUtility.PawnUsesChildren(pawn) && AgeStage.IsYoungerThan(pawn, AgeStage.Child))
             {
                 if (thing.def.thingSetMakerTags == null || !thing.def.thingSetMakerTags.Contains("BabyGear"))
                 {
@@ -84,9 +86,6 @@ namespace BabiesAndChildren.Harmony
     [HarmonyPatch(typeof(FoodUtility), "ShouldBeFedBySomeone")]
     internal static class FoodUtility_ShouldBeFedBySomeone_Patch
     {
-        /// <summary>
-        /// 
-        /// </summary>
         [HarmonyPostfix]
         static void Postfix(Pawn pawn, ref bool __result)
         {
@@ -105,21 +104,9 @@ namespace BabiesAndChildren.Harmony
         static void Postfix(ref Pawn pawn, ref ThoughtDef def, ref bool __result)
         {
             // Toddlers and younger can't get these thoughts
-            if (ChildrenUtility.GetAgeStage(pawn) <= AgeStage.Toddler && ChildrenUtility.RaceUsesChildren(pawn))
+            if (RaceUtility.PawnUsesChildren(pawn) && !AgeStage.IsOlderThan(pawn, AgeStage.Toddler))
             {
-                List<ThoughtDef> thoughtlist = new List<ThoughtDef>
-                {
-                    ThoughtDefOf.AteWithoutTable,
-                    ThoughtDefOf.KnowPrisonerDiedInnocent,
-                    ThoughtDefOf.KnowPrisonerSold,
-                    ThoughtDefOf.Naked,
-                    ThoughtDefOf.SleepDisturbed,
-                    ThoughtDefOf.SleptOnGround,
-                    ThoughtDef.Named("NeedOutdoors"),
-                    ThoughtDef.Named("SleptInBarracks"),
-                    ThoughtDef.Named("Expectations")
-                };
-                __result = __result && !thoughtlist.Contains(def);
+                __result = __result && !Thoughts.IsBlacklisted(def);
             }
         }
     }
@@ -130,7 +117,7 @@ namespace BabiesAndChildren.Harmony
         [HarmonyPostfix]
         static void Postfix(ref List<Pawn> __result)
         {
-            __result.RemoveAll(pawn => ChildrenUtility.GetAgeStage(pawn) < 3);
+            __result.RemoveAll(pawn => AgeStage.IsYoungerThan(pawn, AgeStage.Teenager));
         }
     }
 
@@ -142,7 +129,9 @@ namespace BabiesAndChildren.Harmony
             ref Pawn_EquipmentTracker __instance)
         {
             Pawn pawn = __instance.ParentHolder as Pawn;
-            if (pawn.ageTracker.CurLifeStageIndex < AgeStage.Teenager && ChildrenUtility.RaceUsesChildren(pawn) &&
+            if (pawn != null && 
+                RaceUtility.PawnUsesChildren(pawn) && 
+                AgeStage.IsOlderThan(pawn, AgeStage.Teenager) && 
                 pawn.Faction.IsPlayer)
             {
                 if (eq.def.BaseMass > ChildrenUtility.ChildMaxWeaponMass(pawn))
@@ -163,8 +152,10 @@ namespace BabiesAndChildren.Harmony
         static void Postfix(ref Verb_Shoot __instance)
         {
             Pawn pawn = __instance.CasterPawn;
-            if (pawn != null && ChildrenUtility.RaceUsesChildren(pawn) &&
-                ChildrenUtility.GetAgeStage(pawn) <= AgeStage.Child && pawn.Faction.IsPlayer)
+            if (pawn != null && 
+                RaceUtility.PawnUsesChildren(pawn) &&
+                !AgeStage.IsOlderThan(pawn, AgeStage.Child) &&
+                pawn.Faction.IsPlayer)
             {
                 // The weapon is too heavy and the child will (likely) drop it when trying to fire
                 if (__instance.EquipmentSource.def.BaseMass > ChildrenUtility.ChildMaxWeaponMass(pawn))
@@ -210,7 +201,7 @@ namespace BabiesAndChildren.Harmony
         static void Postfix(ref Pawn_HealthTracker __instance, ref bool __result)
         {
             Pawn pawn = (Pawn) AccessTools.Field(typeof(Pawn_HealthTracker), "pawn").GetValue(__instance);
-            if (ChildrenUtility.RaceUsesChildren(pawn) && ChildrenUtility.GetAgeStage(pawn) < AgeStage.Teenager)
+            if (RaceUtility.PawnUsesChildren(pawn) && AgeStage.IsYoungerThan(pawn, AgeStage.Teenager))
             {
                 __result =
                     __instance.hediffSet.PainTotal >=

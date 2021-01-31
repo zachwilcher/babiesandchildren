@@ -1,3 +1,5 @@
+using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
 using HarmonyLib;
 using Verse;
 
@@ -11,7 +13,7 @@ namespace BabiesAndChildren.Harmony
         {
             Pawn pawn = __instance.pawn;
             PawnGraphicSet _this = __instance;
-            if (ChildrenUtility.RaceUsesChildren(pawn))
+            if (RaceUtility.PawnUsesChildren(pawn))
             {
                 GraphicTools.ResolveAgeGraphics(__instance);
                 LongEventHandler.ExecuteWhenFinished(delegate

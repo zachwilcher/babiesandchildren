@@ -11,7 +11,7 @@ namespace BabiesAndChildren
     /// It will keep track of a pawn's growth from birth to "adult" (see <see cref="AgeStage"/>).
     /// Adds and re-adds HeDiffs associated with pawn's age.
     ///
-    /// See <see cref="PregnancyUtility"/> for changing traits added at birth.
+    /// See <see cref="Traits"/> for changing traits added at birth.
     /// </summary>
     class Growing_Comp : ThingComp
     {
@@ -38,7 +38,6 @@ namespace BabiesAndChildren
         public void Initialize(bool reinitialize = false)
         {
             if (initialized && !reinitialize) return;
-            
             
             if (reinitialize)
             {
@@ -127,7 +126,7 @@ namespace BabiesAndChildren
         /// <param name="stage">The new lifestage index</param>
         public void GrowToStage(int stage)
         {
-            if (parent == null || !AgeStage.Valid(stage)) return;
+            if (parent == null) return;
              
             growthStage = stage;
             
@@ -224,7 +223,7 @@ namespace BabiesAndChildren
             
             int age = pawn.ageTracker.AgeBiologicalYears;
             
-            int agestage = ChildrenUtility.GetAgeStage(pawn);
+            int agestage = AgeStage.GetAgeStage(pawn);
             
             if (growthStage != agestage)
             {

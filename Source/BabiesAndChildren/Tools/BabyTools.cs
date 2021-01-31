@@ -16,7 +16,7 @@ namespace BabiesAndChildren
             TryAddHediff(mother, HediffDef.Named("PostPregnancy"));
             TryAddHediff(mother, HediffDef.Named("Lactating"), mother.RaceProps.body.AllParts.Find(x => x.def.defName == "Torso"));
             
-            if (ChildrenBase.ModRJW_ON && BnCSettings.enable_postpartum)
+            if (ChildrenBase.ModRimJobWorld_ON && BnCSettings.enable_postpartum)
             {
                 TryAddHediff(mother, HediffDef.Named("BnC_RJW_PostPregnancy"));
             }
@@ -354,7 +354,7 @@ namespace BabiesAndChildren
 
             foreach (Trait trait in parent.story.traits.allTraits)
             {
-                if (PregnancyUtility.IsGeneticTrait(trait.def))
+                if (Traits.IsGeneticTrait(trait.def))
                 {
                     parentTraits.Add(trait);
                 }
@@ -383,14 +383,14 @@ namespace BabiesAndChildren
 
         }
         /// <summary>
-        /// Tries to apply a random trait from PregnancyUtility.GetGeneticTraits()
+        /// Tries to apply a random trait from Traits.GetGeneticTraits()
         /// </summary>
         /// <param name="pawn"></param>
         /// <param name="rand"></param>
         /// <returns>whether a trait was added</returns>
         public static bool GiveARandomTrait(Pawn pawn, MathTools.Fixed_Rand rand)
         {
-            List<TraitDef> geneticTraits = PregnancyUtility.GetGeneticTraits();
+            List<TraitDef> geneticTraits = Traits.GetGeneticTraits();
 
             int attempts = 0;
             int maxAttempts = geneticTraits.Count;

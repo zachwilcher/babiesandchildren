@@ -1,5 +1,7 @@
 ﻿using RimWorld;
 using System;
+using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
 using Verse;
 
 namespace BabiesAndChildren
@@ -8,17 +10,13 @@ namespace BabiesAndChildren
     {
         private bool CheckGreedyJealousChild(Pawn pawn)
         {
-            if (pawn.story.traits.HasTrait(TraitDefOf.Greedy) || pawn.story.traits.HasTrait(TraitDefOf.Jealous))
-            {
-                return true;
-            }
-            return false;
+            return pawn.story.traits.HasTrait(TraitDefOf.Greedy) || pawn.story.traits.HasTrait(TraitDefOf.Jealous);
         }
 
         protected override ThoughtState CurrentStateInternal(Pawn pawn)
         {
-            if (!ChildrenUtility.RaceUsesChildren(pawn) || 
-            pawn.ageTracker.CurLifeStageIndex != AgeStage.Child ||
+            if (!RaceUtility.PawnUsesChildren(pawn) || 
+            !AgeStage.IsAgeStage(pawn, AgeStage.Child) ||
             pawn.story.traits.HasTrait(TraitDefOf.Psychopath) || 
             pawn.WorkTagIsDisabled(WorkTags.Violent) ||
             !pawn.Faction.IsPlayer)

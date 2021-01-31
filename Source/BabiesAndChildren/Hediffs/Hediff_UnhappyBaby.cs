@@ -6,11 +6,9 @@ namespace BabiesAndChildren
 {
     public class Hediff_UnhappyBaby : HediffWithComps
     {
-        private bool CanBabyCry(){
-            if (pawn.health.capacities.CapableOf (PawnCapacityDefOf.Breathing) && pawn.health.capacities.CanBeAwake)
-                return true;
-            else
-                return false;
+        private bool CanBabyCry()
+        {
+            return pawn.health.capacities.CapableOf (PawnCapacityDefOf.Breathing) && pawn.health.capacities.CanBeAwake;
         }
 
         public void WhineAndCry()
@@ -67,6 +65,7 @@ namespace BabiesAndChildren
         {
             if (pawn == null || pawn.needs.food == null || pawn.needs.joy == null)
                 return false;
+            
             return
                 (pawn.needs.food.CurLevelPercentage < pawn.needs.food.PercentageThreshHungry) ||
                 (pawn.needs.joy.CurLevelPercentage < 0.1f) ||

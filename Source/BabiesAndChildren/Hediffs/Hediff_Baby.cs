@@ -14,7 +14,7 @@ namespace BabiesAndChildren
             var comp = pawn.TryGetComp<Growing_Comp>();
             if (comp == null) return;
             
-            comp.GrowToStage(ChildrenUtility.GetAgeStage(pawn));
+            comp.GrowToStage(AgeStage.GetAgeStage(pawn));
             
             Pawn mother = pawn.GetMother();
             Pawn father = pawn.GetFather();

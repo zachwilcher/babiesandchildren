@@ -1,5 +1,7 @@
 ﻿using RimWorld;
 using System.Collections.Generic;
+using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
 using Verse;
 using Verse.AI;
 
@@ -7,20 +9,9 @@ namespace BabiesAndChildren
 {
     public class WorkGiver_PlayWithBaby : WorkGiver_Scanner
     {
-        public override PathEndMode PathEndMode
-        {
-            get
-            {
-                return PathEndMode.InteractionCell;
-            }
-        }
-        public override ThingRequest PotentialWorkThingRequest
-        {
-            get
-            {
-                return ThingRequest.ForGroup(ThingRequestGroup.Pawn);
-            }
-        }
+        public override PathEndMode PathEndMode => PathEndMode.InteractionCell;
+
+        public override ThingRequest PotentialWorkThingRequest => ThingRequest.ForGroup(ThingRequestGroup.Pawn);
 
         public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
         {
@@ -35,9 +26,9 @@ namespace BabiesAndChildren
                 return true;
             }
             List<Pawn> list = pawn.Map.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer);
-            for (int i = 0; i < list.Count; i++)
+            foreach (var t in list)
             {
-                if (list[i].InBed())
+                if (t.InBed())
                 {
                     return false;
                 }
@@ -67,21 +58,9 @@ namespace BabiesAndChildren
         private const TargetIndex PatientInd = TargetIndex.A;
         private const TargetIndex ChairInd = TargetIndex.B;
 
-        private Pawn Baby
-        {
-            get
-            {
-                return (Pawn)this.job.GetTarget(TargetIndex.A).Thing;
-            }
-        }
+        private Pawn Baby => (Pawn)this.job.GetTarget(TargetIndex.A).Thing;
 
-        private Thing Chair
-        {
-            get
-            {
-                return this.job.GetTarget(TargetIndex.B).Thing;
-            }
-        }
+        private Thing Chair => this.job.GetTarget(TargetIndex.B).Thing;
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
@@ -144,8 +123,8 @@ namespace BabiesAndChildren
                 pawn != baby &&
                 baby.InBed() &&
                 baby.Awake() &&
-                ChildrenUtility.RaceUsesChildren(baby) &&
-                ChildrenUtility.GetAgeStage(baby) == AgeStage.Baby &&
+                RaceUtility.PawnUsesChildren(baby) &&
+                AgeStage.IsAgeStage(baby, AgeStage.Baby) &&
                 !baby.IsForbidden(pawn) &&
                 baby.needs.joy != null &&
                 baby.needs.joy.CurCategory <= maxPatientJoy &&
@@ -162,9 +141,9 @@ namespace BabiesAndChildren
         {
             //Toddlers can play babygames with each other casually, otherwise interaction can only be done with baby
 
-            if (ChildrenUtility.GetAgeStage(initiator) == AgeStage.Toddler && ChildrenUtility.GetAgeStage(recipient) == AgeStage.Toddler)
+            if (AgeStage.IsAgeStage(initiator, AgeStage.Toddler) && AgeStage.IsAgeStage(recipient, AgeStage.Toddler))
                 return 1f;
-            if (ModTools.IsRobot(recipient) || (ChildrenUtility.GetAgeStage(recipient) > AgeStage.Baby))
+            if (ModTools.IsRobot(recipient) || AgeStage.IsOlderThan(recipient, AgeStage.Baby))
                 return 0;
             return 1f;
         }

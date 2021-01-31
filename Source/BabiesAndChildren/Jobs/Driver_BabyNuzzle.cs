@@ -1,6 +1,8 @@
 ﻿using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
+using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
 using Verse;
 using Verse.AI;
 
@@ -11,23 +13,24 @@ namespace BabiesAndChildren
         private const float BabyMtbHours = 18f;
         protected override float MtbHours(Pawn pawn)
         {
-            float t = -1f;
-            if (!ChildrenUtility.RaceUsesChildren(pawn)) return t;
-            if (ChildrenUtility.GetAgeStage(pawn) > AgeStage.Child) return t;
-            if (!BnCSettings.child_cute_act_enabled || pawn.story.traits.HasTrait(TraitDefOf.Psychopath)) return t;            
-            if (ChildrenUtility.GetAgeStage(pawn) == AgeStage.Child)
+            if (!RaceUtility.PawnUsesChildren(pawn) || 
+                AgeStage.IsOlderThan(pawn, AgeStage.Child) ||
+                !BnCSettings.child_cute_act_enabled || 
+                pawn.story.traits.HasTrait(TraitDefOf.Psychopath)) 
+                return -1f;            
+            
+            if (AgeStage.IsAgeStage(pawn, AgeStage.Child))
             {
-                float agechild = pawn.def.race.lifeStageAges[AgeStage.Child].minAge;
-                float ageteen = pawn.def.race.lifeStageAges[AgeStage.Teenager].minAge;
-                float now = pawn.ageTracker.AgeBiologicalYearsFloat + 0.1f; // prevent 0 + 0.1f
-                float f = 1f + (3f * (now - agechild) / (ageteen - agechild));
-                t = BabyMtbHours * f;
+                float minChildAge = AgeStage.GetLifeStageAge(pawn, AgeStage.Child).minAge;
+                float minTeenAge = AgeStage.GetLifeStageAge(pawn,AgeStage.Teenager).minAge;
+                float curAge = pawn.ageTracker.AgeBiologicalYearsFloat + 0.1f; // prevent 0 + 0.1f
+                float f = 1f + (3f * (curAge - minChildAge) / (minTeenAge - minChildAge));
+                return BabyMtbHours * f;
             }
             else
             {
-                t = BabyMtbHours;
+                return BabyMtbHours;
             }
-            return t;
         }
     }
 
@@ -36,14 +39,19 @@ namespace BabiesAndChildren
         private const float MaxNuzzleDistance = 30f;
         protected override Job TryGiveJob(Pawn pawn)
         {
-            if (!ChildrenUtility.RaceUsesChildren(pawn)) return null;
-            if (ChildrenUtility.GetAgeStage(pawn) > AgeStage.Child) return null;
-            if (!BnCSettings.child_cute_act_enabled || pawn.story.traits.HasTrait(TraitDefOf.Psychopath)) return null;            
+            if (!RaceUtility.PawnUsesChildren(pawn) || 
+                AgeStage.IsOlderThan(pawn, AgeStage.Child) ||
+                !BnCSettings.child_cute_act_enabled || 
+                pawn.story.traits.HasTrait(TraitDefOf.Psychopath)) 
+                return null;
 
-            Pawn t;
             if (!(from p in pawn.Map.mapPawns.SpawnedPawnsInFaction(pawn.Faction)
-                  where !p.NonHumanlikeOrWildMan() && p != pawn && p.Position.InHorDistOf(pawn.Position, MaxNuzzleDistance) && pawn.GetRoom(RegionType.Set_Passable) == p.GetRoom(RegionType.Set_Passable) && !p.Position.IsForbidden(pawn) && p.CanCasuallyInteractNow(false)
-                  select p).TryRandomElement(out t))
+                where !p.NonHumanlikeOrWildMan() && 
+                      (p != pawn && p.Position.InHorDistOf(pawn.Position, MaxNuzzleDistance)) && 
+                      (pawn.GetRoom(RegionType.Set_Passable) == p.GetRoom(RegionType.Set_Passable)) && 
+                      !p.Position.IsForbidden(pawn)
+                      && p.CanCasuallyInteractNow(false)
+                select p).TryRandomElement(out var t))
             {
                 return null;
             }

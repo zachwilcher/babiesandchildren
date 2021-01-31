@@ -51,7 +51,9 @@
     <FileAlignment>4096</FileAlignment>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="api\PregnancyUtility.cs" />
+    <Compile Include="api\Traits.cs" />
+    <Compile Include="api\Races.cs" />
+    <Compile Include="api\Thoughts.cs" />
     <Compile Include="Components\DummyComp.cs" />
     <Compile Include="Components\Growing_Comp.cs" />
     <Compile Include="Harmony\DressPatientsPatches.cs" />
@@ -69,7 +71,7 @@
     <Compile Include="Initializer.cs" />
     <Compile Include="Jobs\Driver_FeedBaby.cs" />
     <Compile Include="Jobs\Driver_BabyNuzzle.cs" />
-    <Compile Include="Jobs\Driver_PlayWithBaby_Reworked.cs" />
+    <Compile Include="Jobs\Driver_PlayWithBaby.cs" />
     <Compile Include="Defs\ChildDefOf.cs" />
     <Compile Include="Jobs\MoveBabyToCrib.cs" />
     <Compile Include="Jobs\MoveBabyToCribAndFeed.cs" />
@@ -94,6 +96,7 @@
     <Compile Include="Tools\GraphicTools.cs" />
     <Compile Include="Tools\MathTools.cs" />
     <Compile Include="Tools\ModTools.cs" />
+    <Compile Include="Tools\RaceUtility.cs" />
     <Compile Include="Tools\Tweaks.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

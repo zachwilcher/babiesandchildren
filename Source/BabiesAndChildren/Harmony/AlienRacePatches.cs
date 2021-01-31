@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
 using UnityEngine;
 using Verse;
 
@@ -79,7 +81,7 @@ namespace BabiesAndChildren.Harmony
             {
                 try
                 {
-                    if (pawn != null && ChildrenUtility.RaceUsesChildren(pawn) && pawn.ageTracker.CurLifeStageIndex < AgeStage.Teenager)
+                    if (pawn != null && RaceUtility.PawnUsesChildren(pawn) && AgeStage.IsYoungerThan(pawn, AgeStage.Teenager))
                     {
                         float bodySizeFactor = ChildrenUtility.GetBodySize(pawn);
                         float headSizeFactor = ChildrenUtility.GetHeadSize(pawn);
@@ -118,6 +120,7 @@ namespace BabiesAndChildren.Harmony
                 }
                 catch
                 {
+                    // Ignore
                 }
                 return true;
             }
@@ -131,7 +134,7 @@ namespace BabiesAndChildren.Harmony
             {
                 try
                 {
-                    if (pawn != null && ChildrenUtility.RaceUsesChildren(pawn) && pawn.ageTracker.CurLifeStageIndex < AgeStage.Teenager)
+                    if (pawn != null && RaceUtility.PawnUsesChildren(pawn) && AgeStage.IsYoungerThan(pawn, AgeStage.Teenager))
                     {
                         //float bodySizeFactor = GetBodySize(pawn);
                         float hairSizeFactor = ChildrenUtility.GetHairSize(0, pawn);
@@ -167,6 +170,7 @@ namespace BabiesAndChildren.Harmony
                 }
                 catch
                 {
+                    // Ignore
                 }
                 return true;
             }
@@ -185,11 +189,10 @@ namespace BabiesAndChildren.Harmony
                 try
                 {
                     if (!(pawn.def is ThingDef_AlienRace alienProps) || invisible) return false;
-                    if (pawn.ageTracker.CurLifeStageIndex <= AgeStage.Child)
+                    if (!AgeStage.IsOlderThan(pawn, AgeStage.Child))
                     {
-                        if (pawn.ageTracker.CurLifeStageIndex < AgeStage.Child) return false;
-                        //if (pawn.def.defName != "Human")
-                        //{
+                        if (AgeStage.IsYoungerThan(pawn, AgeStage.Child))
+                            return false;
                         float bodySizeFactor = ChildrenUtility.GetBodySize(pawn);
                         float moffsetZfb = 1f;
                         float moffsetXfb = 1f;
@@ -234,7 +237,7 @@ namespace BabiesAndChildren.Harmony
                         {
                             AlienPartGenerator.BodyAddon ba = addons[index: i];
                             if (!ba.CanDrawAddon(pawn: pawn)) continue;
-                            if (BnCSettings.human_like_head_enabled && ModTools.HumanFaceRaces(pawn) && ba.bodyPart.Contains("Head")) continue;
+                            if (BnCSettings.human_like_head_enabled && ChildrenUtility.HasHumanlikeFace(pawn) && ba.bodyPart.Contains("Head")) continue;
 
                             AlienPartGenerator.RotationOffset offset = rotation == Rot4.South ?
                                 ba.offsets.south :
@@ -325,6 +328,7 @@ namespace BabiesAndChildren.Harmony
                 }
                 catch
                 {
+                    // Ignored
                 }
                 return true;
             }

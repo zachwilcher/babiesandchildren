@@ -1,4 +1,6 @@
-﻿using Verse;
+﻿using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
+using Verse;
 using Verse.AI;
 using RimWorld;
 
@@ -7,34 +9,24 @@ namespace BabiesAndChildren
 
     public class WorkGiver_TakeBabyToCrib : WorkGiver_Scanner
     {
-        public override PathEndMode PathEndMode {
-            get {
-                return PathEndMode.Touch;
-            }
-        }
-        public override ThingRequest PotentialWorkThingRequest {
-            get {
-                return ThingRequest.ForGroup (ThingRequestGroup.Pawn);
-            }
-        }
-       
+        public override PathEndMode PathEndMode => PathEndMode.Touch;
+
+        public override ThingRequest PotentialWorkThingRequest => ThingRequest.ForGroup (ThingRequestGroup.Pawn);
+
         public override bool HasJobOnThing (Pawn pawn, Thing t, bool forced = false)
         {
             if (t == null || t == pawn) {
                 return false;
             }
 
-            Pawn baby = t as Pawn;
-            if (ChildrenUtility.GetAgeStage(baby) > AgeStage.Baby || !ChildrenUtility.RaceUsesChildren(baby) ) {
+            Pawn baby = (Pawn) t;
+            if (AgeStage.IsOlderThan(baby, AgeStage.Baby) || !RaceUtility.PawnUsesChildren(baby) ) {
                 return false;
             }
             if (!pawn.CanReserveAndReach (t, PathEndMode.ClosestTouch, Danger.Deadly, 1, -1, null, forced)) {
                 return false;
             }
            
-            //if(ChildrenUtility.GetAgeStage(baby) == AgeStage.Toddler){
-            //    return false;
-            //}
             Building_Bed crib = RestUtility.FindBedFor(baby, pawn, false, false);
             if (crib == null) {
                 JobFailReason.Is("NoCrib".Translate());

@@ -1,4 +1,6 @@
-﻿using HarmonyLib;
+﻿using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
+using HarmonyLib;
 using Verse;
 
 namespace BabiesAndChildren.Harmony
@@ -10,7 +12,7 @@ namespace BabiesAndChildren.Harmony
         [HarmonyPostfix]
         static void Postfix(ref Pawn pawn)
         {
-            if (ChildrenUtility.RaceUsesChildren(pawn) && ChildrenUtility.GetAgeStage(pawn) < AgeStage.Teenager)
+            if (RaceUtility.PawnUsesChildren(pawn) && AgeStage.IsYoungerThan(pawn, AgeStage.Teenager))
             {
                 ChildrenUtility.ChangeBodyType(pawn, true, true);
             }

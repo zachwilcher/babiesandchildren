@@ -3,6 +3,8 @@ using Verse.AI;
 using RimWorld;
 using System.Collections.Generic;
 using System.Diagnostics;
+using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
 
 namespace BabiesAndChildren
 {
@@ -20,16 +22,16 @@ namespace BabiesAndChildren
             }
         }
 
-        public override bool HasJobOnThing (Pawn pawn, Thing t, bool forced = false)
+        public override bool HasJobOnThing (Pawn pawn, Thing thing, bool forced = false)
         {
-            Pawn pawn2 = t as Pawn;
+            Pawn pawn2 = (Pawn) thing;
             if (pawn2 == null || pawn2 == pawn) {
                 return false;
             }
-            if (!ChildrenUtility.RaceUsesChildren(pawn2) || ChildrenUtility.GetAgeStage(pawn2) > AgeStage.Toddler) {
+            if (!RaceUtility.PawnUsesChildren(pawn2) || AgeStage.IsOlderThan(pawn2, AgeStage.Toddler)) {
                 return false;
             }
-            if (pawn2.needs.food == null || pawn2.needs.food.CurLevelPercentage > pawn2.needs.food.PercentageThreshHungry + 0.02) {
+            if (pawn2.needs.food == null || pawn2.needs.food.CurLevelPercentage > (pawn2.needs.food.PercentageThreshHungry + 0.02)) {
                 return false;
             }
             if (!pawn2.InBed()){
@@ -38,7 +40,7 @@ namespace BabiesAndChildren
             if (!ChildrenUtility.ShouldBeFed (pawn2)) {
                 return false;
             }
-            if (!pawn.CanReserveAndReach (t, PathEndMode.ClosestTouch, Danger.Deadly, 1, -1, null, forced)) {
+            if (!pawn.CanReserveAndReach (thing, PathEndMode.ClosestTouch, Danger.Deadly, 1, -1, null, forced)) {
                 return false;
             }
             if (!ChildrenUtility.CanBreastfeed(pawn))
@@ -52,12 +54,11 @@ namespace BabiesAndChildren
         public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
         {
             Pawn pawn2 = (Pawn)t;
-            if (pawn2 != null){
-                if(ChildrenUtility.CanBreastfeed(pawn)){
-                    return new Job (DefDatabase<JobDef>.GetNamed ("BreastfeedBaby")) {
-                        targetA = pawn2,
-                    };
-                }
+            if (pawn2 == null) return null;
+            if(ChildrenUtility.CanBreastfeed(pawn)){
+                return new Job (DefDatabase<JobDef>.GetNamed ("BreastfeedBaby")) {
+                    targetA = pawn2,
+                };
             }
             return null;
         }
@@ -95,7 +96,7 @@ namespace BabiesAndChildren
             Toil prepare = new Toil();
             prepare.initAction = delegate
             {
-                if(ChildrenUtility.GetAgeStage(Victim) > AgeStage.Baby)
+                if(AgeStage.IsOlderThan(Victim, AgeStage.Baby))
                     PawnUtility.ForceWait(Victim, breastFeedDuration, Victim);
             };
             prepare.defaultCompleteMode = ToilCompleteMode.Delay;
@@ -140,7 +141,7 @@ namespace BabiesAndChildren
             {
                 return false;
             }
-            if (!ChildrenUtility.RaceUsesChildren(pawn2) || ChildrenUtility.GetAgeStage(pawn2) > AgeStage.Toddler)
+            if (!RaceUtility.PawnUsesChildren(pawn2) || AgeStage.IsOlderThan(pawn2, AgeStage.Toddler))
             {
                 return false;
             }

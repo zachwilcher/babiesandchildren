@@ -8,13 +8,13 @@ namespace BabiesAndChildren
     {
         static Initializer()
         {
-            ChildrenBase.ModWIP_ON = ModTools.IsModOn("[NL] Facial Animation - WIP");
+            ChildrenBase.ModFacialAnimation_ON = ModTools.IsModOn("[NL] Facial Animation - WIP");
             ChildrenBase.ModCSL_ON = ModTools.IsModOn("Children, school and learning");
-            ChildrenBase.ModRJW_ON = ModTools.IsModOn("RimJobWorld");
-            ChildrenBase.ModAT_ON = ModTools.IsModOn("Android tiers");
+            ChildrenBase.ModRimJobWorld_ON = ModTools.IsModOn("RimJobWorld");
+            ChildrenBase.ModAndroid_Tiers_ON = ModTools.IsModOn("Android tiers");
             ChildrenBase.ModDressPatients_ON = ModTools.IsModOn("Dress Patients");
             
-            if (ChildrenBase.ModWIP_ON)
+            if (ChildrenBase.ModFacialAnimation_ON)
             {
                 CLog.Message("Patching Facial Animation");
                 FacialAnimationPatches.Patch();

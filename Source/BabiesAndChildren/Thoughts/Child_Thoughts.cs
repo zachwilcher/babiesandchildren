@@ -1,4 +1,6 @@
-﻿using RimWorld;
+﻿using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
+using RimWorld;
 using Verse;
 
 namespace BabiesAndChildren
@@ -8,7 +10,7 @@ namespace BabiesAndChildren
         protected override ThoughtState CurrentStateInternal (Pawn p)
         {
             // Make sure it only gets applied to kids
-            if (ChildrenUtility.GetAgeStage(p) != AgeStage.Child)
+            if (!AgeStage.IsAgeStage(p, AgeStage.Child))
                 return false;
             return p.Awake () && p.needs.mood.recentMemory.TicksSinceLastLight > 800;
         }
@@ -19,7 +21,7 @@ namespace BabiesAndChildren
         const int maxDist = 8;
         protected override ThoughtState CurrentStateInternal (Pawn p)
         {
-            if (ChildrenUtility.GetAgeStage(p) > AgeStage.Toddler || !ChildrenUtility.RaceUsesChildren(p))
+            if (AgeStage.IsOlderThan(p, AgeStage.Toddler) || !RaceUtility.PawnUsesChildren(p))
                 return false;
             Pawn mother = p.relations.GetFirstDirectRelationPawn (PawnRelationDefOf.Parent, x => x.gender == Gender.Female);
             Pawn father = p.relations.GetFirstDirectRelationPawn (PawnRelationDefOf.Parent, x => x.gender == Gender.Male);

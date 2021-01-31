@@ -1,4 +1,6 @@
-﻿using RimWorld;
+﻿using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
+using RimWorld;
 using Verse;
 
 namespace BabiesAndChildren
@@ -8,14 +10,14 @@ namespace BabiesAndChildren
         protected override ThoughtState CurrentStateInternal (Pawn p)
         {
             // Does not affect babies and toddlers
-            if (ChildrenUtility.GetAgeStage(p) < 2 || p.health.capacities.GetLevel(PawnCapacityDefOf.Hearing) <= 0.1f)
+            if (AgeStage.IsYoungerThan(p, AgeStage.Teenager) || p.health.capacities.GetLevel(PawnCapacityDefOf.Hearing) <= 0.1f)
                 return ThoughtState.Inactive;
 
             // Find all crying babies in the vicinity
             int cryingBabies = 0;
             foreach (Pawn mapPawn in p.MapHeld.mapPawns.AllPawnsSpawned) {
-                if (ChildrenUtility.RaceUsesChildren(mapPawn) &&
-                    ChildrenUtility.GetAgeStage(mapPawn) == 0 &&
+                if (RaceUtility.PawnUsesChildren(mapPawn) &&
+                    AgeStage.IsAgeStage(mapPawn, AgeStage.Baby) &&
                     mapPawn.health.hediffSet.HasHediff (HediffDef.Named ("UnhappyBaby")) &&
                     mapPawn.PositionHeld.InHorDistOf(p.PositionHeld, 24) &&
                     mapPawn.PositionHeld.GetRoomOrAdjacent(mapPawn.MapHeld).ContainedAndAdjacentThings.Contains(p)){

@@ -7,7 +7,10 @@ namespace BabiesAndChildren
 	{
 		public override float RandomSelectionWeight (Pawn initiator, Pawn recipient)
 		{
-			if (initiator.relations.OpinionOf(recipient) >= 50 && initiator.needs.mood.CurLevel >= 0.9f && ChildrenUtility.GetAgeStage(initiator) <= AgeStage.Child && ChildrenUtility.GetAgeStage(initiator) != AgeStage.Baby)
+			if (initiator.relations.OpinionOf(recipient) >= 50 && 
+			    initiator.needs.mood.CurLevel >= 0.9f && 
+			    !AgeStage.IsOlderThan(initiator, AgeStage.Child) && 
+			    !AgeStage.IsAgeStage(initiator, AgeStage.Baby))
 			{
 				return 0.2f;
 			}

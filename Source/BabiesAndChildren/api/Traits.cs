@@ -2,14 +2,11 @@ using System.Collections.Generic;
 using RimWorld;
 
 namespace BabiesAndChildren.api {
-    /// <summary>
-    /// Static utility methods for pregnancy related operations.
-    /// </summary>
-    public static class PregnancyUtility {
+    public static class Traits {
 
         private static List<TraitDef> geneticTraits = new List<TraitDef>();
 
-        static PregnancyUtility() {
+        static Traits() {
             //Genetic Traits
             RegisterGeneticTrait(TraitDefOf.Psychopath);
             RegisterGeneticTrait(TraitDefOf.SpeedOffset);

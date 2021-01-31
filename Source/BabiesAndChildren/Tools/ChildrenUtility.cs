@@ -3,6 +3,8 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
 using UnityEngine;
 using Verse;
 using Verse.AI;
@@ -80,11 +82,6 @@ namespace BabiesAndChildren
             return true;
         }
 
-        public static int GetAgeStage(Pawn pawn)
-        {
-            return pawn.ageTracker.CurLifeStageIndex;
-        }
-
         /// <summary>
         /// Returns true if a crying baby is nearby.
         /// </summary>
@@ -92,13 +89,12 @@ namespace BabiesAndChildren
         public static bool NearCryingBaby(Pawn pawn)
         {
             // Does not affect babies and toddlers
-            if (GetAgeStage(pawn) < AgeStage.Child || pawn.health.capacities.GetLevel(PawnCapacityDefOf.Hearing) <= 0.1f) { return false; }
+            if (AgeStage.IsYoungerThan(pawn, AgeStage.Child) || pawn.health.capacities.GetLevel(PawnCapacityDefOf.Hearing) <= 0.1f) { return false; }
 
             // Find any crying babies in the vicinity
             foreach (Pawn mapPawn in pawn.MapHeld.mapPawns.AllPawnsSpawned)
             {
-                if (RaceUsesChildren(mapPawn) &&
-                    GetAgeStage(mapPawn) == 0 &&
+                if (RaceUtility.PawnUsesChildren(mapPawn) && AgeStage.IsAgeStage(pawn, AgeStage.Baby) &&
                     mapPawn.health.hediffSet.HasHediff(HediffDef.Named("UnhappyBaby")) &&
                     mapPawn.PositionHeld.InHorDistOf(pawn.PositionHeld, 24) &&
                     mapPawn.PositionHeld.GetRoomOrAdjacent(mapPawn.MapHeld).ContainedAndAdjacentThings.Contains(pawn))
@@ -117,7 +113,7 @@ namespace BabiesAndChildren
         public static bool ShouldUseCrib(Pawn pawn)
         {
             //Probably ought to change this based on size at some point, age stages are unreliable
-            return !ModTools.IsRobot(pawn) && (GetAgeStage(pawn) <= AgeStage.Toddler);
+            return !ModTools.IsRobot(pawn) && (AgeStage.IsYoungerThan(pawn, AgeStage.Child));
         }
 
         /// <summary>
@@ -125,7 +121,7 @@ namespace BabiesAndChildren
         /// </summary>
         public static float ChildMaxWeaponMass(Pawn pawn)
         {
-            if (ChildrenUtility.GetAgeStage(pawn) >= AgeStage.Teenager)
+            if (!AgeStage.IsYoungerThan(pawn, AgeStage.Teenager))
                 return 999;
             //const float baseMass = 2.5f;
             //return (pawn.skills.GetSkill(SkillDefOf.Shooting).Level * 0.1f) + baseMass;
@@ -191,17 +187,6 @@ namespace BabiesAndChildren
             return (bed.building.bed_humanlike && bed.building.bed_maxBodySize <= 0.6f);
         }
 
-        ///<summary> Returns whether a race can become pregnant/have kids etc.</summary>
-        public static bool RaceUsesChildren(Pawn pawn)
-        {
-
-            return !ModTools.IsRobot(pawn) &&
-                   pawn.RaceProps.Humanlike &&
-                   pawn.RaceProps.lifeStageAges.Count == 5;
-
-
-        }
-
         /// <summary>
         /// Returns the accelerated growth factor setting value for a given growth stage.
         /// </summary>
@@ -243,7 +228,9 @@ namespace BabiesAndChildren
 
         public static bool ToddlerIsUpright(Pawn pawn)
         {
-            float a = pawn.def.race.lifeStageAges[AgeStage.Toddler].minAge + ((pawn.def.race.lifeStageAges[AgeStage.Child].minAge - pawn.def.race.lifeStageAges[AgeStage.Toddler].minAge) / 2);
+            if (!RaceUtility.PawnUsesChildren(pawn))
+                return false;
+            float a = AgeStage.GetLifeStageAge(pawn, AgeStage.Toddler).minAge + ((AgeStage.GetLifeStageAge(pawn, AgeStage.Child).minAge - AgeStage.GetLifeStageAge(pawn, AgeStage.Toddler).minAge) / 2);
             if (pawn.ageTracker.AgeBiologicalYearsFloat > a)
             {
                 return true;
@@ -253,11 +240,7 @@ namespace BabiesAndChildren
 
         public static bool SetMakerTagCheck(Thing thing, string tag)
         {
-            if (thing.def.thingSetMakerTags != null)
-            {
-                if (thing.def.thingSetMakerTags.Contains(tag)) return true;
-            }
-            return false;
+            return thing.def.thingSetMakerTags != null && thing.def.thingSetMakerTags.Contains(tag);
         }
 
         /// <summary>
@@ -317,7 +300,7 @@ namespace BabiesAndChildren
         public static void ChangeBodyType(Pawn pawn, bool Is_SizeInit = false, bool Is_ChangeSize_Skip = true)
         {
             float size = 0.01f;
-            switch (GetAgeStage(pawn))
+            switch (AgeStage.GetAgeStage(pawn))
             {
                 case AgeStage.Adult:
                     size = 1f;
@@ -415,40 +398,36 @@ namespace BabiesAndChildren
 
         public static void ChangeChildBackstory(Pawn pawn)
         {
-                if (pawn != null)
-                {
-                    if (GetAgeStage(pawn) == AgeStage.Child)
-                    {
-                        if (pawn.story.childhood == BackstoryDatabase.allBackstories["CustomBackstory_NA_Childhood_Disabled"])
-                        {
-                            pawn.story.childhood = BackstoryDatabase.allBackstories["CustomBackstory_Rimchild"];
-                            pawn.Notify_DisabledWorkTypesChanged();
-                            pawn.skills.Notify_SkillDisablesChanged();
-                            MeditationFocusTypeAvailabilityCache.ClearFor(pawn);
+            if (pawn == null) return;
+            if (AgeStage.IsAgeStage(pawn, AgeStage.Child) && pawn.story.childhood == BackstoryDatabase.allBackstories["CustomBackstory_NA_Childhood_Disabled"])
+            {
+                pawn.story.childhood = BackstoryDatabase.allBackstories["CustomBackstory_Rimchild"];
+                pawn.Notify_DisabledWorkTypesChanged();
+                pawn.skills.Notify_SkillDisablesChanged();
+                MeditationFocusTypeAvailabilityCache.ClearFor(pawn);
 
-                            if (pawn.TryGetComp<Growing_Comp>() != null)
-                            {
-                                Pawn mother = pawn.GetMother();
-                                Pawn father = pawn.GetFather();
-                                if (mother != null)
-                                {
-                                    MathTools.Fixed_Rand rand = new MathTools.Fixed_Rand((int)mother.ageTracker.AgeBiologicalTicks);
-                                    BabyTools.SetBabySkillsAndPassions(pawn, mother, father, rand);
-                                    List<SkillDef> allDefsListForReading = DefDatabase<SkillDef>.AllDefsListForReading;
-                                    foreach (var skillDef in allDefsListForReading)
-                                    {
-                                        pawn.skills.Learn(skillDef, 100, true);
-                                        CLog.DevMessage("Showbaby skill>> " + pawn.Name + "'s " + skillDef.defName + " Skills set =" + pawn.skills.GetSkill(skillDef));
-                                    }
-                                    Messages.Message("Successfully changed child's Backstory", MessageTypeDefOf.PositiveEvent);
-                                }
-                                //else Messages.Message("Mother Is Null", MessageTypeDefOf.NeutralEvent);
-                            }
+                if (pawn.TryGetComp<Growing_Comp>() != null)
+                {
+                    Pawn mother = pawn.GetMother();
+                    Pawn father = pawn.GetFather();
+                    if (mother != null)
+                    {
+                        MathTools.Fixed_Rand rand = new MathTools.Fixed_Rand((int)mother.ageTracker.AgeBiologicalTicks);
+                        BabyTools.SetBabySkillsAndPassions(pawn, mother, father, rand);
+                        List<SkillDef> allDefsListForReading = DefDatabase<SkillDef>.AllDefsListForReading;
+                        foreach (var skillDef in allDefsListForReading)
+                        {
+                            pawn.skills.Learn(skillDef, 100, true);
+                            CLog.DevMessage("Showbaby skill>> " + pawn.Name + "'s " + skillDef.defName + " Skills set =" + pawn.skills.GetSkill(skillDef));
                         }
-                        //else Messages.Message("Choose a child who has a backstory 'Baby'", MessageTypeDefOf.NeutralEvent);
+                        Messages.Message("Successfully changed child's Backstory", MessageTypeDefOf.PositiveEvent);
                     }
-                    //else Messages.Message("Choose a child (Not baby)", MessageTypeDefOf.NeutralEvent);
-                }            
+                    //else Messages.Message("Mother Is Null", MessageTypeDefOf.NeutralEvent);
+                }
+
+                //else Messages.Message("Choose a child who has a backstory 'Baby'", MessageTypeDefOf.NeutralEvent);
+            }
+            //else Messages.Message("Choose a child (Not baby)", MessageTypeDefOf.NeutralEvent);
         }
 
         //Modified version of Children.PawnRenderer_RenderPawnInternal_Patch:GetBodysizeScaling
@@ -479,8 +458,10 @@ namespace BabiesAndChildren
             }
             else
             {
-                if (BnCSettings.human_like_head_enabled && ModTools.HumanFaceRaces(pawn)) return BnCSettings.AlienHeadSizeB * AgeFactor(pawn);
-                else return BnCSettings.AlienHeadSizeA * AgeFactor(pawn);
+                if (BnCSettings.human_like_head_enabled && HasHumanlikeFace(pawn)) 
+                    return BnCSettings.AlienHeadSizeB * AgeFactor(pawn);
+                else 
+                    return BnCSettings.AlienHeadSizeA * AgeFactor(pawn);
             }
         }
 
@@ -505,7 +486,7 @@ namespace BabiesAndChildren
             }
             else
             {
-                if (BnCSettings.human_like_head_enabled && ModTools.HumanFaceRaces(pawn))
+                if (BnCSettings.human_like_head_enabled && HasHumanlikeFace(pawn))
                 {
                     newPos.z += BnCSettings.ShowHairAlienHFLocZ * AgeFactor(pawn);
                 }
@@ -520,8 +501,8 @@ namespace BabiesAndChildren
         public static float AgeFactor(Pawn pawn)
         {
             if (pawn.ageTracker.CurLifeStageIndex < AgeStage.Child) return 1f;
-            float agechild = pawn.def.race.lifeStageAges[AgeStage.Child].minAge;
-            float ageteen = pawn.def.race.lifeStageAges[AgeStage.Teenager].minAge;
+            float agechild = AgeStage.GetLifeStageAge(pawn, AgeStage.Child).minAge;
+            float ageteen = AgeStage.GetLifeStageAge(pawn, AgeStage.Teenager).minAge;
             float now = pawn.ageTracker.AgeBiologicalYearsFloat + 0.1f; // prevent 0 + 0.1f
 
             float agefac = 0.8f + (0.3f * (now - agechild) / (ageteen - agechild));
@@ -537,6 +518,15 @@ namespace BabiesAndChildren
         /// <returns>Sorted list of beds </returns>
         public static List<ThingDef> GetSortedBeds_RestEffectiveness(Pawn pawn) {
             return (ChildrenUtility.ShouldUseCrib(pawn)) ? ChildrenUtility.AllBedDefBestToWorstCribRest : RestUtility.AllBedDefBestToWorst;
+        }
+
+        public static bool HasHumanlikeFace(Pawn pawn)
+        {
+            if (pawn.def.race.Humanlike)
+                return true;
+
+            string[] humanlikes = { "Kurin_Race", "Ratkin"};
+            return humanlikes.Contains(pawn.def.defName);
         }
     }
 }

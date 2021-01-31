@@ -1,5 +1,7 @@
 using System;
 using System.Reflection;
+using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
 using HarmonyLib;
 using Verse;
 
@@ -22,7 +24,7 @@ namespace BabiesAndChildren.Harmony
 
         private static void IsPatientPostfix(ref bool __result, Pawn pawn)
         {
-            if (ChildrenUtility.RaceUsesChildren(pawn) && ChildrenUtility.GetAgeStage(pawn) == AgeStage.Baby)
+            if (RaceUtility.PawnUsesChildren(pawn) && AgeStage.IsAgeStage(pawn, AgeStage.Baby))
                 __result = true;
         }
     }

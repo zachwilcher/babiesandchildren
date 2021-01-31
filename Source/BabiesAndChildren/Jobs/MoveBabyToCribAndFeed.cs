@@ -4,6 +4,8 @@ using Verse.AI;
 using RimWorld;
 using System.Collections.Generic;
 using System.Diagnostics;
+using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
 
 namespace BabiesAndChildren
 {
@@ -23,12 +25,12 @@ namespace BabiesAndChildren
         
 		public override bool HasJobOnThing (Pawn pawn, Thing t, bool forced = false)
 		{
-			Pawn baby = t as Pawn;
+			Pawn baby = (Pawn) t;
 			if (baby == null || baby == pawn) {
 				return false;
 			}
 			//Only perform job if baby is toddler
-			if (ChildrenUtility.GetAgeStage(baby) != AgeStage.Toddler || !ChildrenUtility.RaceUsesChildren(baby)) {
+			if (!AgeStage.IsAgeStage(baby, AgeStage.Toddler) || !RaceUtility.PawnUsesChildren(baby)) {
 				return false;
 			}
 			if (!pawn.CanReserveAndReach (t, PathEndMode.ClosestTouch, Danger.Deadly, 1, -1, null, forced)) {
@@ -98,23 +100,11 @@ namespace BabiesAndChildren
 
 		private const float FeedDurationMultiplier = 1.5f;
 
-		protected Thing Food{
-			get{
-				return job.targetA.Thing;
-			}
-		}
+		protected Thing Food => job.targetA.Thing;
 
-		protected Pawn Deliveree{
-			get{
-				return (Pawn)job.targetB.Thing;
-			}
-		}
-		
-		protected Building_Bed Crib{
-			get{
-				return (Building_Bed)job.targetC.Thing;
-			}
-		}
+		protected Pawn Deliveree => (Pawn)job.targetB.Thing;
+
+		protected Building_Bed Crib => (Building_Bed)job.targetC.Thing;
 
 		public override string GetReport()
 		{

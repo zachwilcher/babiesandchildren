@@ -11,12 +11,8 @@ namespace BabiesAndChildren
         private int scoldDuration = 300;
         private int num_times_scolded = 0;
         
-        protected Pawn Victim {
-            get {
-                return (Pawn)TargetA.Thing;
-            }
-        }
-        
+        protected Pawn Victim => (Pawn)TargetA.Thing;
+
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
             return this.pawn.Reserve(this.Victim, this.job, 1, -1, null);

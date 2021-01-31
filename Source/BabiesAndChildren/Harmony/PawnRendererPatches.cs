@@ -1,4 +1,6 @@
 using System;
+using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
 using HarmonyLib;
 using UnityEngine;
 using Verse;
@@ -37,22 +39,21 @@ namespace BabiesAndChildren.Harmony
     public static class PawnRenderer_RenderPawnInternal_Patch
     {
         [HarmonyPrefix]
-        //TODO determine if the following annotation is necessary 
         [HarmonyBefore(new string[] {"rimworld.Nals.FacialAnimation"})]
         internal static void Prefix(ref PawnGraphicSet __instance, ref Vector3 rootLoc,
             ref Pawn ___pawn, bool portrait)
         {
-            if (ChildrenUtility.RaceUsesChildren(___pawn))
+            if (RaceUtility.PawnUsesChildren(___pawn))
             {
-                if (ChildrenUtility.GetAgeStage(___pawn) < AgeStage.Teenager)
+                if (AgeStage.IsYoungerThan(___pawn, AgeStage.Teenager))
                 {
                     // Change the root location of the child's draw position
                     rootLoc = GraphicTools.ModifyChildYPosOffset(rootLoc, ___pawn, portrait);
                 }
 
-                if (ChildrenUtility.GetAgeStage(___pawn) < AgeStage.Child)
-                    // For facial animation (WIP)
-                    if (ChildrenBase.ModWIP_ON)
+                if (AgeStage.IsYoungerThan(___pawn, AgeStage.Child))
+                    // Remove Face drawing comp from facial animation for toddlers and babies
+                    if (ChildrenBase.ModFacialAnimation_ON)
                     {
                         ThingComp WIPcomp =
                             ChildrenUtility.GetCompByClassName(___pawn, "FacialAnimation.DrawFaceGraphicsComp");
@@ -78,10 +79,10 @@ namespace BabiesAndChildren.Harmony
             {
                 Pawn pawn = Traverse.Create(__instance).Field("pawn").GetValue<Pawn>();
 
-                if (pawn != null && pawn.ageTracker.CurLifeStageIndex == AgeStage.Child)
+                if (pawn != null && AgeStage.IsAgeStage(pawn, AgeStage.Child))
                 {
 
-                    if (ChildrenUtility.RaceUsesChildren(pawn))
+                    if (RaceUtility.PawnUsesChildren(pawn))
                     {
                         float bodySizeFactor = ChildrenUtility.GetBodySize(pawn);
                         float num2 = 1f;
@@ -98,7 +99,7 @@ namespace BabiesAndChildren.Harmony
                         {
                             __result.z += Tweaks.HuHeadlocZ ; 
                         }
-                        if (ChildrenBase.ModWIP_ON)
+                        if (ChildrenBase.ModFacialAnimation_ON)
                         {
                             __result += GraphicTools.ModifyChildYPosOffset(Vector3.zero, ___pawn, false);
                         }
@@ -108,6 +109,7 @@ namespace BabiesAndChildren.Harmony
             }
             catch
             {
+                // Ignore
             }
         }
     }

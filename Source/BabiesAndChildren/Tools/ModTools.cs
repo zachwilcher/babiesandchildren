@@ -17,29 +17,28 @@ namespace BabiesAndChildren
         }
         public static bool IsRobot(Pawn pawn)
         {
-            if (ChildrenBase.ModAT_ON)
-            {
-                string defName = pawn.def.defName.ToLower();
-                return defName.Contains("robot") || defName.Contains("android");
-            }
-            else
-            {
-                return false;
-            }
+            return pawn != null && IsRobot(pawn.def);
         }
 
-
-        public static bool HumanFaceRaces(Pawn pawn)
+        public static bool IsRobot(ThingDef thingDef)
         {
-            if (
-                pawn.def.defName == "Kurin_Race"
-                || pawn.def.defName == "Ratkin"
-            )
+            if (thingDef?.race == null)
+                return false;
+
+            bool isRobot = false;
+            
+            if (ChildrenBase.ModAndroid_Tiers_ON)
             {
-                return true;
+                string defName = thingDef.defName.ToLower();
+                isRobot =  defName.Contains("robot") || defName.Contains("android");
             }
-            return false;
+
+            if (thingDef.race.IsMechanoid)
+                isRobot = true;
+
+            return isRobot;
         }
+
 
         public static Hediff GetVag(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.def.defName.ToLower().Contains("vagina"));
         public static Hediff GetPen(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.def.defName.ToLower().Contains("penis"));
@@ -48,7 +47,7 @@ namespace BabiesAndChildren
 
         public static void ChangeSize(Pawn pawn, float Maxsize, bool Is_SizeInit)
         {
-            if (ChildrenBase.ModRJW_ON)
+            if (ChildrenBase.ModRimJobWorld_ON)
             {
                 Hediff bodypart = GetAnu(pawn);
                 if (bodypart == null) return;
@@ -96,7 +95,7 @@ namespace BabiesAndChildren
 
                     bodypart = GetBre(pawn);
                     if (bodypart == null) return;
-                    if (ChildrenUtility.GetAgeStage(pawn) < AgeStage.Teenager && Maxsize > 0.07f) Maxsize = 0.07f;
+                    if (AgeStage.IsYoungerThan(pawn, AgeStage.Teenager) && Maxsize > 0.07f) Maxsize = 0.07f;
                     size = Rand.Range(0.01f, Maxsize);
                     cursize = bodypart.Severity;
                     if (Is_SizeInit)
