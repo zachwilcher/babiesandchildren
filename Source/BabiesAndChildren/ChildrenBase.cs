@@ -1,6 +1,7 @@
 ﻿using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 using HugsLib;
+using RimWorld;
 using Verse;
 
 namespace BabiesAndChildren
@@ -41,22 +42,33 @@ namespace BabiesAndChildren
 
         }
 
+        public static void ReinitializeChildren(Map map)
+        {
+                CLog.Message("Resetting body types of all children.");
+                    foreach (Pawn pawn in map.mapPawns.AllPawnsSpawned)
+                    {
+                        if (RaceUtility.PawnUsesChildren(pawn) && AgeStage.IsYoungerThan(pawn ,AgeStage.Teenager))
+                        {
+                            if(pawn.story.bodyType == null)
+                                pawn.story.bodyType = ((pawn.gender == Gender.Female) ? BodyTypeDefOf.Female : BodyTypeDefOf.Male);
+                            
+                            Growing_Comp comp = pawn.TryGetComp<Growing_Comp>();
+                            comp?.Initialize(true);
+                            ChildrenUtility.ChangeBodyType(pawn, true, false);
+                            ChildrenUtility.ChangeChildBackstory(pawn);
+                        }
+                    }
+            
+        }
+
         public override void MapLoaded(Map map)
         {
             if (map != Current.Game.CurrentMap) return;
             if (!BnCSettings.OncePerGame)
             {
-                CLog.Message("Changing Body types of all children.");
                 foreach (Map tmap in Current.Game.Maps)
                 {
-                    foreach (Pawn pawn in tmap.mapPawns.AllPawnsSpawned)
-                    {
-                        if (RaceUtility.PawnUsesChildren(pawn) && AgeStage.IsYoungerThan(pawn ,AgeStage.Teenager))
-                        {
-                            ChildrenUtility.ChangeBodyType(pawn, true, false);
-                            ChildrenUtility.ChangeChildBackstory(pawn);
-                        }
-                    }
+                    ReinitializeChildren(tmap);
                 }
                 BnCSettings.OncePerGame = true;
             }

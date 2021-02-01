@@ -1,15 +1,18 @@
 ﻿using RimWorld;
 using System.Linq;
-using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 using Verse;
 
 namespace BabiesAndChildren
 {
-
-
     public static class DebugToolsChildren
     {
+        
+        [DebugAction("Pawns", "Reinitialize Children", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+        private static void Reinitialize()
+        {
+            ChildrenBase.ReinitializeChildren(Current.Game.CurrentMap);
+        }
 
         [DebugAction("Pawns", "Change Child Backstory", actionType = DebugActionType.ToolMap, allowedGameStates = AllowedGameStates.PlayingOnMap)]
         private static void ChangeChildBackstory()

@@ -299,6 +299,8 @@ namespace BabiesAndChildren
         /// <param name="Is_ChangeSize_Skip">Whether to change the size (if appropriate) of the pawn's heDiffs</param>
         public static void ChangeBodyType(Pawn pawn, bool Is_SizeInit = false, bool Is_ChangeSize_Skip = true)
         {
+            
+            
             float size = 0.01f;
             switch (AgeStage.GetAgeStage(pawn))
             {
@@ -309,6 +311,7 @@ namespace BabiesAndChildren
                 case AgeStage.Teenager:
                     if (pawn.def.defName == "Human")
                     {
+                        //35% chance of thin body type
                         if (Rand.Value < 0.35f)
                         {
                             pawn.story.bodyType = BodyTypeDefOf.Thin;
