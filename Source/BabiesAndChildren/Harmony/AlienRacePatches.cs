@@ -9,16 +9,20 @@ using Verse;
 
 namespace BabiesAndChildren.Harmony
 {
-    [HarmonyPatch] 
+    [HarmonyPatch]
     internal static class AlienRacePatches
     {
         static Dictionary<float, GraphicMeshSet> humanlikeBodySetModified = new Dictionary<float, GraphicMeshSet>();
         static Dictionary<float, GraphicMeshSet> humanlikeHeadSetModified = new Dictionary<float, GraphicMeshSet>();
-        static Dictionary<float, GraphicMeshSet> humanlikeHairAverageSetModified = new Dictionary<float, GraphicMeshSet>();
-        static Dictionary<float, GraphicMeshSet> humanlikeHairNarrowSetModified = new Dictionary<float, GraphicMeshSet>();
-        static MethodInfo meshInfo = AccessTools.Method(AccessTools.TypeByName("MeshMakerPlanes"), "NewPlaneMesh", new[]
-            { typeof(Vector2), typeof(bool), typeof(bool), typeof(bool) }, null);
 
+        static Dictionary<float, GraphicMeshSet> humanlikeHairAverageSetModified =
+            new Dictionary<float, GraphicMeshSet>();
+
+        static Dictionary<float, GraphicMeshSet> humanlikeHairNarrowSetModified =
+            new Dictionary<float, GraphicMeshSet>();
+
+        static MethodInfo meshInfo = AccessTools.Method(AccessTools.TypeByName("MeshMakerPlanes"), "NewPlaneMesh", new[]
+            {typeof(Vector2), typeof(bool), typeof(bool), typeof(bool)}, null);
 
         static GraphicMeshSet GetModifiedBodyMeshSet(float bodySizeFactor, Pawn pawn)
         {
@@ -26,6 +30,7 @@ namespace BabiesAndChildren.Harmony
             {
                 humanlikeBodySetModified.Add(bodySizeFactor, new GraphicMeshSet(1.5f * bodySizeFactor));
             }
+
             return humanlikeBodySetModified[bodySizeFactor];
         }
 
@@ -35,6 +40,7 @@ namespace BabiesAndChildren.Harmony
             {
                 humanlikeHeadSetModified.Add(headSizeFactor, new GraphicMeshSet(1.5f * headSizeFactor));
             }
+
             return humanlikeHeadSetModified[headSizeFactor];
         }
 
@@ -47,6 +53,7 @@ namespace BabiesAndChildren.Harmony
                 {
                     humanlikeHairAverageSetModified.Add(hairSizeFactor, new GraphicMeshSet(1.5f * hairSizeFactor));
                 }
+
                 result = humanlikeHairAverageSetModified[hairSizeFactor];
             }
             else
@@ -55,8 +62,10 @@ namespace BabiesAndChildren.Harmony
                 {
                     if (!humanlikeHairNarrowSetModified.ContainsKey(hairSizeFactor))
                     {
-                        humanlikeHairNarrowSetModified.Add(hairSizeFactor, new GraphicMeshSet(1.3f * hairSizeFactor, 1.5f * hairSizeFactor));
+                        humanlikeHairNarrowSetModified.Add(hairSizeFactor,
+                            new GraphicMeshSet(1.3f * hairSizeFactor, 1.5f * hairSizeFactor));
                     }
+
                     result = humanlikeHairNarrowSetModified[hairSizeFactor];
                 }
                 else
@@ -65,117 +74,52 @@ namespace BabiesAndChildren.Harmony
                     {
                         humanlikeHairAverageSetModified.Add(hairSizeFactor, new GraphicMeshSet(1.5f * hairSizeFactor));
                     }
+
                     result = humanlikeHairAverageSetModified[hairSizeFactor];
                 }
             }
+
             return result;
         }
 
+
+        //get scaled mesh sets for children bodies and heads
         [HarmonyPatch(typeof(HarmonyPatches), "GetPawnMesh")]
         static class GetPawnMesh_Patch
         {
-            [HarmonyPrefix]
-            static bool Prefix(bool portrait, Pawn pawn, Rot4 facing, bool wantsBody, ref Mesh __result)
+            [HarmonyPostfix]
+            static void Postfix(bool portrait, Pawn pawn, Rot4 facing, bool wantsBody, ref Mesh __result)
             {
-                try
-                {
-                    if (pawn != null && RaceUtility.PawnUsesChildren(pawn) && AgeStage.IsYoungerThan(pawn, AgeStage.Teenager))
-                    {
-                        float bodySizeFactor = ChildrenUtility.GetBodySize(pawn);
-                        float headSizeFactor = ChildrenUtility.GetHeadSize(pawn);
-                        if (pawn.GetComp<AlienPartGenerator.AlienComp>() != null)
-                        {
-                            if (portrait)
-                            {
-                                if (wantsBody)
-                                {
-                                    __result = GetModifiedBodyMeshSet(bodySizeFactor, pawn).MeshAt(facing);
-                                }
-                                else
-                                {
-                                    __result = GetModifiedHeadMeshSet(headSizeFactor, pawn).MeshAt(facing);
-                                }
-                            }
-                            else if (wantsBody)
-                            {
-                                __result = GetModifiedBodyMeshSet(bodySizeFactor, pawn).MeshAt(facing);
-                            }
-                            else
-                            {
-                                __result = GetModifiedHeadMeshSet(headSizeFactor, pawn).MeshAt(facing);
-                            }
-                        }
-                        else if (wantsBody)
-                        {
-                            __result = GetModifiedBodyMeshSet(bodySizeFactor, pawn).MeshAt(facing);
-                        }
-                        else
-                        {
-                            __result = GetModifiedHeadMeshSet(headSizeFactor, pawn).MeshAt(facing);
-                        }
-                        return false;
-                    }
-                }
-                catch
-                {
-                    // Ignore
-                }
-                return true;
+                if (pawn == null ||
+                    !RaceUtility.PawnUsesChildren(pawn) ||
+                    !AgeStage.IsAgeStage(pawn, AgeStage.Child))
+                    return;
+
+                __result = wantsBody ? 
+                    GetModifiedBodyMeshSet(ChildrenUtility.GetBodySize(pawn), pawn).MeshAt(facing) : 
+                    GetModifiedHeadMeshSet(ChildrenUtility.GetHeadSize(pawn), pawn).MeshAt(facing);
             }
         }
 
+        
+        //Get scaled hair meshes for children bodies and heads
         [HarmonyPatch(typeof(HarmonyPatches), "GetPawnHairMesh")]
         static class GetPawnHairMesh_Patch
         {
-            [HarmonyPrefix]
-            static bool Prefix(bool portrait, Pawn pawn, Rot4 headFacing, PawnGraphicSet graphics, ref Mesh __result)
+            [HarmonyPostfix]
+            static void Postfix(bool portrait, Pawn pawn, Rot4 headFacing, PawnGraphicSet graphics, ref Mesh __result)
             {
-                try
-                {
-                    if (pawn != null && RaceUtility.PawnUsesChildren(pawn) && AgeStage.IsYoungerThan(pawn, AgeStage.Teenager))
-                    {
-                        //float bodySizeFactor = GetBodySize(pawn);
-                        float hairSizeFactor = ChildrenUtility.GetHairSize(0, pawn);
-                        if (pawn.GetComp<AlienPartGenerator.AlienComp>() != null)
-                        {
-
-                            if (pawn.story.crownType == CrownType.Narrow)
-                            {
-                                if (portrait)
-                                {
-                                    __result = GetModifiedHairMeshSet(hairSizeFactor, pawn).MeshAt(headFacing);
-                                }
-                                else
-                                {
-                                    __result = GetModifiedHairMeshSet(hairSizeFactor, pawn).MeshAt(headFacing);
-                                }
-                            }
-                            else if (portrait)
-                            {
-                                __result = GetModifiedHairMeshSet(hairSizeFactor, pawn).MeshAt(headFacing);
-                            }
-                            else
-                            {
-                                __result = GetModifiedHairMeshSet(hairSizeFactor, pawn).MeshAt(headFacing);
-                            }
-                        }
-                        else
-                        {
-                            __result = GetModifiedHairMeshSet(hairSizeFactor, pawn).MeshAt(headFacing);
-                        }
-                        return false;
-                    }
-                }
-                catch
-                {
-                    // Ignore
-                }
-                return true;
+                if (pawn == null || 
+                    !RaceUtility.PawnUsesChildren(pawn) ||
+                    !AgeStage.IsAgeStage(pawn, AgeStage.Child)) 
+                    return;
+                
+                float hairSizeFactor = ChildrenUtility.GetHairSize(0, pawn);
+                __result = GetModifiedHairMeshSet(hairSizeFactor, pawn).MeshAt(headFacing);
             }
         }
 
-
-        [HarmonyPatch(typeof(HarmonyPatches), "DrawAddons")] 
+        [HarmonyPatch(typeof(HarmonyPatches), "DrawAddons")]
         static class DrawAddons_Patch
         {
             static Dictionary<Vector2, Mesh> addonMeshs = new Dictionary<Vector2, Mesh>();
@@ -186,19 +130,28 @@ namespace BabiesAndChildren.Harmony
             {
                 try
                 {
-                    if (!(pawn.def is ThingDef_AlienRace alienProps) || 
-                        invisible || 
+                    if (!(pawn.def is ThingDef_AlienRace alienProps) ||
+                        invisible ||
                         !RaceUtility.PawnUsesChildren(pawn) || 
-                        !AgeStage.IsAgeStage(pawn, AgeStage.Child)) 
+                        AgeStage.IsOlderThan(pawn, AgeStage.Child))
+                        return true;
+
+                    if (AgeStage.IsYoungerThan(pawn, AgeStage.Child)) //don't draw addons for babies and toddlers
                         return false;
-                    //only for children not babies and toddlers
+                    
+                    
+                    
                     float bodySizeFactor = ChildrenUtility.GetBodySize(pawn);
+                    
                     float moffsetZfb = 1f;
                     float moffsetXfb = 1f;
+                    
                     float moffsetZfa = 1f;
                     float moffsetXfa = 1f;
+                    
                     bool IsEastWestFlipped = false;
 
+                    
                     if (pawn.def.defName == "Alien_Orassan")
                     {
                         moffsetZfb = 1.4f;
@@ -211,22 +164,13 @@ namespace BabiesAndChildren.Harmony
                             IsEastWestFlipped = true;
                         }
                     }
-                    else
+                    else if (pawn.kindDef.race.ToString().ToLower().Contains("lizardman") && rotation == Rot4.East)
                     {
-                        if (pawn.kindDef.race.ToString().ToLower().Contains("lizardman"))
-                        {
-                            if (rotation == Rot4.East)
-                            {
-                                IsEastWestFlipped = true;
-                            }
-                        }
-                        else
-                        {
-                            if (rotation == Rot4.West)
-                            {
-                                IsEastWestFlipped = true;
-                            }
-                        }
+                        IsEastWestFlipped = true;
+                    }
+                    else if(rotation == Rot4.West)
+                    {
+                        IsEastWestFlipped = true;
                     }
 
                     List<AlienPartGenerator.BodyAddon> addons = alienProps.alienRace.generalSettings.alienPartGenerator.bodyAddons;
@@ -235,20 +179,27 @@ namespace BabiesAndChildren.Harmony
                     for (int i = 0; i < addons.Count; i++)
                     {
                         AlienPartGenerator.BodyAddon ba = addons[index: i];
+                        //don't draw if we cant
                         if (!ba.CanDrawAddon(pawn: pawn)) continue;
-                        if (BnCSettings.human_like_head_enabled && ChildrenUtility.HasHumanlikeHead(pawn) && ba.bodyPart.Contains("Head")) continue;
-
-                        AlienPartGenerator.RotationOffset offset = rotation == Rot4.South ?
-                            ba.offsets.south :
-                            rotation == Rot4.North ?
-                                ba.offsets.north :
-                                rotation == Rot4.East ?
-                                    ba.offsets.east :
-                                    ba.offsets.west;
-
-                        Vector2 bodyOffset = (portrait ? offset?.portraitBodyTypes ?? offset?.bodyTypes : offset?.bodyTypes)?.FirstOrDefault(predicate: to => to.bodyType == pawn.story.bodyType)
+                        //dont draw head if we want human like heads
+                        if (BnCSettings.human_like_head_enabled && 
+                            RaceUtility.HasHumanlikeHead(pawn) &&
+                            ba.bodyPart.Contains("Head")) 
+                            continue;
+                        //straight from alien race
+                        AlienPartGenerator.RotationOffset offset = rotation == Rot4.South ? ba.offsets.south :
+                            rotation == Rot4.North ? ba.offsets.north :
+                            rotation == Rot4.East ? ba.offsets.east :
+                            ba.offsets.west;
+                        //strait from alien race
+                        Vector2 bodyOffset =
+                            (portrait ? offset?.portraitBodyTypes ?? offset?.bodyTypes : offset?.bodyTypes)
+                            ?.FirstOrDefault(predicate: to => to.bodyType == pawn.story.bodyType)
                             ?.offset ?? Vector2.zero;
-                        Vector2 crownOffset = (portrait ? offset?.portraitCrownTypes ?? offset?.crownTypes : offset?.crownTypes)?.FirstOrDefault(predicate: to => to.crownType == alienComp.crownType)
+                        //straight from alien race
+                        Vector2 crownOffset =
+                            (portrait ? offset?.portraitCrownTypes ?? offset?.crownTypes : offset?.crownTypes)
+                            ?.FirstOrDefault(predicate: to => to.crownType == alienComp.crownType)
                             ?.offset ?? Vector2.zero;
 
                         //Defaults for tails 
@@ -263,17 +214,20 @@ namespace BabiesAndChildren.Harmony
 
                         if (!addonMeshsFlipped.ContainsKey(ba.drawSize * bodySizeFactor))
                         {
-                            addonMeshsFlipped.Add(ba.drawSize * bodySizeFactor, (Mesh)meshInfo.Invoke(null, new object[]
-                                {new Vector2(bodySizeFactor * 1.5f, bodySizeFactor * 1.5f),true,false,false}));
+                            addonMeshsFlipped.Add(ba.drawSize * bodySizeFactor, (Mesh) meshInfo.Invoke(null,
+                                new object[]
+                                    {new Vector2(bodySizeFactor * 1.5f, bodySizeFactor * 1.5f), true, false, false}));
                         }
 
                         if (!addonMeshs.ContainsKey(ba.drawSize * bodySizeFactor))
                         {
-                            addonMeshs.Add(ba.drawSize * bodySizeFactor, (Mesh)meshInfo.Invoke(null, new object[]
-                                {new Vector2(bodySizeFactor * 1.5f, bodySizeFactor * 1.5f),false,false,false}));
+                            addonMeshs.Add(ba.drawSize * bodySizeFactor, (Mesh) meshInfo.Invoke(null, new object[]
+                                {new Vector2(bodySizeFactor * 1.5f, bodySizeFactor * 1.5f), false, false, false}));
                         }
 
-                        Mesh mesh = IsEastWestFlipped ? addonMeshsFlipped[ba.drawSize * bodySizeFactor] : addonMeshs[ba.drawSize * bodySizeFactor];
+                        Mesh mesh = IsEastWestFlipped
+                            ? addonMeshsFlipped[ba.drawSize * bodySizeFactor]
+                            : addonMeshs[ba.drawSize * bodySizeFactor];
 
                         if (rotation == Rot4.North)
                         {
@@ -304,17 +258,22 @@ namespace BabiesAndChildren.Harmony
                             baAngle = -baAngle; //Angle
                         }
 
-                        Vector3 offsetVector = new Vector3(x: moffsetX, y: moffsetY, z: (moffsetZ  * Tweaks.G_offsetfac) + Tweaks.G_offset);
+                        Vector3 offsetVector = new Vector3(x: moffsetX, y: moffsetY,
+                            z: (moffsetZ * Tweaks.G_offsetfac) + Tweaks.G_offset);
 
-                        GenDraw.DrawMeshNowOrLater(mesh, vector + offsetVector.RotatedBy(Mathf.Acos(Quaternion.Dot(Quaternion.identity, quat)) * 2f * 57.29578f), Quaternion.AngleAxis(baAngle, Vector3.up) * quat, alienComp.addonGraphics[i].MatAt(rotation, null), portrait);
-
+                        GenDraw.DrawMeshNowOrLater(mesh,
+                            vector + offsetVector.RotatedBy(Mathf.Acos(Quaternion.Dot(Quaternion.identity, quat)) * 2f * 57.29578f),
+                            Quaternion.AngleAxis(baAngle, Vector3.up) * quat,
+                            alienComp.addonGraphics[i].MatAt(rotation, null), portrait);
                     }
+
                     return false;
                 }
                 catch
                 {
                     // Ignored
                 }
+
                 return true;
             }
         }

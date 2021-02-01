@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using BabiesAndChildren.api;
 using Verse;
 
@@ -46,6 +47,13 @@ namespace BabiesAndChildren.Tools
         public static bool PawnUsesChildren(Pawn pawn)
         {
             return ThingUsesChildren(pawn?.def);
+        }
+
+        public static bool HasHumanlikeHead(Pawn pawn)
+        {
+            //TODO have a setting to chose which races are effected by this
+            string[] humanlikes = { "Kurin_Race", "Ratkin"};
+            return humanlikes.Contains(pawn.def.defName);
         }
     }
 }

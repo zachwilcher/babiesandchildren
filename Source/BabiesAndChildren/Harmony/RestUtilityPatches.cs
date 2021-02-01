@@ -51,7 +51,7 @@ namespace BabiesAndChildren.Harmony {
         /// Modify FindBedFor to pass in a different order for bedDefs when looking
         /// for the best bed for a pawn. We do not touch the order of beds for
         /// medical effectiveness, as a baby still needs to go to the most effective
-        /// hospital bed if actually unwell.
+        /// hospital bed if it is actually unwell.
         /// </summary>
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {

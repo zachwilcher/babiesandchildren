@@ -1,6 +1,5 @@
 ﻿using AlienRace;
 using RimWorld;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using BabiesAndChildren.Tools;
@@ -24,16 +23,12 @@ namespace BabiesAndChildren
             get
             {
                 if (bedDefsBestToWorst_CribRestEffectiveness != null)
-                {
                     return bedDefsBestToWorst_CribRestEffectiveness;
-                }
-                else
-                {
-                    bedDefsBestToWorst_CribRestEffectiveness = DefDatabase<ThingDef>.AllDefs.Where(def => def.IsBed).
-                        OrderByDescending(def => IsBedCrib(def)).
-                        ThenByDescending(d => d.GetStatValueAbstract(StatDefOf.BedRestEffectiveness, null)).ToList();
-                    return bedDefsBestToWorst_CribRestEffectiveness;
-                }
+                
+                bedDefsBestToWorst_CribRestEffectiveness = DefDatabase<ThingDef>.AllDefs.Where(def => def.IsBed).
+                    OrderByDescending(IsBedCrib).
+                    ThenByDescending(d => d.GetStatValueAbstract(StatDefOf.BedRestEffectiveness, null)).ToList();
+                return bedDefsBestToWorst_CribRestEffectiveness;
             }
         }
 
@@ -93,7 +88,8 @@ namespace BabiesAndChildren
             // Find any crying babies in the vicinity
             foreach (Pawn mapPawn in pawn.MapHeld.mapPawns.AllPawnsSpawned)
             {
-                if (RaceUtility.PawnUsesChildren(mapPawn) && AgeStage.IsAgeStage(pawn, AgeStage.Baby) &&
+                if (RaceUtility.PawnUsesChildren(mapPawn) && 
+                    AgeStage.IsAgeStage(pawn, AgeStage.Baby) &&
                     mapPawn.health.hediffSet.HasHediff(HediffDef.Named("UnhappyBaby")) &&
                     mapPawn.PositionHeld.InHorDistOf(pawn.PositionHeld, 24) &&
                     mapPawn.PositionHeld.GetRoomOrAdjacent(mapPawn.MapHeld).ContainedAndAdjacentThings.Contains(pawn))
@@ -201,40 +197,12 @@ namespace BabiesAndChildren
             return 1;
         }
 
-        /// <summary>
-        /// Fetch a random body part matching the provided string
-        /// </summary>
-        /// <param name="pawn">The pawn whose parts will be searched</param>
-        /// <param name="bodyPart">The string defName of the body part to be returned</param>
-        /// <returns>A single bodypartrecord matching the provided string, or the only part if only one part exists</returns>
-        internal static BodyPartRecord GetPawnBodyPart(Pawn pawn, String bodyPart)
-        {
-            //Get collection of parts matching the def, then get a random left or right
-            return pawn.RaceProps.body.AllParts.FindAll(x => x.def == DefDatabase<BodyPartDef>.GetNamed(bodyPart, true)).RandomElement();
-        }
-
-        /// <summary>
-        /// Returns a collection of BodyPartRecords based on the part name provided.
-        /// This may be a collection containing a single element, or multiple for left and right parts
-        /// </summary>
-        /// <param name="pawn">The pawn whose parts will be searched</param>
-        /// <param name="bodyPart">The string defName of the body part to be returned</param>
-        /// <returns>A collection of bodypart records</returns>
-        internal static List<BodyPartRecord> GetPawnBodyParts(Pawn pawn, String bodyPart)
-        {
-            return pawn.RaceProps.body.AllParts.FindAll(x => x.def == DefDatabase<BodyPartDef>.GetNamed(bodyPart, true));
-        }
-
         public static bool ToddlerIsUpright(Pawn pawn)
         {
             if (!RaceUtility.PawnUsesChildren(pawn))
                 return false;
             float a = AgeStage.GetLifeStageAge(pawn, AgeStage.Toddler).minAge + ((AgeStage.GetLifeStageAge(pawn, AgeStage.Child).minAge - AgeStage.GetLifeStageAge(pawn, AgeStage.Toddler).minAge) / 2);
-            if (pawn.ageTracker.AgeBiologicalYearsFloat > a)
-            {
-                return true;
-            }
-            return false;
+            return pawn.ageTracker.AgeBiologicalYearsFloat > a;
         }
 
         public static bool SetMakerTagCheck(Thing thing, string tag)
@@ -301,67 +269,87 @@ namespace BabiesAndChildren
             
             
             float size = 0.01f;
+            
             switch (AgeStage.GetAgeStage(pawn))
             {
                 case AgeStage.Adult:
                     size = 1f;
-                    goto default;
-
+                    break;
+                
                 case AgeStage.Teenager:
-                    if (pawn.def.defName == "Human")
+                    //35% chance of thin body type
+                    if (Rand.Value < 0.35f)
                     {
-                        //35% chance of thin body type
-                        if (Rand.Value < 0.35f)
-                        {
-                            pawn.story.bodyType = BodyTypeDefOf.Thin;
-                        }
-                        else
-                        {
-                            pawn.story.bodyType = ((pawn.gender == Gender.Female) ? BodyTypeDefOf.Female : BodyTypeDefOf.Male);
-                        }
+                        TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
+                    }
+                    else if(pawn.gender == Gender.Male)
+                    {
+                        TrySetPawnBodyType(pawn, BodyTypeDefOf.Male);
+                    }
+                    else if (pawn.gender == Gender.Female)
+                    {
+                        TrySetPawnBodyType(pawn, BodyTypeDefOf.Female);
                     }
                     size = 0.8f;
-                    goto default;
-
+                    break;
                 case AgeStage.Child:
-                    if (pawn.def.defName == "Human")
-                    {
-                        pawn.story.bodyType = BodyTypeDefOf.Thin;
-                    }
-                    else
-                    {
-                        if (pawn.def is ThingDef_AlienRace thingDef_AlienRace && 
-                            !thingDef_AlienRace.alienRace.generalSettings.alienPartGenerator.alienbodytypes.NullOrEmpty<BodyTypeDef>() &&
-                            !thingDef_AlienRace.alienRace.generalSettings.alienPartGenerator.alienbodytypes.Contains(pawn.story.bodyType))
-                        {
-                            pawn.story.bodyType = thingDef_AlienRace.alienRace.generalSettings.alienPartGenerator.alienbodytypes.RandomElement<BodyTypeDef>();
-                        }
-                    }
+                    TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
                     size = 0.12f;
-                    goto default;
+                    break;
 
                 case AgeStage.Toddler:
-                    if (ToddlerIsUpright(pawn))
-                    {
-                        pawn.story.bodyType = BodyTypeDefOf.Thin;
-                        size = 0.10f;
-                    }
-                    else
-                    {
-                        pawn.story.bodyType = BodyTypeDefOf.Fat;
-                        size = 0.08f;
-                    }
-                    goto default;
+                if (ToddlerIsUpright(pawn))
+                {
+                    TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
+                    size = 0.10f;
+                }
+                else
+                {
+                    TrySetPawnBodyType(pawn, BodyTypeDefOf.Fat);
+                    size = 0.08f;
+                }
+                break;
 
                 case AgeStage.Baby:
-                    pawn.story.bodyType = BodyTypeDefOf.Fat;
+                    TrySetPawnBodyType(pawn, BodyTypeDefOf.Fat);
                     size = 0.07f;
-                    goto default;
-
-                default:
-                    if (!Is_ChangeSize_Skip) ModTools.ChangeSize(pawn, size, Is_SizeInit);
                     break;
+
             }
+            if (!Is_ChangeSize_Skip) 
+                ModTools.ChangeSize(pawn, size, Is_SizeInit);
+        }
+
+        public static bool TrySetPawnBodyType(Pawn pawn, BodyTypeDef bodyTypeDef, bool force = false)
+        {
+            if (pawn.def == DefDatabase<ThingDef>.GetNamed("Human") || force)
+            {
+                pawn.story.bodyType = bodyTypeDef;
+                return true;
+            } 
+            if (pawn.def is ThingDef_AlienRace thingDef)
+            {
+                List<BodyTypeDef> bodyTypes = thingDef.alienRace.generalSettings.alienPartGenerator.alienbodytypes;
+                if (bodyTypes.NullOrEmpty())
+                    return false;
+
+                if (bodyTypes.Contains(bodyTypeDef))
+                {
+                    pawn.story.bodyType = bodyTypeDef;
+                    return true;
+                }
+
+                //can't set to desired to body type but leaving an invalid one
+                //leads to pink boxes
+                if (!bodyTypes.Contains(pawn.story.bodyType))
+                {
+                    pawn.story.bodyType = bodyTypes.RandomElement<BodyTypeDef>();
+                    return false;
+                }
+                
+            }
+            //pawn's which are not humans or alien races is out of the scope of this mod
+            return false;
         }
 
         /// <summary>
@@ -460,7 +448,7 @@ namespace BabiesAndChildren
             }
             else
             {
-                if (BnCSettings.human_like_head_enabled && HasHumanlikeHead(pawn)) 
+                if (BnCSettings.human_like_head_enabled && RaceUtility.HasHumanlikeHead(pawn)) 
                     return BnCSettings.AlienHeadSizeB * AgeFactor(pawn);
                 else 
                     return BnCSettings.AlienHeadSizeA * AgeFactor(pawn);
@@ -488,7 +476,7 @@ namespace BabiesAndChildren
             }
             else
             {
-                if (BnCSettings.human_like_head_enabled && HasHumanlikeHead(pawn))
+                if (BnCSettings.human_like_head_enabled && RaceUtility.HasHumanlikeHead(pawn))
                 {
                     newPos.z += BnCSettings.ShowHairAlienHFLocZ * AgeFactor(pawn);
                 }
@@ -521,15 +509,8 @@ namespace BabiesAndChildren
         public static List<ThingDef> GetSortedBeds_RestEffectiveness(Pawn pawn) {
             return (ChildrenUtility.ShouldUseCrib(pawn)) ? ChildrenUtility.AllBedDefBestToWorstCribRest : RestUtility.AllBedDefBestToWorst;
         }
+        
+        
 
-        //TODO have a setting to chose which races are effected by this
-        public static bool HasHumanlikeHead(Pawn pawn)
-        {
-            string[] humanlikes = { "Kurin_Race", "Ratkin"};
-            return humanlikes.Contains(pawn.def.defName);
-        }
     }
 }
-
-
-

@@ -5,6 +5,7 @@ using BabiesAndChildren.Tools;
 using HarmonyLib;
 using RimWorld;
 using Verse;
+using HealthUtility = BabiesAndChildren.Tools.HealthUtility;
 
 namespace BabiesAndChildren.Harmony
 {
@@ -128,18 +129,19 @@ namespace BabiesAndChildren.Harmony
         static void Postfix(ref ThingWithComps eq,
             ref Pawn_EquipmentTracker __instance)
         {
-            Pawn pawn = __instance.ParentHolder as Pawn;
-            if (pawn != null && 
-                RaceUtility.PawnUsesChildren(pawn) && 
-                AgeStage.IsOlderThan(pawn, AgeStage.Teenager) && 
-                pawn.Faction.IsPlayer)
+            Pawn pawn = (Pawn) __instance?.ParentHolder;
+            if (pawn == null || 
+                eq?.def == null ||
+                !RaceUtility.PawnUsesChildren(pawn) || 
+                AgeStage.IsOlderThan(pawn, AgeStage.Child) ||
+                !pawn.Faction.IsPlayer) 
+                return;
+            
+            if (eq.def.BaseMass > ChildrenUtility.ChildMaxWeaponMass(pawn))
             {
-                if (eq.def.BaseMass > ChildrenUtility.ChildMaxWeaponMass(pawn))
-                {
-                    Messages.Message(
-                        "MessageWeaponTooLarge".Translate(eq.def.label,
-                            ((Pawn) __instance.ParentHolder).Name.ToStringShort), MessageTypeDefOf.CautionInput);
-                }
+                Messages.Message(
+                    "MessageWeaponTooLarge".Translate(eq.def.label,
+                        pawn.Name.ToStringShort), MessageTypeDefOf.CautionInput);
             }
         }
     }
@@ -152,41 +154,36 @@ namespace BabiesAndChildren.Harmony
         static void Postfix(ref Verb_Shoot __instance)
         {
             Pawn pawn = __instance.CasterPawn;
-            if (pawn != null && 
-                RaceUtility.PawnUsesChildren(pawn) &&
-                !AgeStage.IsOlderThan(pawn, AgeStage.Child) &&
-                pawn.Faction.IsPlayer)
+            if (pawn == null || !RaceUtility.PawnUsesChildren(pawn) || AgeStage.IsOlderThan(pawn, AgeStage.Child) ||
+                !pawn.Faction.IsPlayer) return;
+            // The weapon is too heavy and the child will (likely) drop it when trying to fire
+            if (__instance.EquipmentSource.def.BaseMass > ChildrenUtility.ChildMaxWeaponMass(pawn))
             {
-                // The weapon is too heavy and the child will (likely) drop it when trying to fire
-                if (__instance.EquipmentSource.def.BaseMass > ChildrenUtility.ChildMaxWeaponMass(pawn))
+                pawn.equipment.TryDropEquipment(__instance.EquipmentSource, out _, pawn.Position, false);
+
+                float recoilForce = (__instance.EquipmentSource.def.BaseMass - 3);
+
+                if (recoilForce > 0)
                 {
-                    ThingWithComps benis;
-                    pawn.equipment.TryDropEquipment(__instance.EquipmentSource, out benis, pawn.Position, false);
-
-                    float recoilForce = (__instance.EquipmentSource.def.BaseMass - 3);
-
-                    if (recoilForce > 0)
+                    string[] hitPart =
                     {
-                        string[] hitPart =
-                        {
-                            "Torso",
-                            "Shoulder",
-                            "Arm",
-                            "Hand",
-                            "Head",
-                            "Neck",
-                            "Eye",
-                            "Nose",
-                        };
-                        int hits = Rand.Range(1, 4);
-                        while (hits > 0)
-                        {
-                            pawn.TakeDamage(new DamageInfo(DamageDefOf.Blunt,
-                                (int) ((recoilForce + Rand.Range(0f, 3f)) / hits), 0, -1,
-                                __instance.EquipmentSource,
-                                ChildrenUtility.GetPawnBodyPart(pawn, hitPart.RandomElement<String>()), null));
-                            hits--;
-                        }
+                        "Torso",
+                        "Shoulder",
+                        "Arm",
+                        "Hand",
+                        "Head",
+                        "Neck",
+                        "Eye",
+                        "Nose",
+                    };
+                    int hits = Rand.Range(1, 4);
+                    while (hits > 0)
+                    {
+                        pawn.TakeDamage(new DamageInfo(DamageDefOf.Blunt,
+                            (int) ((recoilForce + Rand.Range(0f, 3f)) / hits), 0, -1,
+                            __instance.EquipmentSource,
+                            HealthUtility.GetPawnBodyPart(pawn, hitPart.RandomElement<String>()), null));
+                        hits--;
                     }
                 }
             }

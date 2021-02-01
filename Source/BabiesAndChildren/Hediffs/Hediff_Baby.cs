@@ -48,7 +48,7 @@ namespace BabiesAndChildren
             if (mother != null)
             {
                 HealthUtility.TryAddHediff(mother, HediffDef.Named("PostPregnancy"));
-                HealthUtility.TryAddHediff(mother, HediffDef.Named("Lactating"), HealthUtility.TryGetBodyPart(mother, "Torso"));
+                HealthUtility.TryAddHediff(mother, HediffDef.Named("Lactating"), HealthUtility.GetPawnBodyPart(mother, "Torso"));
             }
             
             if (ChildrenBase.ModRimJobWorld_ON && BnCSettings.enable_postpartum)
