@@ -3,6 +3,9 @@ using Verse;
 
 namespace BabiesAndChildren.api
 {
+    /// <summary>
+    /// Blacklist races to not have their children processed by this mod
+    /// </summary>
     public static class Races
     {
         private static List<ThingDef> raceBlacklist = new List<ThingDef>();

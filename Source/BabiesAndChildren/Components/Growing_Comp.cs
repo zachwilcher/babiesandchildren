@@ -2,6 +2,7 @@
 using System;
 using BabiesAndChildren.api;
 using Verse;
+using HealthUtility = BabiesAndChildren.Tools.HealthUtility;
 
 
 namespace BabiesAndChildren
@@ -52,8 +53,8 @@ namespace BabiesAndChildren
             if (pawn.ageTracker.AgeBiologicalTicks < 10000 && !pawn.health.hediffSet.HasHediff(HediffDef.Named("BabyState")))
             {
                 //basically a call to Hediff_Baby:PostRemoved() in about 5 ticks
-                BabyTools.TryAddHediff(pawn, HediffDef.Named("BabyState"));
-                BabyTools.TryAddHediff(pawn, HediffDef.Named("NoManipulationFlag"));
+                HealthUtility.TryAddHediff(pawn, HediffDef.Named("BabyState"));
+                HealthUtility.TryAddHediff(pawn, HediffDef.Named("NoManipulationFlag"));
             }
 
             initialized = true;
@@ -71,7 +72,7 @@ namespace BabiesAndChildren
             if ((growthStage <= AgeStage.Toddler) &&
                 Hediff_UnhappyBaby.CheckUnhappy(pawn))
             {
-                BabyTools.TryAddHediff(pawn, ChildHediffDefOf.UnhappyBaby);
+                HealthUtility.TryAddHediff(pawn, ChildHediffDefOf.UnhappyBaby);
             }
         }
 
@@ -223,16 +224,16 @@ namespace BabiesAndChildren
             
             int age = pawn.ageTracker.AgeBiologicalYears;
             
-            int agestage = AgeStage.GetAgeStage(pawn);
+            int ageStage = AgeStage.GetAgeStage(pawn);
             
-            if (growthStage != agestage)
+            if (growthStage != ageStage)
             {
                 graphicsDirty = true;
                 PortraitsCache.SetDirty(pawn);
-                GrowToStage(agestage);
+                GrowToStage(ageStage);
             }
 
-            if (agestage == AgeStage.Toddler)
+            if (ageStage == AgeStage.Toddler)
             {
                 if (pawn.story.bodyType != BodyTypeDefOf.Thin)
                 {

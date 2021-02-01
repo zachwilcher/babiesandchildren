@@ -4,6 +4,9 @@ using Verse;
 
 namespace BabiesAndChildren.Tools
 {
+    /// <summary>
+    /// Helper class for race properties
+    /// </summary>
     public static class RaceUtility
     {
 

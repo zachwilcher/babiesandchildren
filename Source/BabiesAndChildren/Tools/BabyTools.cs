@@ -2,64 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
 using HarmonyLib;
 using RimWorld;
 using Verse;
-using Verse.Sound;
+using HealthUtility = BabiesAndChildren.Tools.HealthUtility;
 
 namespace BabiesAndChildren
 {
     public static class BabyTools
     {
-        public static void BabyProcess(Pawn pawn, Pawn mother, Pawn father, MathTools.Fixed_Rand rand)
-        {
-            TryAddHediff(mother, HediffDef.Named("PostPregnancy"));
-            TryAddHediff(mother, HediffDef.Named("Lactating"), mother.RaceProps.body.AllParts.Find(x => x.def.defName == "Torso"));
-            
-            if (ChildrenBase.ModRimJobWorld_ON && BnCSettings.enable_postpartum)
-            {
-                TryAddHediff(mother, HediffDef.Named("BnC_RJW_PostPregnancy"));
-            }
-            
-
-            //Make crying sound when baby is born
-            SoundInfo info = SoundInfo.InMap(new TargetInfo(pawn.PositionHeld, pawn.MapHeld));
-            SoundDef.Named("Pawn_BabyCry").PlayOneShot(info);
-
-            //ChildrenUtility.ChangeBodyType(pawn, true, false);
-            ChildrenUtility.ClearImplantAndAddiction(pawn);
-            ChildrenUtility.RenamePawn(pawn, mother, father);
-
-            //For rabbie
-            if (pawn.def.defName == "Rabbie")
-            {
-                TryAddHediff(pawn, HediffDef.Named("PlanetariumAddiction"));
-            }
-
-            if (!ChildrenBase.ModCSL_ON)
-            {
-                SetBabyTraits(pawn, mother, father, rand);
-                SetBabySkillsAndPassions(pawn, mother, father, rand);
-            }
-        }
-    
-        public static void TryAddHediff(Pawn pawn, HediffDef hediffDef, BodyPartRecord part = null, DamageInfo? damageInfo = null, bool force = false)
-        {
-            if (pawn == null )
-                return;
-
-            if (pawn.health.hediffSet.HasHediff(hediffDef) && !force)
-                return;
-
-            pawn.health.AddHediff(hediffDef, part, damageInfo);
-        }
-
         public static void Miscarry(Pawn baby, Pawn mother, Pawn father)
         {
             baby.Name = new NameSingle("Unnamed".Translate(), false);
             baby.SetFaction(null, null);
-            baby.health.AddHediff(HediffDef.Named("DefectStillborn"));
-
+            HealthUtility.TryAddHediff(baby, HediffDef.Named("DefectStillborn"), force: true);
             if (father != null)
             {
                 father.needs.mood.thoughts.memories.TryGainMemory(ThoughtDef.Named("BabyStillborn"), baby);
@@ -71,42 +28,6 @@ namespace BabiesAndChildren
                 mother.needs.mood.thoughts.memories.TryGainMemory(ThoughtDef.Named("BabyStillborn"), baby);
                 RemoveChildDiedThought(mother, baby);
                 Find.LetterStack.ReceiveLetter("WordStillborn".Translate(), TranslatorFormattedStringExtensions.Translate("MessageStillborn", mother.LabelIndefinite()), LetterDefOf.Death, mother);
-            }
-        }
-        /// <summary>
-        /// Verse.PawnGenerator:GenerateSkills
-        /// Effectively generates random skills and passions
-        /// </summary>
-        /// <param name="pawn">pawn whose skills will be set</param>
-        public static void PawnGenerator_GenerateSkills(Pawn pawn)
-        {
-            try
-            {
-                Traverse.CreateWithType("PawnGenerator").Method("GenerateSkills", pawn).GetValue();
-                CLog.DevMessage("Skills for: " + pawn.Name.ToStringShort + " randomly generated.");
-            }
-            catch
-            {
-                CLog.DevMessage("Skills for: " + pawn.Name.ToStringShort + " failed to randomly generate.");
-            }
-        }
-
-        /// <summary>
-        /// Verse.PawnGenerator:GenerateTraits
-        /// Effectively generates random traits
-        /// </summary>
-        /// <param name="pawn">pawn whose traits will be set</param>
-        public static void PawnGenerator_GenerateTraits(Pawn pawn)
-        {
-            try
-            {
-                PawnGenerationRequest request = new PawnGenerationRequest(pawn.kindDef, pawn.Faction);
-                Traverse.CreateWithType("PawnGenerator").Method("GenerateTraits", pawn, request).GetValue();
-                CLog.DevMessage("Traits for: " + pawn.Name.ToStringShort + " randomly generated.");
-            }
-            catch 
-            {
-                CLog.DevMessage("Traits for: " + pawn.Name.ToStringShort + " failed to randomly generate.");
             }
         }
 
@@ -142,14 +63,14 @@ namespace BabiesAndChildren
             if (father == null || mother == null)
             {
                 CLog.Warning("Father or Mother is null. Randomly generating skills.");
-                PawnGenerator_GenerateSkills(pawn);
+                VerseExposed.PawnGenerator_GenerateSkills(pawn);
                 return;
             }
 
 
             if (BnCSettings.baby_Inherit_percentage == BnCSettings.BabyInheritPercentageHandleEnum._Random)
             {
-                PawnGenerator_GenerateSkills(pawn);
+                VerseExposed.PawnGenerator_GenerateSkills(pawn);
                 return;
             }
             
@@ -243,10 +164,6 @@ namespace BabiesAndChildren
         /// Sets the babies traits either randomly or based on mother and father
         /// depending on mod settings and luck
         /// </summary>
-        /// <param name="pawn"></param>
-        /// <param name="mother"></param>
-        /// <param name="father"></param>
-        /// <param name="rand"></param>
         public static void SetBabyTraits(Pawn pawn, Pawn mother, Pawn father, MathTools.Fixed_Rand rand)
         {
             //clear traits
@@ -256,18 +173,18 @@ namespace BabiesAndChildren
             if (mother == null || father == null)
             {
                 CLog.Warning("Mother or father of: " + pawn.Name.ToStringShort + " is null, generating random traits.");
-                PawnGenerator_GenerateTraits(pawn);
+                VerseExposed.PawnGenerator_GenerateTraits(pawn);
                 return;
             }
 
             if (BnCSettings.baby_Inherit_percentage == BnCSettings.BabyInheritPercentageHandleEnum._Random)
             {
-                PawnGenerator_GenerateTraits(pawn);
+                VerseExposed.PawnGenerator_GenerateTraits(pawn);
                 return;
             }
 
             //add new type and sexuality
-            GetNewTypeAndSexuality(pawn, rand);
+            StoryUtility.GetNewTypeAndSexuality(pawn, rand);
             
             if (BnCSettings.baby_Inherit_percentage == BnCSettings.BabyInheritPercentageHandleEnum._None)
                 return;
@@ -314,8 +231,8 @@ namespace BabiesAndChildren
             }
 
 
-            InheritTraits(pawn, mother, rand, inheritChance);
-            InheritTraits(pawn, father, rand, inheritChance + 0.2);
+            StoryUtility.InheritTraits(pawn, mother, rand, inheritChance);
+            StoryUtility.InheritTraits(pawn, father, rand, inheritChance + 0.2);
 
             //Add more traits for some reason
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
@@ -324,141 +241,15 @@ namespace BabiesAndChildren
                 // give random trait
                 if (pawn.story.traits.allTraits.Count == 2)
                 {
-                    if (rand.Fixed_RandChance(0.15)) GiveARandomTrait(pawn, rand);
+                    if (rand.Fixed_RandChance(0.15)) StoryUtility.GiveARandomTrait(pawn, rand);
                 }
                 else if (pawn.story.traits.allTraits.Count <= 1)
                 {
-                    if (rand.Fixed_RandChance(0.4)) GiveARandomTrait(pawn, rand);
-                    if (rand.Fixed_RandChance(0.15)) GiveARandomTrait(pawn, rand);
+                    if (rand.Fixed_RandChance(0.4)) StoryUtility.GiveARandomTrait(pawn, rand);
+                    if (rand.Fixed_RandChance(0.15)) StoryUtility.GiveARandomTrait(pawn, rand);
                 }
             }
             
-        }
-
-        /// <summary>
-        /// Adds traits from parent to child based on inheritChance, mod settings, and luck.
-        /// </summary>
-        /// <param name="child"></param>
-        /// <param name="parent"></param>
-        /// <param name="rand"></param>
-        /// <param name="inheritChance"></param>
-        public static void InheritTraits(Pawn child, Pawn parent, MathTools.Fixed_Rand rand, double inheritChance)
-        {
-            if (child == null || parent == null)
-                return;
-
-            if (parent.story.traits.allTraits.Count <= 0 || child.story.traits.allTraits.Count > BnCSettings.MAX_TRAIT_COUNT)
-                return;
-            
-            List<Trait> parentTraits = new List<Trait>();
-
-            foreach (Trait trait in parent.story.traits.allTraits)
-            {
-                if (Traits.IsGeneticTrait(trait.def))
-                {
-                    parentTraits.Add(trait);
-                }
-            }
-            
-            if(parentTraits.Count <= 0) return;
-            
-
-            int traitsToGive = rand.Fixed_RandInt(1, 2);
-            int traitsAdded = 0;
-            
-            int attempts = 0;
-            int maxAttempts = parentTraits.Count;
-            
-            while ((traitsAdded < BnCSettings.MAX_TRAIT_COUNT) &&
-                   (traitsAdded < traitsToGive) &&
-                   (attempts++ < maxAttempts))
-            {
-                var traitToGive = (Trait) rand.Fixed_RandElement(parentTraits);
-                if (ApplyTraitToPawn(child, traitToGive, rand, inheritChance))
-                {
-                    traitsAdded++;
-                }
-
-            }
-
-        }
-        /// <summary>
-        /// Tries to apply a random trait from Traits.GetGeneticTraits()
-        /// </summary>
-        /// <param name="pawn"></param>
-        /// <param name="rand"></param>
-        /// <returns>whether a trait was added</returns>
-        public static bool GiveARandomTrait(Pawn pawn, MathTools.Fixed_Rand rand)
-        {
-            List<TraitDef> geneticTraits = Traits.GetGeneticTraits();
-
-            int attempts = 0;
-            int maxAttempts = geneticTraits.Count;
-            
-            while(attempts++ < maxAttempts)
-            {
-                TraitDef def = (TraitDef) rand.Fixed_RandElement(geneticTraits);
-                Trait trait2 = new Trait(def, PawnGenerator.RandomTraitDegree(def), false);
-                if (ApplyTraitToPawn(pawn, trait2,rand, 1)) 
-                    return true;                
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// This method will check trait conflict, already exist
-        /// and no conflict will apply pawn trait
-        /// </summary>
-        /// <param name="pawn"></param>
-        /// <param name="traitToGive"></param>
-        /// <param name="rand"></param>
-        /// <param name="chance"></param>
-        /// <returns>Whether the trait was applied</returns>
-        public static bool ApplyTraitToPawn(Pawn pawn, Trait traitToGive, MathTools.Fixed_Rand rand, double chance)
-        {
-            if ((traitToGive == null) || (rand.Fixed_RandDouble(0, 1) > chance) ||  pawn.story.traits.HasTrait(traitToGive.def)) 
-                return false;
-
-            foreach (Trait itrait in pawn.story.traits.allTraits)
-            {
-                if (traitToGive.def.ConflictsWith(itrait))
-                    return false;
-            }
-
-            pawn.story.traits.GainTrait(traitToGive);
-            return true;
-        }
-
-        /// <summary>
-        /// This method will roll for a chance to make the pawn Asexual, Bisexual, or Gay
-        /// </summary>
-        /// <param name="pawn">The pawn to be analyzed</param>
-        /// <param name="rand">fixed random number generator</param>
-        /// <returns>An AcquirableTrait for sexuality</returns>
-        public static void GetNewTypeAndSexuality(Pawn pawn, MathTools.Fixed_Rand rand)
-        {
-            int traitsCount = pawn.story.traits.allTraits.Count;
-            if (traitsCount >= BnCSettings.MAX_TRAIT_COUNT) return;
-            
-            if (rand.Fixed_RandChance(BnCSettings.GET_NEW_TYPE_CHANCE))
-            {
-                pawn.story.traits.GainTrait(new Trait(ChildTraitDefOf.Newtype, 0, true));
-                Find.LetterStack.ReceiveLetter("Newtype".Translate(), 
-                    "MessageNewtype".Translate(pawn.LabelIndefinite()), 
-                    LetterDefOf.PositiveEvent, pawn);
-            }
-
-            if (rand.Fixed_RandChance(BnCSettings.GET_SPECIFIC_SEXUALITY))
-            {
-                pawn.story.traits.GainTrait(rand.Fixed_RandBool()
-                    ? new Trait(TraitDefOf.Asexual, 0, true)
-                    : new Trait(TraitDefOf.Bisexual, 0, true));
-            }
-            else if (rand.Fixed_RandChance(BnCSettings.GET_GAY_SEXUALITY))
-            {
-                pawn.story.traits.GainTrait(new Trait(TraitDefOf.Gay, 0, true));
-            }
         }
 
 

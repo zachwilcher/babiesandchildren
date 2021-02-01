@@ -3,7 +3,6 @@ using RimWorld;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 using UnityEngine;
 using Verse;
@@ -113,7 +112,7 @@ namespace BabiesAndChildren
         public static bool ShouldUseCrib(Pawn pawn)
         {
             //Probably ought to change this based on size at some point, age stages are unreliable
-            return !ModTools.IsRobot(pawn) && (AgeStage.IsYoungerThan(pawn, AgeStage.Child));
+            return RaceUtility.PawnUsesChildren(pawn) && (AgeStage.IsYoungerThan(pawn, AgeStage.Child));
         }
 
         /// <summary>
@@ -461,7 +460,7 @@ namespace BabiesAndChildren
             }
             else
             {
-                if (BnCSettings.human_like_head_enabled && HasHumanlikeFace(pawn)) 
+                if (BnCSettings.human_like_head_enabled && HasHumanlikeHead(pawn)) 
                     return BnCSettings.AlienHeadSizeB * AgeFactor(pawn);
                 else 
                     return BnCSettings.AlienHeadSizeA * AgeFactor(pawn);
@@ -480,7 +479,7 @@ namespace BabiesAndChildren
         public static Vector3 ModifiedHairLoc(Vector3 pos, Pawn pawn)
         {
             Vector3 newPos = new Vector3(pos.x, pos.y, pos.z);
-            if (pawn.ageTracker.CurLifeStageIndex != AgeStage.Child) return newPos;
+            if (!AgeStage.IsAgeStage(pawn, AgeStage.Child)) return newPos;
             newPos.y += BnCSettings.ShowHairLocY;
 
             if (pawn.def.defName == "Human")
@@ -489,7 +488,7 @@ namespace BabiesAndChildren
             }
             else
             {
-                if (BnCSettings.human_like_head_enabled && HasHumanlikeFace(pawn))
+                if (BnCSettings.human_like_head_enabled && HasHumanlikeHead(pawn))
                 {
                     newPos.z += BnCSettings.ShowHairAlienHFLocZ * AgeFactor(pawn);
                 }
@@ -523,11 +522,9 @@ namespace BabiesAndChildren
             return (ChildrenUtility.ShouldUseCrib(pawn)) ? ChildrenUtility.AllBedDefBestToWorstCribRest : RestUtility.AllBedDefBestToWorst;
         }
 
-        public static bool HasHumanlikeFace(Pawn pawn)
+        //TODO have a setting to chose which races are effected by this
+        public static bool HasHumanlikeHead(Pawn pawn)
         {
-            if (pawn.def.race.Humanlike)
-                return true;
-
             string[] humanlikes = { "Kurin_Race", "Ratkin"};
             return humanlikes.Contains(pawn.def.defName);
         }

@@ -5,7 +5,7 @@ using Verse;
 
 namespace BabiesAndChildren
 {
-    public static class DebugToolsChildren
+    public static class DebugActions
     {
         
         [DebugAction("Pawns", "Reinitialize Children", actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]

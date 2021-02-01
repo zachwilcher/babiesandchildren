@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using RimWorld;
 
 namespace BabiesAndChildren.api {
+    /// <summary>
+    /// Add traits to be be inherited at birth.
+    /// </summary>
     public static class Traits {
 
         private static List<TraitDef> geneticTraits = new List<TraitDef>();

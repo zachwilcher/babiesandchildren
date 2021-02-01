@@ -3,6 +3,9 @@ using RimWorld;
 
 namespace BabiesAndChildren.api
 {
+    /// <summary>
+    /// Blacklist thoughts that babies and toddlers can have.
+    /// </summary>
     public static class Thoughts
     {
         private static List<ThoughtDef> thoughtBlacklist = new List<ThoughtDef>
