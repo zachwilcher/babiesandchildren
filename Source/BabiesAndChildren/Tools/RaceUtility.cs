@@ -49,6 +49,12 @@ namespace BabiesAndChildren.Tools
             return ThingUsesChildren(pawn?.def);
         }
 
+        public static bool IsHuman(Pawn pawn)
+        {
+            return pawn.def == DefDatabase<ThingDef>.GetNamed("Human");
+        }
+        
+
         public static bool HasHumanlikeHead(Pawn pawn)
         {
             //TODO have a setting to chose which races are effected by this

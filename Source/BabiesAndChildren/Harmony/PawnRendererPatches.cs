@@ -1,5 +1,4 @@
 using System;
-using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 using HarmonyLib;
 using UnityEngine;
@@ -10,16 +9,14 @@ namespace BabiesAndChildren.Harmony
     [HarmonyPatch(typeof(PawnRenderer), "CarryWeaponOpenly")]
     internal static class PawnRenderer_CarryWeaponOpenly_Patch
     {
-        [HarmonyPrefix]
-        public static bool Prefix(ref PawnGraphicSet __instance, ref bool __result)
+        [HarmonyPostfix]
+        public static void Postfix(ref PawnGraphicSet __instance, ref bool __result)
         {
             if (ChildrenUtility.SetMakerTagCheck(__instance.pawn.equipment.Primary, "Toy"))
             {
                 __result = true;
-                return false;
             }
 
-            return true;
         }
     }
 
@@ -43,26 +40,25 @@ namespace BabiesAndChildren.Harmony
         internal static void Prefix(ref PawnGraphicSet __instance, ref Vector3 rootLoc,
             ref Pawn ___pawn, bool portrait)
         {
-            if (RaceUtility.PawnUsesChildren(___pawn))
+            if (!RaceUtility.PawnUsesChildren(___pawn)) return;
+            
+            if (AgeStage.IsYoungerThan(___pawn, AgeStage.Teenager))
             {
-                if (AgeStage.IsYoungerThan(___pawn, AgeStage.Teenager))
-                {
-                    // Change the root location of the child's draw position
-                    rootLoc = GraphicTools.ModifyChildYPosOffset(rootLoc, ___pawn, portrait);
-                }
-
-                if (AgeStage.IsYoungerThan(___pawn, AgeStage.Child))
-                    // Remove Face drawing comp from facial animation for toddlers and babies
-                    if (ChildrenBase.ModFacialAnimation_ON)
-                    {
-                        ThingComp WIPcomp =
-                            ChildrenUtility.GetCompByClassName(___pawn, "FacialAnimation.DrawFaceGraphicsComp");
-                        if (WIPcomp != null)
-                        {
-                            ___pawn.AllComps.Remove(WIPcomp);
-                        }
-                    }
+                // Change the root location of the child's draw position
+                rootLoc = GraphicTools.ModifyChildYPosOffset(rootLoc, ___pawn, portrait);
             }
+
+            if (AgeStage.IsYoungerThan(___pawn, AgeStage.Child))
+                // Remove Face drawing comp from facial animation for toddlers and babies
+                if (ChildrenBase.ModFacialAnimation_ON)
+                {
+                    ThingComp WIPcomp =
+                        ChildrenUtility.GetCompByClassName(___pawn, "FacialAnimation.DrawFaceGraphicsComp");
+                    if (WIPcomp != null)
+                    {
+                        ___pawn.AllComps.Remove(WIPcomp);
+                    }
+                }
 
             // The rest of the child Pawn renderering is done by alienrace mod.
         }
@@ -75,41 +71,39 @@ namespace BabiesAndChildren.Harmony
         [HarmonyPostfix]
         public static void BaseHeadOffsetAtPostfix_Post(PawnRenderer __instance, Rot4 rotation, ref Vector3 __result, ref Pawn ___pawn)
         {
+            Pawn pawn = null;
             try
             {
-                Pawn pawn = Traverse.Create(__instance).Field("pawn").GetValue<Pawn>();
-
-                if (pawn != null && AgeStage.IsAgeStage(pawn, AgeStage.Child))
-                {
-
-                    if (RaceUtility.PawnUsesChildren(pawn))
-                    {
-                        float bodySizeFactor = ChildrenUtility.GetBodySize(pawn);
-                        float num2 = 1f;
-                        float num3 = 1f;
-
-                        if (pawn.def.defName == "Alien_Orassan")
-                        {
-                            num2 = 1.4f;
-                            num3 = 1.4f;
-                        }
-                        __result.z *= bodySizeFactor * num2;
-                        __result.x *= bodySizeFactor * num3;
-                        if (pawn.def.defName == "Human")
-                        {
-                            __result.z += Tweaks.HuHeadlocZ ; 
-                        }
-                        if (ChildrenBase.ModFacialAnimation_ON)
-                        {
-                            __result += GraphicTools.ModifyChildYPosOffset(Vector3.zero, ___pawn, false);
-                        }
-
-                    }
-                }
+                pawn = Traverse.Create(__instance).Field("pawn").GetValue<Pawn>();
             }
             catch
             {
-                // Ignore
+                CLog.Warning("PawnRenderer instance has null pawn.");
+                return;
+            }
+
+            if (pawn == null || 
+                !RaceUtility.PawnUsesChildren(pawn) ||
+                !AgeStage.IsAgeStage(pawn, AgeStage.Child)) return;
+            
+            float bodySizeFactor = ChildrenUtility.GetBodySize(pawn);
+            float num2 = 1f;
+            float num3 = 1f;
+
+            if (pawn.def.defName == "Alien_Orassan")
+            {
+                num2 = 1.4f;
+                num3 = 1.4f;
+            }
+            __result.z *= bodySizeFactor * num2;
+            __result.x *= bodySizeFactor * num3;
+            if (RaceUtility.IsHuman(pawn))
+            {
+                __result.z += Tweaks.HuHeadlocZ ; 
+            }
+            if (ChildrenBase.ModFacialAnimation_ON)
+            {
+                __result += GraphicTools.ModifyChildYPosOffset(Vector3.zero, ___pawn, false);
             }
         }
     }

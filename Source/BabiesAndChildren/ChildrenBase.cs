@@ -54,7 +54,7 @@ namespace BabiesAndChildren
                             Growing_Comp comp = pawn.TryGetComp<Growing_Comp>();
                             comp?.Initialize(true);
                             ChildrenUtility.ChangeBodyType(pawn, true, false);
-                            ChildrenUtility.ChangeChildBackstory(pawn);
+                            StoryUtility.ChangeChildBackstory(pawn);
                         }
                     }
             
@@ -96,7 +96,8 @@ namespace BabiesAndChildren
         public static int GetAgeStage(Pawn pawn)
         {
             int currentLifeStageIndex = pawn.ageTracker.CurLifeStageIndex;
-            
+
+            int totalLifeStages = pawn.RaceProps.lifeStageAges.Count;
             
             //clamp index between baby and adult
             //may cause incompatibilities with mods that add more life stages

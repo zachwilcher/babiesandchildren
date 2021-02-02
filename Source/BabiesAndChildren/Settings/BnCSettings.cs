@@ -14,7 +14,8 @@ namespace BabiesAndChildren
         public const double GET_NEW_TYPE_CHANCE = 0.08;
         public const double GET_SPECIFIC_SEXUALITY = 0.08;
         public const double GET_GAY_SEXUALITY = 0.05;
-        public const int MAX_ACCELRATED_GROWTH_FACTOR = 20;
+        public const int MAX_ACCELERATED_GROWTH_FACTOR = 20;
+        public const float MAX_CRIB_BODYSIZE = 0.6f;
 
         public static bool accelerated_growth = true;
         public static int accelerated_growth_end_age = 14;
@@ -42,8 +43,10 @@ namespace BabiesAndChildren
 
         public static bool debug_and_gsetting = false;
         public static bool child_cute_act_enabled = true;
-        public static bool human_like_head_enabled = true;
+        public static bool human_like_head_enabled = false;
         public static bool Rabbie_Child_head_enabled = false;
+        
+        //tweak-able values to visually determine what looks good
         public static float HumanBodySize = 0.713f;
         public static float HumanHeadSize = 0.922f;
         public static float HumanHairSize = 0.730f;
@@ -58,6 +61,9 @@ namespace BabiesAndChildren
         public static float ShowHairHumanLocZ = 0.092f;
         public static float ShowHairAlienLocZ = 0.035f;
         public static float ShowHairAlienHFLocZ = 0.048f;
+        
+        //special flag to reinitialize all childeren on all maps (not saves) at map load once per "game"/ once per mod added
+        //TODO make this a world component
         public static bool OncePerGame = false;
 
         private static Vector2 scrollPosition;
@@ -90,16 +96,16 @@ namespace BabiesAndChildren
                 accelerated_growth_end_age = (int)listingStandard.Slider(accelerated_growth_end_age, 0, 18);
                 listingStandard.Gap(3f);
                 listingStandard.Label("BabyAcceleratedGrowth_title".Translate() + ": " + baby_accelerated_growth, -1f, "BabyAcceleratedGrowth_desc".Translate());
-                baby_accelerated_growth = (int)listingStandard.Slider(baby_accelerated_growth, 1, MAX_ACCELRATED_GROWTH_FACTOR);
+                baby_accelerated_growth = (int)listingStandard.Slider(baby_accelerated_growth, 1, MAX_ACCELERATED_GROWTH_FACTOR);
                 listingStandard.Gap(3f);
                 listingStandard.Label("ToddlerAcceleratedGrowth_title".Translate() + ": " + toddler_accelerated_growth, -1f, "ToddlerAcceleratedGrowth_desc".Translate());
-                toddler_accelerated_growth = (int)listingStandard.Slider(toddler_accelerated_growth, 1, MAX_ACCELRATED_GROWTH_FACTOR);
+                toddler_accelerated_growth = (int)listingStandard.Slider(toddler_accelerated_growth, 1, MAX_ACCELERATED_GROWTH_FACTOR);
                 listingStandard.Gap(3f);
                 listingStandard.Label("ChildAcceleratedGrowth_title".Translate() + ": " + child_accelerated_growth, -1f, "ChildAcceleratedGrowth_desc".Translate());
-                child_accelerated_growth = (int)listingStandard.Slider(child_accelerated_growth, 1, MAX_ACCELRATED_GROWTH_FACTOR);
+                child_accelerated_growth = (int)listingStandard.Slider(child_accelerated_growth, 1, MAX_ACCELERATED_GROWTH_FACTOR);
                 listingStandard.Gap(3f);
                 listingStandard.Label("TeenagerAcceleratedGrowth_title".Translate() + ": " + teenager_accelerated_growth, -1f, "TeenagerAcceleratedGrowth_desc".Translate());
-                teenager_accelerated_growth = (int)listingStandard.Slider(teenager_accelerated_growth, 1, MAX_ACCELRATED_GROWTH_FACTOR);
+                teenager_accelerated_growth = (int)listingStandard.Slider(teenager_accelerated_growth, 1, MAX_ACCELERATED_GROWTH_FACTOR);
             }
             //else
             //{
@@ -264,7 +270,7 @@ namespace BabiesAndChildren
             cryVolume = 0.8f;
             debug_and_gsetting = false;
             child_cute_act_enabled = true;
-            human_like_head_enabled = true;
+            human_like_head_enabled = false;
             Rabbie_Child_head_enabled = false;
             HumanBodySize = 0.713f;
             HumanHeadSize = 0.922f;

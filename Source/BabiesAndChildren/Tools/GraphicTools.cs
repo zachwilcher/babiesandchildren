@@ -1,5 +1,4 @@
 using System;
-using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 using RimWorld;
 using UnityEngine;
@@ -45,7 +44,7 @@ namespace BabiesAndChildren
                 // The pawn is a child
                 else if (AgeStage.IsAgeStage(graphics.pawn, AgeStage.Child))
                 {
-                    if (graphics.pawn.def.defName == "Human")
+                    if (RaceUtility.IsHuman(graphics.pawn))
                     {               
                         graphics.headGraphic = GetChildHeadGraphics(ShaderDatabase.CutoutSkin, graphics.pawn.story.SkinColor);
                     }
@@ -77,7 +76,7 @@ namespace BabiesAndChildren
             // move the draw target down to compensate for child shortness
             if (RaceUtility.PawnUsesChildren(pawn) && AgeStage.IsAgeStage(pawn, AgeStage.Child) && !pawn.InBed())
             {
-                if (pawn.def.defName == "Human") newPos.z += BnCSettings.HumanrootlocZ;
+                if (RaceUtility.IsHuman(pawn)) newPos.z += BnCSettings.HumanrootlocZ;
                 else newPos.z += BnCSettings.AlienrootlocZ;
                 //newPos.z -= 0.15f;            
             }
@@ -93,7 +92,7 @@ namespace BabiesAndChildren
                 }
                 else if (RaceUtility.PawnUsesChildren(pawn) && AgeStage.IsAgeStage(pawn, AgeStage.Child))
                 {
-                    if (pawn.def.defName == "Human") newPos.z += BnCSettings.HumanrootlocZ;
+                    if (RaceUtility.IsHuman(pawn)) newPos.z += BnCSettings.HumanrootlocZ;
                     else newPos.z += BnCSettings.AlienrootlocZ;
                     // Are we in a crib?
                     Vector3 vector = new Vector3(0, 0, 0.2f).RotatedBy(bed.Rotation.AsAngle);

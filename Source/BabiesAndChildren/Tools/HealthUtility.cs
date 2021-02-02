@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using RimWorld;
 using Verse;
 
 namespace BabiesAndChildren.Tools
@@ -40,6 +41,23 @@ namespace BabiesAndChildren.Tools
         {
             //Get collection of parts matching the def, then get a random left or right
             return GetPawnBodyParts(pawn, bodyPart).RandomElement();
+        }
+
+        /// <summary>
+        /// Removes hediffs of types: Hediff_Implant, Hediff_Addiction, and Hediff_MissingPart
+        /// </summary>
+        /// <param name="pawn">Pawn to be altered</param>
+        public static void ClearImplantAndAddiction(Pawn pawn)
+        {
+            List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
+            for (int i = 0; i < hediffs.Count; i++)
+            {
+                if (hediffs[i] is Hediff_Implant || hediffs[i] is Hediff_Addiction || hediffs[i] is Hediff_MissingPart)
+                {
+                    pawn.health.hediffSet.hediffs.Remove(hediffs[i]);
+                }
+            }
+            pawn.health.Notify_HediffChanged(null);
         }
     }
 }

@@ -24,7 +24,7 @@ namespace BabiesAndChildren
                 {
                     if (RaceUtility.PawnUsesChildren(pawn) && AgeStage.GetAgeStage(pawn) < AgeStage.Teenager)
                     {
-                        ChildrenUtility.ChangeChildBackstory(pawn);
+                        StoryUtility.ChangeChildBackstory(pawn);
                     }
                 }
             }

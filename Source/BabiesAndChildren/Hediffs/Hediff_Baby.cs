@@ -61,7 +61,7 @@ namespace BabiesAndChildren
             SoundInfo info = SoundInfo.InMap(new TargetInfo(pawn.PositionHeld, pawn.MapHeld));
             SoundDef.Named("Pawn_BabyCry").PlayOneShot(info);
 
-            ChildrenUtility.ClearImplantAndAddiction(pawn);
+            HealthUtility.ClearImplantAndAddiction(pawn);
             ChildrenUtility.RenamePawn(pawn, mother, father);
 
             //For rabbie

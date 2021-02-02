@@ -125,15 +125,19 @@ namespace BabiesAndChildren.Harmony
             static Dictionary<Vector2, Mesh> addonMeshs = new Dictionary<Vector2, Mesh>();
             static Dictionary<Vector2, Mesh> addonMeshsFlipped = new Dictionary<Vector2, Mesh>();
 
+
+            
+            //Patch to draw addons for children
             [HarmonyPrefix]
             static bool Prefix(bool portrait, Pawn pawn, Vector3 vector, Quaternion quat, Rot4 rotation, bool invisible)
             {
                 try
                 {
+                    
                     if (!(pawn.def is ThingDef_AlienRace alienProps) ||
                         invisible ||
                         !RaceUtility.PawnUsesChildren(pawn) || 
-                        AgeStage.IsOlderThan(pawn, AgeStage.Child))
+                        AgeStage.IsOlderThan(pawn, AgeStage.Child)) //draw addons normally
                         return true;
 
                     if (AgeStage.IsYoungerThan(pawn, AgeStage.Child)) //don't draw addons for babies and toddlers
@@ -178,40 +182,41 @@ namespace BabiesAndChildren.Harmony
 
                     for (int i = 0; i < addons.Count; i++)
                     {
+                        //straight from alien race
                         AlienPartGenerator.BodyAddon ba = addons[index: i];
-                        //don't draw if we cant
                         if (!ba.CanDrawAddon(pawn: pawn)) continue;
-                        //dont draw head if we want human like heads
+                        
+                        //Special code 2.
                         if (BnCSettings.human_like_head_enabled && 
                             RaceUtility.HasHumanlikeHead(pawn) &&
                             ba.bodyPart.Contains("Head")) 
                             continue;
+                        
                         //straight from alien race
                         AlienPartGenerator.RotationOffset offset = rotation == Rot4.South ? ba.offsets.south :
                             rotation == Rot4.North ? ba.offsets.north :
                             rotation == Rot4.East ? ba.offsets.east :
                             ba.offsets.west;
+                        
                         //strait from alien race
                         Vector2 bodyOffset =
                             (portrait ? offset?.portraitBodyTypes ?? offset?.bodyTypes : offset?.bodyTypes)
                             ?.FirstOrDefault(predicate: to => to.bodyType == pawn.story.bodyType)
                             ?.offset ?? Vector2.zero;
+                        
                         //straight from alien race
                         Vector2 crownOffset =
                             (portrait ? offset?.portraitCrownTypes ?? offset?.crownTypes : offset?.crownTypes)
                             ?.FirstOrDefault(predicate: to => to.crownType == alienComp.crownType)
                             ?.offset ?? Vector2.zero;
 
-                        //Defaults for tails 
-                        //south 0.42f, -0.3f, -0.22f
-                        //north     0f,  0.3f, -0.55f
-                        //east -0.42f, -0.3f, -0.22f   
-
+                        //straight from alien race
                         float moffsetX = 0.42f;
                         float moffsetZ = -0.22f;
                         float moffsetY = ba.inFrontOfBody ? 0.3f + ba.layerOffset : -0.3f - ba.layerOffset;
                         float baAngle = ba.angle;
-
+                        
+                        //special code 3 that initializes mesh passed to DrawMeshNowOrLater at end
                         if (!addonMeshsFlipped.ContainsKey(ba.drawSize * bodySizeFactor))
                         {
                             addonMeshsFlipped.Add(ba.drawSize * bodySizeFactor, (Mesh) meshInfo.Invoke(null,
@@ -229,6 +234,8 @@ namespace BabiesAndChildren.Harmony
                             ? addonMeshsFlipped[ba.drawSize * bodySizeFactor]
                             : addonMeshs[ba.drawSize * bodySizeFactor];
 
+                        
+                        //Straight from alien race
                         if (rotation == Rot4.North)
                         {
                             moffsetX = 0f;
@@ -237,10 +244,13 @@ namespace BabiesAndChildren.Harmony
                             moffsetZ = -0.55f;
                             baAngle = 0;
                         }
-
+                        
+                        //straight from alien race 
                         moffsetX += bodyOffset.x + crownOffset.x;
                         moffsetZ += bodyOffset.y + crownOffset.y;
-
+                        
+                        
+                        //special code 4.1 (initialize offset vector coords)
                         if (ba.bodyPart.Contains("tail"))
                         {
                             moffsetX *= bodySizeFactor * moffsetXfa;
@@ -252,12 +262,14 @@ namespace BabiesAndChildren.Harmony
                             moffsetZ *= bodySizeFactor * moffsetZfb;
                         }
 
+                        //straight from alien race
                         if (rotation == Rot4.East)
                         {
                             moffsetX = -moffsetX;
                             baAngle = -baAngle; //Angle
                         }
-
+                        
+                        //special code 4.2 (instantiate offset vector)
                         Vector3 offsetVector = new Vector3(x: moffsetX, y: moffsetY,
                             z: (moffsetZ * Tweaks.G_offsetfac) + Tweaks.G_offset);
 

@@ -1,5 +1,4 @@
-﻿using AlienRace;
-using RimWorld;
+﻿using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
 using BabiesAndChildren.Tools;
@@ -107,6 +106,7 @@ namespace BabiesAndChildren
         /// <returns>True if the pawn should be using a crib</returns>
         public static bool ShouldUseCrib(Pawn pawn)
         {
+            //pawn.BodySize;
             //Probably ought to change this based on size at some point, age stages are unreliable
             return RaceUtility.PawnUsesChildren(pawn) && (AgeStage.IsYoungerThan(pawn, AgeStage.Child));
         }
@@ -179,7 +179,7 @@ namespace BabiesAndChildren
 
         public static bool IsBedCrib(ThingDef bed)
         {
-            return (bed.building.bed_humanlike && bed.building.bed_maxBodySize <= 0.6f);
+            return (bed.building.bed_humanlike && bed.building.bed_maxBodySize <= BnCSettings.MAX_CRIB_BODYSIZE);
         }
 
         /// <summary>
@@ -280,93 +280,44 @@ namespace BabiesAndChildren
                     //35% chance of thin body type
                     if (Rand.Value < 0.35f)
                     {
-                        TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
+                        StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
                     }
                     else if(pawn.gender == Gender.Male)
                     {
-                        TrySetPawnBodyType(pawn, BodyTypeDefOf.Male);
+                        StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Male);
                     }
                     else if (pawn.gender == Gender.Female)
                     {
-                        TrySetPawnBodyType(pawn, BodyTypeDefOf.Female);
+                        StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Female);
                     }
                     size = 0.8f;
                     break;
                 case AgeStage.Child:
-                    TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
+                    StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
                     size = 0.12f;
                     break;
 
                 case AgeStage.Toddler:
-                if (ToddlerIsUpright(pawn))
-                {
-                    TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
-                    size = 0.10f;
-                }
-                else
-                {
-                    TrySetPawnBodyType(pawn, BodyTypeDefOf.Fat);
-                    size = 0.08f;
-                }
-                break;
+                    if (ToddlerIsUpright(pawn))
+                    {
+                        StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
+                        size = 0.10f;
+                    }
+                    else
+                    {
+                        StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Fat);
+                        size = 0.08f;
+                    }
+                    break;
 
                 case AgeStage.Baby:
-                    TrySetPawnBodyType(pawn, BodyTypeDefOf.Fat);
+                    StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Fat);
                     size = 0.07f;
                     break;
 
             }
             if (!Is_ChangeSize_Skip) 
                 ModTools.ChangeSize(pawn, size, Is_SizeInit);
-        }
-
-        public static bool TrySetPawnBodyType(Pawn pawn, BodyTypeDef bodyTypeDef, bool force = false)
-        {
-            if (pawn.def == DefDatabase<ThingDef>.GetNamed("Human") || force)
-            {
-                pawn.story.bodyType = bodyTypeDef;
-                return true;
-            } 
-            if (pawn.def is ThingDef_AlienRace thingDef)
-            {
-                List<BodyTypeDef> bodyTypes = thingDef.alienRace.generalSettings.alienPartGenerator.alienbodytypes;
-                if (bodyTypes.NullOrEmpty())
-                    return false;
-
-                if (bodyTypes.Contains(bodyTypeDef))
-                {
-                    pawn.story.bodyType = bodyTypeDef;
-                    return true;
-                }
-
-                //can't set to desired to body type but leaving an invalid one
-                //leads to pink boxes
-                if (!bodyTypes.Contains(pawn.story.bodyType))
-                {
-                    pawn.story.bodyType = bodyTypes.RandomElement<BodyTypeDef>();
-                    return false;
-                }
-                
-            }
-            //pawn's which are not humans or alien races is out of the scope of this mod
-            return false;
-        }
-
-        /// <summary>
-        /// Removes hediffs of types: Hediff_Implant, Hediff_Addiction, and Hediff_MissingPart
-        /// </summary>
-        /// <param name="pawn">Pawn to be altered</param>
-        public static void ClearImplantAndAddiction(Pawn pawn)
-        {
-            List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
-            for (int i = 0; i < hediffs.Count; i++)
-            {
-                if (hediffs[i] is Hediff_Implant || hediffs[i] is Hediff_Addiction || hediffs[i] is Hediff_MissingPart)
-                {
-                    pawn.health.hediffSet.hediffs.Remove(hediffs[i]);
-                }
-            }
-            pawn.health.Notify_HediffChanged(null);
         }
 
         /// <summary>
@@ -386,54 +337,20 @@ namespace BabiesAndChildren
             pawn.Name = PawnBioAndNameGenerator.GeneratePawnName(pawn, NameStyle.Full, NameTriple?.Last);
         }
 
-        public static void ChangeChildBackstory(Pawn pawn)
-        {
-            if (pawn == null) return;
-            if (AgeStage.IsAgeStage(pawn, AgeStage.Child) && pawn.story.childhood == BackstoryDatabase.allBackstories["CustomBackstory_NA_Childhood_Disabled"])
-            {
-                pawn.story.childhood = BackstoryDatabase.allBackstories["CustomBackstory_Rimchild"];
-                pawn.Notify_DisabledWorkTypesChanged();
-                pawn.skills.Notify_SkillDisablesChanged();
-                MeditationFocusTypeAvailabilityCache.ClearFor(pawn);
-
-                if (pawn.TryGetComp<Growing_Comp>() != null)
-                {
-                    Pawn mother = pawn.GetMother();
-                    Pawn father = pawn.GetFather();
-                    if (mother != null)
-                    {
-                        MathTools.Fixed_Rand rand = new MathTools.Fixed_Rand((int)mother.ageTracker.AgeBiologicalTicks);
-                        BabyTools.SetBabySkillsAndPassions(pawn, mother, father, rand);
-                        List<SkillDef> allDefsListForReading = DefDatabase<SkillDef>.AllDefsListForReading;
-                        foreach (var skillDef in allDefsListForReading)
-                        {
-                            pawn.skills.Learn(skillDef, 100, true);
-                            CLog.DevMessage("Showbaby skill>> " + pawn.Name + "'s " + skillDef.defName + " Skills set =" + pawn.skills.GetSkill(skillDef));
-                        }
-                        Messages.Message("Successfully changed child's Backstory", MessageTypeDefOf.PositiveEvent);
-                    }
-                    //else Messages.Message("Mother Is Null", MessageTypeDefOf.NeutralEvent);
-                }
-
-                //else Messages.Message("Choose a child who has a backstory 'Baby'", MessageTypeDefOf.NeutralEvent);
-            }
-            //else Messages.Message("Choose a child (Not baby)", MessageTypeDefOf.NeutralEvent);
-        }
-
         //Modified version of Children.PawnRenderer_RenderPawnInternal_Patch:GetBodysizeScaling
         public static float GetHairSize(float n, Pawn pawn)
         {
             if (pawn.ageTracker.CurLifeStageIndex > AgeStage.Child) return 1f;
             if (n != 0)
             {
-                if (pawn.def.defName == "Human")
+                if (RaceUtility.IsHuman(pawn))
                 {
                     return BnCSettings.HumanHairSize * BnCSettings.ShowHairSize * AgeFactor(pawn);
                 }
                 else return BnCSettings.AlienHairSize * BnCSettings.ShowHairSize * AgeFactor(pawn);
             }
 
-            if (pawn.def.defName == "Human")
+            if (RaceUtility.IsHuman(pawn))
             {
                 return BnCSettings.HumanHairSize * AgeFactor(pawn);
             }
@@ -442,7 +359,7 @@ namespace BabiesAndChildren
 
         public static float GetHeadSize(Pawn pawn)
         {
-            if (pawn.def.defName == "Human")
+            if (RaceUtility.IsHuman(pawn))
             {
                 return BnCSettings.HumanHeadSize * AgeFactor(pawn);
             }
@@ -454,10 +371,14 @@ namespace BabiesAndChildren
                     return BnCSettings.AlienHeadSizeA * AgeFactor(pawn);
             }
         }
-
+        /// <summary>
+        /// A BodySize different from pawn.BodySize calculated based on AgeFactor
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <returns></returns>
         public static float GetBodySize(Pawn pawn)
         {
-            if (pawn.def.defName == "Human")
+            if (RaceUtility.IsHuman(pawn))
             {
                 return BnCSettings.HumanBodySize * AgeFactor(pawn);
             }
@@ -470,7 +391,7 @@ namespace BabiesAndChildren
             if (!AgeStage.IsAgeStage(pawn, AgeStage.Child)) return newPos;
             newPos.y += BnCSettings.ShowHairLocY;
 
-            if (pawn.def.defName == "Human")
+            if (RaceUtility.IsHuman(pawn))
             {
                 newPos.z += BnCSettings.ShowHairHumanLocZ * AgeFactor(pawn);
             }
@@ -487,16 +408,37 @@ namespace BabiesAndChildren
             }
             return newPos;
         }
-
+        
+        /// <summary>
+        /// Maps a child or teen's current age to a number between .3 and 1 based on
+        /// how far progressed the pawn is into adolescence 
+        /// </summary>
+        /// <param name="pawn">Child or Teen</param>
+        /// <returns>1 if baby, toddler, or adult. number between .3 and .9 if child or teen</returns>
         public static float AgeFactor(Pawn pawn)
-        {
-            if (pawn.ageTracker.CurLifeStageIndex < AgeStage.Child) return 1f;
+        {   
+            //Age factor only relevant for children and teens
+            if (!RaceUtility.PawnUsesChildren(pawn) || AgeStage.IsYoungerThan(pawn, AgeStage.Child) || AgeStage.IsOlderThan(pawn, AgeStage.Teenager))
+                return 1f; 
+            
+            
             float agechild = AgeStage.GetLifeStageAge(pawn, AgeStage.Child).minAge;
             float ageteen = AgeStage.GetLifeStageAge(pawn, AgeStage.Teenager).minAge;
+
+            float childLifeStageDuration = ageteen - agechild;
+            
             float now = pawn.ageTracker.AgeBiologicalYearsFloat + 0.1f; // prevent 0 + 0.1f
 
-            float agefac = 0.8f + (0.3f * (now - agechild) / (ageteen - agechild));
-            //if (agefac < 0.7f) return 0.7f;
+            float yearsSinceToddler = now - agechild;
+
+            const float offset = 0.8f;
+            const float scalar = 0.3f;
+            
+            //0 < x < 2
+            //scalar -> 0 < x < 0.6
+            //offset -> 0.3 < x < 0.9
+            float agefac = offset + scalar * yearsSinceToddler / childLifeStageDuration;
+            
             return agefac;
         }
 
