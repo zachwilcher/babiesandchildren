@@ -1,5 +1,6 @@
 ﻿using RimWorld;
 using System.Linq;
+using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 using Verse;
 
@@ -22,7 +23,7 @@ namespace BabiesAndChildren
                 Pawn pawn = thing as Pawn;
                 if (pawn != null)
                 {
-                    if (RaceUtility.PawnUsesChildren(pawn) && AgeStage.GetAgeStage(pawn) < AgeStage.Teenager)
+                    if (RaceUtility.PawnUsesChildren(pawn) && AgeStages.GetAgeStage(pawn) < AgeStages.Teenager)
                     {
                         StoryUtility.ChangeChildBackstory(pawn);
                     }
@@ -38,7 +39,7 @@ namespace BabiesAndChildren
                 Pawn pawn = thing as Pawn;
                 if (pawn != null)
                 {
-                    if (RaceUtility.PawnUsesChildren(pawn) && AgeStage.GetAgeStage(pawn) < AgeStage.Child)
+                    if (RaceUtility.PawnUsesChildren(pawn) && AgeStages.GetAgeStage(pawn) < AgeStages.Child)
                     {
                         if (pawn.story.childhood == BackstoryDatabase.allBackstories["CustomBackstory_NA_Childhood_Disabled"])
                         {

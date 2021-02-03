@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using Verse;
 
 namespace BabiesAndChildren
 {
@@ -73,6 +75,15 @@ namespace BabiesAndChildren
                 
                 return collection[Fixed_RandInt(0, collection.Count - 1)];
             }
+        }
+
+        public static int Clamp(int num, int min, int max)
+        {
+            if (num < min)
+                return min;
+            if (num > max)
+                return max;
+            return num;
         }
     }
 }

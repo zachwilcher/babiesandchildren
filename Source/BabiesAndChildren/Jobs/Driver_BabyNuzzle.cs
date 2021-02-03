@@ -1,9 +1,11 @@
 ﻿using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
+using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 using Verse;
 using Verse.AI;
+using LifeStageUtility = BabiesAndChildren.Tools.LifeStageUtility;
 
 namespace BabiesAndChildren
 {
@@ -13,15 +15,15 @@ namespace BabiesAndChildren
         protected override float MtbHours(Pawn pawn)
         {
             if (!RaceUtility.PawnUsesChildren(pawn) || 
-                AgeStage.IsOlderThan(pawn, AgeStage.Child) ||
+                AgeStages.IsOlderThan(pawn, AgeStages.Child) ||
                 !BnCSettings.child_cute_act_enabled || 
                 pawn.story.traits.HasTrait(TraitDefOf.Psychopath)) 
                 return -1f;            
             
-            if (AgeStage.IsAgeStage(pawn, AgeStage.Child))
+            if (AgeStages.IsAgeStage(pawn, AgeStages.Child))
             {
-                float minChildAge = AgeStage.GetLifeStageAge(pawn, AgeStage.Child).minAge;
-                float minTeenAge = AgeStage.GetLifeStageAge(pawn,AgeStage.Teenager).minAge;
+                float minChildAge = LifeStageUtility.GetLifeStageAge(pawn, AgeStages.Child).minAge;
+                float minTeenAge = LifeStageUtility.GetLifeStageAge(pawn,AgeStages.Teenager).minAge;
                 float curAge = pawn.ageTracker.AgeBiologicalYearsFloat + 0.1f; // prevent 0 + 0.1f
                 float f = 1f + (3f * (curAge - minChildAge) / (minTeenAge - minChildAge));
                 return BabyMtbHours * f;
@@ -39,7 +41,7 @@ namespace BabiesAndChildren
         protected override Job TryGiveJob(Pawn pawn)
         {
             if (!RaceUtility.PawnUsesChildren(pawn) || 
-                AgeStage.IsOlderThan(pawn, AgeStage.Child) ||
+                AgeStages.IsOlderThan(pawn, AgeStages.Child) ||
                 !BnCSettings.child_cute_act_enabled || 
                 pawn.story.traits.HasTrait(TraitDefOf.Psychopath)) 
                 return null;

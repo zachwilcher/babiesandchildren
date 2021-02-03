@@ -1,3 +1,4 @@
+using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 using HarmonyLib;
 using RimWorld;
@@ -14,12 +15,12 @@ namespace BabiesAndChildren.Harmony
             Pawn other = ((MentalState_SocialFighting)pawn.MentalState).otherPawn;
             if (__result == null) return;
             
-            if (AgeStage.IsYoungerThan(pawn, AgeStage.Child) && RaceUtility.PawnUsesChildren(pawn))
+            if (AgeStages.IsYoungerThan(pawn, AgeStages.Child) && RaceUtility.PawnUsesChildren(pawn))
             {
                 __result = null;
             }
             // Make sure kids don't start social fights with adults
-            if (AgeStage.GetAgeStage(other) > AgeStage.Child && AgeStage.GetAgeStage(pawn) <= AgeStage.Child) {
+            if (AgeStages.GetAgeStage(other) > AgeStages.Child && AgeStages.GetAgeStage(pawn) <= AgeStages.Child) {
                 CLog.DevMessage("Child starting social fight with adult");
                 // Adult will "start" the fight, following the code below
                 other.interactions.StartSocialFight (pawn);
@@ -27,8 +28,8 @@ namespace BabiesAndChildren.Harmony
             }
 
             // Make sure adults don't start social fights with kids (unless psychopaths)
-            if (!AgeStage.IsOlderThan(other, AgeStage.Child) && 
-                AgeStage.IsOlderThan(pawn, AgeStage.Child) && 
+            if (!AgeStages.IsOlderThan(other, AgeStages.Child) && 
+                AgeStages.IsOlderThan(pawn, AgeStages.Child) && 
                 !pawn.story.traits.HasTrait (TraitDefOf.Psychopath)) {
                 
                 CLog.DevMessage("Adult starting social fight with child");

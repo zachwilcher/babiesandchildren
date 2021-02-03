@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
+using BabiesAndChildren.api;
 using HarmonyLib;
 using RimWorld;
 using Verse;
@@ -13,7 +14,7 @@ namespace BabiesAndChildren.Harmony {
     internal static class RestUtility_WakeThreshold_Patch {
         [HarmonyPostfix]
         static void Postfix(ref float __result, ref Pawn p) {
-            if (AgeStage.IsYoungerThan(p, AgeStage.Child) && p.health.hediffSet.HasHediff(ChildHediffDefOf.UnhappyBaby)) {
+            if (AgeStages.IsYoungerThan(p, AgeStages.Child) && p.health.hediffSet.HasHediff(ChildHediffDefOf.UnhappyBaby)) {
                 __result = 0.15f;
             }
             // Adults nearby wake up too

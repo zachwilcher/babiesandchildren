@@ -3,6 +3,7 @@ using Verse.AI;
 using RimWorld;
 using System.Collections.Generic;
 using System.Diagnostics;
+using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 
 namespace BabiesAndChildren
@@ -27,7 +28,7 @@ namespace BabiesAndChildren
             if (pawn2 == null || pawn2 == pawn) {
                 return false;
             }
-            if (!RaceUtility.PawnUsesChildren(pawn2) || AgeStage.IsOlderThan(pawn2, AgeStage.Toddler)) {
+            if (!RaceUtility.PawnUsesChildren(pawn2) || AgeStages.IsOlderThan(pawn2, AgeStages.Toddler)) {
                 return false;
             }
             if (pawn2.needs.food == null || pawn2.needs.food.CurLevelPercentage > (pawn2.needs.food.PercentageThreshHungry + 0.02)) {
@@ -95,7 +96,7 @@ namespace BabiesAndChildren
             Toil prepare = new Toil();
             prepare.initAction = delegate
             {
-                if(AgeStage.IsOlderThan(Victim, AgeStage.Baby))
+                if(AgeStages.IsOlderThan(Victim, AgeStages.Baby))
                     PawnUtility.ForceWait(Victim, breastFeedDuration, Victim);
             };
             prepare.defaultCompleteMode = ToilCompleteMode.Delay;
@@ -140,7 +141,7 @@ namespace BabiesAndChildren
             {
                 return false;
             }
-            if (!RaceUtility.PawnUsesChildren(pawn2) || AgeStage.IsOlderThan(pawn2, AgeStage.Toddler))
+            if (!RaceUtility.PawnUsesChildren(pawn2) || AgeStages.IsOlderThan(pawn2, AgeStages.Toddler))
             {
                 return false;
             }

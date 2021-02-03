@@ -165,7 +165,7 @@ namespace BabiesAndChildren.Tools
         public static void ChangeChildBackstory(Pawn pawn)
         {
             if (pawn == null) return;
-            if (AgeStage.IsAgeStage(pawn, AgeStage.Child) && pawn.story.childhood == BackstoryDatabase.allBackstories["CustomBackstory_NA_Childhood_Disabled"])
+            if (AgeStages.IsAgeStage(pawn, AgeStages.Child) && pawn.story.childhood == BackstoryDatabase.allBackstories["CustomBackstory_NA_Childhood_Disabled"])
             {
                 pawn.story.childhood = BackstoryDatabase.allBackstories["CustomBackstory_Rimchild"];
                 pawn.Notify_DisabledWorkTypesChanged();

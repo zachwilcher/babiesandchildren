@@ -1,3 +1,4 @@
+using BabiesAndChildren.api;
 using Verse;
 
 namespace BabiesAndChildren
@@ -95,7 +96,7 @@ namespace BabiesAndChildren
 
                     bodypart = GetBre(pawn);
                     if (bodypart == null) return;
-                    if (AgeStage.IsYoungerThan(pawn, AgeStage.Teenager) && Maxsize > 0.07f) Maxsize = 0.07f;
+                    if (AgeStages.IsYoungerThan(pawn, AgeStages.Teenager) && Maxsize > 0.07f) Maxsize = 0.07f;
                     size = Rand.Range(0.01f, Maxsize);
                     cursize = bodypart.Severity;
                     if (Is_SizeInit)

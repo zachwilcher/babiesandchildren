@@ -69,7 +69,7 @@ namespace BabiesAndChildren
         {
             if(parent == null) return;
             
-            if ((growthStage <= AgeStage.Toddler) &&
+            if ((growthStage <= AgeStages.Toddler) &&
                 Hediff_UnhappyBaby.CheckUnhappy(pawn))
             {
                 HealthUtility.TryAddHediff(pawn, ChildHediffDefOf.UnhappyBaby);
@@ -134,7 +134,7 @@ namespace BabiesAndChildren
             Backstory currentBackstory = pawn.story.childhood;
             
             //If we are still a child, we will find the most appropriate hediff stage and update the severity to match
-            if (growthStage < AgeStage.Adult)
+            if (growthStage < AgeStages.Adult)
             {
                 DestroyHediffs();
                 var growingHediff = HediffMaker.MakeHediff(ChildHediffDefOf.BabyState0, pawn);
@@ -145,15 +145,15 @@ namespace BabiesAndChildren
             //update bodytype and backstory
             switch (growthStage)
             {
-                case AgeStage.Baby:
+                case AgeStages.Baby:
                     pawn.story.childhood = Childhood_Disabled;
                     ChildrenUtility.ChangeBodyType(pawn, true, false);
                     break;
-                case AgeStage.Toddler:
+                case AgeStages.Toddler:
                     pawn.story.childhood = Childhood_Disabled;
                     ChildrenUtility.ChangeBodyType(pawn, false, false);
                     break;
-                case AgeStage.Child:
+                case AgeStages.Child:
                 {
                     if (currentBackstory == Childhood_Disabled)
                     {
@@ -173,7 +173,7 @@ namespace BabiesAndChildren
                     ChildrenUtility.TryDrop(pawn, "BabyGear");
                     break;
                 }
-                case AgeStage.Teenager:
+                case AgeStages.Teenager:
                 {
                     if (currentBackstory == Childhood_Disabled)
                     {
@@ -224,7 +224,7 @@ namespace BabiesAndChildren
             
             int age = pawn.ageTracker.AgeBiologicalYears;
             
-            int ageStage = AgeStage.GetAgeStage(pawn);
+            int ageStage = AgeStages.GetAgeStage(pawn);
             
             if (growthStage != ageStage)
             {
@@ -233,7 +233,7 @@ namespace BabiesAndChildren
                 GrowToStage(ageStage);
             }
 
-            if (ageStage == AgeStage.Toddler)
+            if (ageStage == AgeStages.Toddler)
             {
                 if (pawn.story.bodyType != BodyTypeDefOf.Thin)
                 {

@@ -1,10 +1,12 @@
 ﻿using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
+using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using LifeStageUtility = BabiesAndChildren.Tools.LifeStageUtility;
 using StatDefOf = RimWorld.StatDefOf;
 
 namespace BabiesAndChildren
@@ -82,13 +84,13 @@ namespace BabiesAndChildren
         public static bool NearCryingBaby(Pawn pawn)
         {
             // Does not affect babies and toddlers
-            if (AgeStage.IsYoungerThan(pawn, AgeStage.Child) || pawn.health.capacities.GetLevel(PawnCapacityDefOf.Hearing) <= 0.1f) { return false; }
+            if (AgeStages.IsYoungerThan(pawn, AgeStages.Child) || pawn.health.capacities.GetLevel(PawnCapacityDefOf.Hearing) <= 0.1f) { return false; }
 
             // Find any crying babies in the vicinity
             foreach (Pawn mapPawn in pawn.MapHeld.mapPawns.AllPawnsSpawned)
             {
                 if (RaceUtility.PawnUsesChildren(mapPawn) && 
-                    AgeStage.IsAgeStage(pawn, AgeStage.Baby) &&
+                    AgeStages.IsAgeStage(pawn, AgeStages.Baby) &&
                     mapPawn.health.hediffSet.HasHediff(HediffDef.Named("UnhappyBaby")) &&
                     mapPawn.PositionHeld.InHorDistOf(pawn.PositionHeld, 24) &&
                     mapPawn.PositionHeld.GetRoomOrAdjacent(mapPawn.MapHeld).ContainedAndAdjacentThings.Contains(pawn))
@@ -108,7 +110,7 @@ namespace BabiesAndChildren
         {
             //pawn.BodySize;
             //Probably ought to change this based on size at some point, age stages are unreliable
-            return RaceUtility.PawnUsesChildren(pawn) && (AgeStage.IsYoungerThan(pawn, AgeStage.Child));
+            return RaceUtility.PawnUsesChildren(pawn) && (AgeStages.IsYoungerThan(pawn, AgeStages.Child));
         }
 
         /// <summary>
@@ -116,7 +118,7 @@ namespace BabiesAndChildren
         /// </summary>
         public static float ChildMaxWeaponMass(Pawn pawn)
         {
-            if (!AgeStage.IsYoungerThan(pawn, AgeStage.Teenager))
+            if (!AgeStages.IsYoungerThan(pawn, AgeStages.Teenager))
                 return 999;
             //const float baseMass = 2.5f;
             //return (pawn.skills.GetSkill(SkillDefOf.Shooting).Level * 0.1f) + baseMass;
@@ -201,7 +203,7 @@ namespace BabiesAndChildren
         {
             if (!RaceUtility.PawnUsesChildren(pawn))
                 return false;
-            float a = AgeStage.GetLifeStageAge(pawn, AgeStage.Toddler).minAge + ((AgeStage.GetLifeStageAge(pawn, AgeStage.Child).minAge - AgeStage.GetLifeStageAge(pawn, AgeStage.Toddler).minAge) / 2);
+            float a = LifeStageUtility.GetLifeStageAge(pawn, AgeStages.Toddler).minAge + ((LifeStageUtility.GetLifeStageAge(pawn, AgeStages.Child).minAge - LifeStageUtility.GetLifeStageAge(pawn, AgeStages.Toddler).minAge) / 2);
             return pawn.ageTracker.AgeBiologicalYearsFloat > a;
         }
 
@@ -270,13 +272,13 @@ namespace BabiesAndChildren
             
             float size = 0.01f;
             
-            switch (AgeStage.GetAgeStage(pawn))
+            switch (AgeStages.GetAgeStage(pawn))
             {
-                case AgeStage.Adult:
+                case AgeStages.Adult:
                     size = 1f;
                     break;
                 
-                case AgeStage.Teenager:
+                case AgeStages.Teenager:
                     //35% chance of thin body type
                     if (Rand.Value < 0.35f)
                     {
@@ -292,12 +294,12 @@ namespace BabiesAndChildren
                     }
                     size = 0.8f;
                     break;
-                case AgeStage.Child:
+                case AgeStages.Child:
                     StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
                     size = 0.12f;
                     break;
 
-                case AgeStage.Toddler:
+                case AgeStages.Toddler:
                     if (ToddlerIsUpright(pawn))
                     {
                         StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
@@ -310,7 +312,7 @@ namespace BabiesAndChildren
                     }
                     break;
 
-                case AgeStage.Baby:
+                case AgeStages.Baby:
                     StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Fat);
                     size = 0.07f;
                     break;
@@ -340,7 +342,7 @@ namespace BabiesAndChildren
         //Modified version of Children.PawnRenderer_RenderPawnInternal_Patch:GetBodysizeScaling
         public static float GetHairSize(float n, Pawn pawn)
         {
-            if (pawn.ageTracker.CurLifeStageIndex > AgeStage.Child) return 1f;
+            if (AgeStages.GetAgeStage(pawn) > AgeStages.Child) return 1f;
             if (n != 0)
             {
                 if (RaceUtility.IsHuman(pawn))
@@ -388,7 +390,7 @@ namespace BabiesAndChildren
         public static Vector3 ModifiedHairLoc(Vector3 pos, Pawn pawn)
         {
             Vector3 newPos = new Vector3(pos.x, pos.y, pos.z);
-            if (!AgeStage.IsAgeStage(pawn, AgeStage.Child)) return newPos;
+            if (!AgeStages.IsAgeStage(pawn, AgeStages.Child)) return newPos;
             newPos.y += BnCSettings.ShowHairLocY;
 
             if (RaceUtility.IsHuman(pawn))
@@ -418,12 +420,12 @@ namespace BabiesAndChildren
         public static float AgeFactor(Pawn pawn)
         {   
             //Age factor only relevant for children and teens
-            if (!RaceUtility.PawnUsesChildren(pawn) || AgeStage.IsYoungerThan(pawn, AgeStage.Child) || AgeStage.IsOlderThan(pawn, AgeStage.Teenager))
+            if (!RaceUtility.PawnUsesChildren(pawn) || AgeStages.IsYoungerThan(pawn, AgeStages.Child) || AgeStages.IsOlderThan(pawn, AgeStages.Teenager))
                 return 1f; 
             
             
-            float agechild = AgeStage.GetLifeStageAge(pawn, AgeStage.Child).minAge;
-            float ageteen = AgeStage.GetLifeStageAge(pawn, AgeStage.Teenager).minAge;
+            float agechild = LifeStageUtility.GetLifeStageAge(pawn, AgeStages.Child).minAge;
+            float ageteen = LifeStageUtility.GetLifeStageAge(pawn, AgeStages.Teenager).minAge;
 
             float childLifeStageDuration = ageteen - agechild;
             

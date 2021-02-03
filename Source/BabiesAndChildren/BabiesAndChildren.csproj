@@ -51,11 +51,15 @@
     <FileAlignment>4096</FileAlignment>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="api\AgeStages.cs">
+      <Link>AgeStages.cs</Link>
+    </Compile>
     <Compile Include="api\Traits.cs" />
     <Compile Include="api\Races.cs" />
     <Compile Include="api\Thoughts.cs" />
     <Compile Include="Components\DummyComp.cs" />
     <Compile Include="Components\Growing_Comp.cs" />
+    <Compile Include="Defs\AgeStageExtensions.cs" />
     <Compile Include="Harmony\DressPatientsPatches.cs" />
     <Compile Include="Harmony\FacialAnimationPatches.cs" />
     <Compile Include="Harmony\JobGiverPatches.cs" />
@@ -90,6 +94,7 @@
     <Compile Include="Hediffs\Hediff_UnhappyBaby.cs" />
     <Compile Include="Thoughts\ThoughtWorker_CryingBaby.cs" />
     <Compile Include="ChildrenBase.cs" />
+    <Compile Include="Tools\LifeStageUtility.cs" />
     <Compile Include="Tools\StoryUtility.cs" />
     <Compile Include="Tools\VerseExposed.cs" />
     <None Include="packages.config" />

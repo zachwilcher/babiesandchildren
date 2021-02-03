@@ -1,4 +1,5 @@
-﻿using BabiesAndChildren.Tools;
+﻿using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
 using HarmonyLib;
 using RimWorld;
 using Verse;
@@ -15,7 +16,7 @@ namespace BabiesAndChildren.Harmony {
         {
             if (!RaceUtility.PawnUsesChildren(___pawn) || 
                 joyKind != JoyKindDefOf.Social ||
-                AgeStage.IsOlderThan(___pawn, AgeStage.Toddler))
+                AgeStages.IsOlderThan(___pawn, AgeStages.Toddler))
                 return;
             
             DefMap<JoyKindDef, float> tolerances = Traverse.Create(__instance).Field("tolerances").Field("tolerances").GetValue<DefMap<JoyKindDef, float>>();

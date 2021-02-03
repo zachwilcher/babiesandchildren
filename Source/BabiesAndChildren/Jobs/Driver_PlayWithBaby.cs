@@ -1,5 +1,6 @@
 ﻿using RimWorld;
 using System.Collections.Generic;
+using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 using Verse;
 using Verse.AI;
@@ -123,7 +124,7 @@ namespace BabiesAndChildren
                 baby.InBed() &&
                 baby.Awake() &&
                 RaceUtility.PawnUsesChildren(baby) &&
-                AgeStage.IsAgeStage(baby, AgeStage.Baby) &&
+                AgeStages.IsAgeStage(baby, AgeStages.Baby) &&
                 !baby.IsForbidden(pawn) &&
                 baby.needs.joy != null &&
                 baby.needs.joy.CurCategory <= maxPatientJoy &&
@@ -140,9 +141,9 @@ namespace BabiesAndChildren
         {
             //Toddlers can play babygames with each other casually, otherwise interaction can only be done with baby
 
-            if (AgeStage.IsAgeStage(initiator, AgeStage.Toddler) && AgeStage.IsAgeStage(recipient, AgeStage.Toddler))
+            if (AgeStages.IsAgeStage(initiator, AgeStages.Toddler) && AgeStages.IsAgeStage(recipient, AgeStages.Toddler))
                 return 1f;
-            if (ModTools.IsRobot(recipient) || AgeStage.IsOlderThan(recipient, AgeStage.Baby))
+            if (ModTools.IsRobot(recipient) || AgeStages.IsOlderThan(recipient, AgeStages.Baby))
                 return 0;
             return 1f;
         }

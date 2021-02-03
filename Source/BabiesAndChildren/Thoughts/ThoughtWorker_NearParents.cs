@@ -1,4 +1,5 @@
-﻿using BabiesAndChildren.Tools;
+﻿using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
 using RimWorld;
 using Verse;
 
@@ -9,7 +10,7 @@ namespace BabiesAndChildren
         const int maxDist = 8;
         protected override ThoughtState CurrentStateInternal (Pawn p)
         {
-            if (AgeStage.IsOlderThan(p, AgeStage.Toddler) || !RaceUtility.PawnUsesChildren(p))
+            if (AgeStages.IsOlderThan(p, AgeStages.Toddler) || !RaceUtility.PawnUsesChildren(p))
                 return false;
             Pawn mother = p.relations.GetFirstDirectRelationPawn (PawnRelationDefOf.Parent, x => x.gender == Gender.Female);
             Pawn father = p.relations.GetFirstDirectRelationPawn (PawnRelationDefOf.Parent, x => x.gender == Gender.Male);

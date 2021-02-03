@@ -3,10 +3,10 @@
 
   <Operation Class="PatchOperationFindMod">
     <mods>
-      <li>Fantasy Goblins Updated</li>
+      <li>Androids</li>
     </mods>
     <match Class="PatchOperationReplace">
-      <xpath>/Defs/AlienRace.ThingDef_AlienRace[defName = "Fantasy_Goblin"]/race/ageGenerationCurve/points</xpath>
+      <xpath>/Defs/AlienRace.ThingDef_AlienRace[defName = "ChjAndroid"]/race/ageGenerationCurve/points</xpath>
       <value>
         <points>
           <li>(4,0)</li>

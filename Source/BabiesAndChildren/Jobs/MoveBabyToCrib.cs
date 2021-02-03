@@ -1,4 +1,5 @@
-﻿using BabiesAndChildren.Tools;
+﻿using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
 using Verse;
 using Verse.AI;
 using RimWorld;
@@ -14,12 +15,11 @@ namespace BabiesAndChildren
 
         public override bool HasJobOnThing (Pawn pawn, Thing t, bool forced = false)
         {
-            if (t == null || t == pawn) {
+            if (t == null || t == pawn || !(t is Pawn))
                 return false;
-            }
 
             Pawn baby = (Pawn) t;
-            if (AgeStage.IsOlderThan(baby, AgeStage.Baby) || !RaceUtility.PawnUsesChildren(baby) ) {
+            if (AgeStages.IsOlderThan(baby, AgeStages.Baby) || !RaceUtility.PawnUsesChildren(baby) ) {
                 return false;
             }
             if (!pawn.CanReserveAndReach (t, PathEndMode.ClosestTouch, Danger.Deadly, 1, -1, null, forced)) {
@@ -36,10 +36,9 @@ namespace BabiesAndChildren
                 return false;
             }
             // Is it time for the baby to go to bed?
-            bool baby_sleep_time = baby.timetable.GetAssignment(GenLocalDate.HourInteger(baby.Map)).allowRest;
-            if(!baby_sleep_time){
+            var timetable = baby.timetable;
+            if (timetable == null || baby.Map == null || !timetable.GetAssignment(GenLocalDate.HourInteger(baby.Map)).allowRest)
                 return false;
-            }           
             
             return true;
         }

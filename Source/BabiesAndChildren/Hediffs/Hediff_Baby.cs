@@ -1,3 +1,4 @@
+using BabiesAndChildren.api;
 using RimWorld;
 using Verse;
 using Verse.Sound;
@@ -16,7 +17,7 @@ namespace BabiesAndChildren
             var comp = pawn.TryGetComp<Growing_Comp>();
             if (comp == null) return;
             
-            comp.GrowToStage(AgeStage.GetAgeStage(pawn));
+            comp.GrowToStage(AgeStages.GetAgeStage(pawn));
             
             Pawn mother = pawn.GetMother();
             Pawn father = pawn.GetFather();
