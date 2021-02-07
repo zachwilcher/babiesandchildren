@@ -14,7 +14,7 @@ namespace BabiesAndChildren.Harmony {
     internal static class RestUtility_WakeThreshold_Patch {
         [HarmonyPostfix]
         static void Postfix(ref float __result, ref Pawn p) {
-            if (AgeStages.IsYoungerThan(p, AgeStages.Child) && p.health.hediffSet.HasHediff(ChildHediffDefOf.UnhappyBaby)) {
+            if (AgeStages.IsYoungerThan(p, AgeStages.Child) && p.health.hediffSet.HasHediff(BnCHediffDefOf.UnhappyBaby)) {
                 __result = 0.15f;
             }
             // Adults nearby wake up too
@@ -47,7 +47,9 @@ namespace BabiesAndChildren.Harmony {
     internal static class RestUtility_FindBedFor_Patch
     {
         private static MethodInfo GetSortedBeds_MethodInfo = AccessTools.Method(typeof(ChildrenUtility), "GetSortedBeds_RestEffectiveness");
-            
+
+        private static FieldInfo bedDefsBestToWorst_RestEffectivenessInfo =
+            AccessTools.Field(typeof(RestUtility), "bedDefsBestToWorst_RestEffectiveness");
         /// <summary>
         /// Modify FindBedFor to pass in a different order for bedDefs when looking
         /// for the best bed for a pawn. We do not touch the order of beds for
@@ -56,10 +58,9 @@ namespace BabiesAndChildren.Harmony {
         /// </summary>
         [HarmonyTranspiler]
         static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
-            FieldInfo bedDefFieldInfo = AccessTools.Field(typeof(RestUtility), "bedDefsBestToWorst_RestEffectiveness");
             foreach (CodeInstruction instruction in instructions) {
                 //Convert all references to bedDefsBestToWorst_RestEffectiveness for toddler pawns
-                if (instruction.opcode == OpCodes.Ldsfld && instruction.OperandIs(bedDefFieldInfo)) {
+                if (instruction.opcode == OpCodes.Ldsfld && instruction.OperandIs(bedDefsBestToWorst_RestEffectivenessInfo)) {
                     yield return new CodeInstruction(OpCodes.Ldarg_1) { labels = instruction.labels.ListFullCopy() };
                     yield return new CodeInstruction(OpCodes.Call, GetSortedBeds_MethodInfo);
                 }

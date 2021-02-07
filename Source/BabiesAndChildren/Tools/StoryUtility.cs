@@ -24,7 +24,7 @@ namespace BabiesAndChildren.Tools
             
             if (rand.Fixed_RandChance(BnCSettings.GET_NEW_TYPE_CHANCE))
             {
-                pawn.story.traits.GainTrait(new Trait(ChildTraitDefOf.Newtype, 0, true));
+                pawn.story.traits.GainTrait(new Trait(BnCTraitDefOf.Newtype, 0, true));
                 Find.LetterStack.ReceiveLetter("Newtype".Translate(), 
                     "MessageNewtype".Translate(pawn.LabelIndefinite()), 
                     LetterDefOf.PositiveEvent, pawn);

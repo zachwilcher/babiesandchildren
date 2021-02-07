@@ -157,7 +157,7 @@ namespace BabiesAndChildren
             {
                 foreach (var thingDef in RestUtility.AllBedDefBestToWorst)
                 {
-                    if (RestUtility.CanUseBedEver(baby, thingDef) && thingDef.building.bed_maxBodySize <= 0.6f)
+                    if (RestUtility.CanUseBedEver(baby, thingDef) && IsBedCrib(thingDef))
                     {
                         Building_Bed find_crib = (Building_Bed)GenClosest.ClosestThingReachable(
                             baby.Position, 
@@ -203,8 +203,12 @@ namespace BabiesAndChildren
         {
             if (!RaceUtility.PawnUsesChildren(pawn))
                 return false;
-            float a = LifeStageUtility.GetLifeStageAge(pawn, AgeStages.Toddler).minAge + ((LifeStageUtility.GetLifeStageAge(pawn, AgeStages.Child).minAge - LifeStageUtility.GetLifeStageAge(pawn, AgeStages.Toddler).minAge) / 2);
-            return pawn.ageTracker.AgeBiologicalYearsFloat > a;
+            float childAge = LifeStageUtility.GetLifeStageAge(pawn, AgeStages.Child).minAge;
+            float toddlerAge = LifeStageUtility.GetLifeStageAge(pawn, AgeStages.Toddler).minAge;
+            float toddlerDuration = childAge - toddlerAge;
+
+            //second half of toddler agestage is upright
+            return pawn.ageTracker.AgeBiologicalYearsFloat >= toddlerAge + toddlerDuration / 2;
         }
 
         public static bool SetMakerTagCheck(Thing thing, string tag)
@@ -445,7 +449,7 @@ namespace BabiesAndChildren
         }
 
         /// <summary>
-        /// Get the most appropriate bed list for a pawn. Child pawns will recieve 
+        /// Get the most appropriate bed list for a pawn. Child pawns will receive 
         /// a bed list sorted to prioritize cribs
         /// </summary>
         /// <param name="pawn">The pawn being evaluated</param>

@@ -70,7 +70,7 @@
   <HediffDef>
     <defName>BabyState</defName>
     <description>This child is still growing. Encourage them to perform activities that help them develop.</description>
-    <hediffClass>BabiesAndChildren.Hediff_Baby</hediffClass>
+    <hediffClass>BabiesAndChildren.Hediff_BabyState</hediffClass>
     <label>BabyState</label>
     <initialSeverity>0.001</initialSeverity>
     <comps>

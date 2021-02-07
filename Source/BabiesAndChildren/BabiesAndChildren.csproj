@@ -60,6 +60,7 @@
     <Compile Include="Components\DummyComp.cs" />
     <Compile Include="Components\Growing_Comp.cs" />
     <Compile Include="Defs\AgeStageExtensions.cs" />
+    <Compile Include="Defs\BnCHediffDefOf.cs" />
     <Compile Include="Harmony\DressPatientsPatches.cs" />
     <Compile Include="Harmony\FacialAnimationPatches.cs" />
     <Compile Include="Harmony\JobGiverPatches.cs" />
@@ -73,12 +74,12 @@
     <Compile Include="Hediffs\Hediff_Baby.cs" />
     <Compile Include="Hediffs\Hediff_NoFlag.cs" />
     <Compile Include="Initializer.cs" />
-    <Compile Include="Jobs\Driver_FeedBaby.cs" />
-    <Compile Include="Jobs\Driver_BabyNuzzle.cs" />
-    <Compile Include="Jobs\Driver_PlayWithBaby.cs" />
-    <Compile Include="Defs\ChildDefOf.cs" />
-    <Compile Include="Jobs\MoveBabyToCrib.cs" />
-    <Compile Include="Jobs\MoveBabyToCribAndFeed.cs" />
+    <Compile Include="Jobs\JobDriver_FeedBaby.cs" />
+    <Compile Include="Jobs\JobDriver_BabyNuzzle.cs" />
+    <Compile Include="Jobs\JobDriver_PlayWithBaby.cs" />
+    <Compile Include="Defs\BnCTraitDefOf.cs" />
+    <Compile Include="Jobs\WorkGiver_TakeBabyToCrib.cs" />
+    <Compile Include="Jobs\WorkGiver_TakeBabyToBedAndFeed.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Defs\BackstoryDef.cs" />
     <Compile Include="Settings\BnCSettings.cs" />
@@ -88,9 +89,9 @@
     <Compile Include="Tools\BabyTools.cs" />
     <Compile Include="Tools\DebugActions.cs" />
     <Compile Include="Thoughts\ThoughtWorker_NearParents.cs" />
-    <Compile Include="Jobs\Driver_DisciplineChild.cs" />
-    <Compile Include="Jobs\Driver_HugFriend.cs" />
-    <Compile Include="Jobs\Driver_ScoldChild.cs" />
+    <Compile Include="Jobs\JobDriver_DisciplineChild.cs" />
+    <Compile Include="Jobs\JobDriver_HugFriend.cs" />
+    <Compile Include="Jobs\JobDriver_ScoldChild.cs" />
     <Compile Include="Hediffs\Hediff_UnhappyBaby.cs" />
     <Compile Include="Thoughts\ThoughtWorker_CryingBaby.cs" />
     <Compile Include="ChildrenBase.cs" />
@@ -118,7 +119,7 @@
       <HintPath>../../../../../../workshop/content/294100/839005762/1.1/Assemblies/AlienRace.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Assembly-CSharp, Version=1.2.7558.21451, Culture=neutral, PublicKeyToken=null">
+    <Reference Include="Assembly-CSharp, Version=1.2.7705.25173, Culture=neutral, PublicKeyToken=null">
       <HintPath>../../../../RimWorldLinux_Data/Managed/Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>

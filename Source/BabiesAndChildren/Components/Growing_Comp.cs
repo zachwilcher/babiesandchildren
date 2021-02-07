@@ -72,7 +72,7 @@ namespace BabiesAndChildren
             if ((growthStage <= AgeStages.Toddler) &&
                 Hediff_UnhappyBaby.CheckUnhappy(pawn))
             {
-                HealthUtility.TryAddHediff(pawn, ChildHediffDefOf.UnhappyBaby);
+                HealthUtility.TryAddHediff(pawn, BnCHediffDefOf.UnhappyBaby);
             }
         }
 
@@ -103,19 +103,19 @@ namespace BabiesAndChildren
         {
             if (parent == null) return;
             
-            if (pawn.health.hediffSet.HasHediff(ChildHediffDefOf.BabyState0))
+            if (pawn.health.hediffSet.HasHediff(BnCHediffDefOf.BabyState0))
             {
-                pawn.health.hediffSet.hediffs.Remove(pawn.health.hediffSet.GetFirstHediffOfDef(ChildHediffDefOf.BabyState0));
+                pawn.health.hediffSet.hediffs.Remove(pawn.health.hediffSet.GetFirstHediffOfDef(BnCHediffDefOf.BabyState0));
             }
-            if (pawn.health.hediffSet.HasHediff(ChildHediffDefOf.UnhappyBaby))
+            if (pawn.health.hediffSet.HasHediff(BnCHediffDefOf.UnhappyBaby))
             {
-                pawn.health.hediffSet.hediffs.Remove(pawn.health.hediffSet.GetFirstHediffOfDef(ChildHediffDefOf.UnhappyBaby));
+                pawn.health.hediffSet.hediffs.Remove(pawn.health.hediffSet.GetFirstHediffOfDef(BnCHediffDefOf.UnhappyBaby));
             }
 
-            if (pawn.health.hediffSet.HasHediff(ChildHediffDefOf.NoManipulationFlag))
+            if (pawn.health.hediffSet.HasHediff(BnCHediffDefOf.NoManipulationFlag))
             {
                 pawn.health.hediffSet.hediffs.Remove(
-                    pawn.health.hediffSet.GetFirstHediffOfDef(ChildHediffDefOf.NoManipulationFlag));
+                    pawn.health.hediffSet.GetFirstHediffOfDef(BnCHediffDefOf.NoManipulationFlag));
             }
         }
 
@@ -137,8 +137,8 @@ namespace BabiesAndChildren
             if (growthStage < AgeStages.Adult)
             {
                 DestroyHediffs();
-                var growingHediff = HediffMaker.MakeHediff(ChildHediffDefOf.BabyState0, pawn);
-                growingHediff.Severity = ChildHediffDefOf.BabyState0.stages[growthStage].minSeverity;
+                var growingHediff = HediffMaker.MakeHediff(BnCHediffDefOf.BabyState0, pawn);
+                growingHediff.Severity = BnCHediffDefOf.BabyState0.stages[growthStage].minSeverity;
                 pawn.health.AddHediff(growingHediff);
             }
 

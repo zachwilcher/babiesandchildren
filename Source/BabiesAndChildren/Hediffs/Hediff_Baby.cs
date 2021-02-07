@@ -10,7 +10,7 @@ namespace BabiesAndChildren
     /// class for BabyState HediffDef
     /// Added by Growing_Comp if pawn is a little baby
     /// </summary>
-    public class Hediff_Baby : HediffWithComps
+    public class Hediff_BabyState : HediffWithComps
     {
         public override void PostRemoved()
         {
