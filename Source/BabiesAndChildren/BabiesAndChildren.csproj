@@ -51,9 +51,7 @@
     <FileAlignment>4096</FileAlignment>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="api\AgeStages.cs">
-      <Link>AgeStages.cs</Link>
-    </Compile>
+    <Compile Include="api\AgeStages.cs" />
     <Compile Include="api\Traits.cs" />
     <Compile Include="api\Races.cs" />
     <Compile Include="api\Thoughts.cs" />
