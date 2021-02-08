@@ -6,15 +6,18 @@ namespace BabiesAndChildren
 {
     public class Hediff_UnhappyBaby : HediffWithComps
     {
+        
+        // Hide the hediff
+        public override bool Visible => false;
         private bool CanBabyCry()
         {
-            return pawn.health.capacities.CapableOf (PawnCapacityDefOf.Breathing) && pawn.health.capacities.CanBeAwake;
+            return pawn.health.capacities.CapableOf(PawnCapacityDefOf.Breathing) && pawn.health.capacities.CanBeAwake;
         }
 
         public void WhineAndCry()
         {
-            if (!IsBabyHungry() && !IsBabyUnhappy() && !IsBabyHurt()) {
-                pawn.health.RemoveHediff (this);
+            if (!CheckUnhappy(pawn)) {
+                pawn.health.RemoveHediff(this);
             } else if(CanBabyCry()){
                 // Whine and cry
                 MoteMaker.ThrowMetaIcon(pawn.Position, pawn.Map, ThingDefOf.Mote_IncapIcon);
@@ -24,18 +27,7 @@ namespace BabiesAndChildren
             }
         }
 
-        private bool IsBabyHurt()
-        {
-            return pawn.health.HasHediffsNeedingTend();
-        }
 
-        private bool IsBabyHungry(){
-            return pawn.needs.food.CurLevelPercentage < pawn.needs.food.PercentageThreshHungry;
-        }
-
-        private bool IsBabyUnhappy(){
-            return pawn.needs.joy.CurLevelPercentage < 0.2f;
-        }
         
         public override void PostMake ()
         {
@@ -54,8 +46,6 @@ namespace BabiesAndChildren
             }
         }
 
-        // Hide the hediff
-        public override bool Visible => false;
 
         /// <summary>
         /// checks if a pawn satisfies the requirements for this hediff
@@ -63,9 +53,11 @@ namespace BabiesAndChildren
         /// <returns>whether the pawn meets the requirements for this hediff</returns>
         public static bool CheckUnhappy(Pawn pawn)
         {
-            if (pawn == null || pawn.needs.food == null || pawn.needs.joy == null)
+            if ((pawn?.needs == null) || (pawn.needs.food == null) || (pawn.needs.joy == null))
+            {
                 return false;
-            
+            }
+
             return
                 (pawn.needs.food.CurLevelPercentage < pawn.needs.food.PercentageThreshHungry) ||
                 (pawn.needs.joy.CurLevelPercentage < 0.1f) ||

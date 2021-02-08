@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using System;
+using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
 using BabiesAndChildren.api;
@@ -6,6 +7,7 @@ using BabiesAndChildren.Tools;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using HealthUtility = BabiesAndChildren.Tools.HealthUtility;
 using LifeStageUtility = BabiesAndChildren.Tools.LifeStageUtility;
 using StatDefOf = RimWorld.StatDefOf;
 
@@ -116,12 +118,11 @@ namespace BabiesAndChildren
         /// <summary>
         /// Returns the maximum possible mass of a weapon the specified child can use
         /// </summary>
-        public static float ChildMaxWeaponMass(Pawn pawn)
+        public static float GetMaxWeaponMass(Pawn pawn)
         {
             if (!AgeStages.IsYoungerThan(pawn, AgeStages.Teenager))
-                return 999;
-            //const float baseMass = 2.5f;
-            //return (pawn.skills.GetSkill(SkillDefOf.Shooting).Level * 0.1f) + baseMass;
+                return float.PositiveInfinity;
+            
             return (pawn.ageTracker.AgeBiologicalYearsFloat * 0.1f) + BnCSettings.option_child_max_weapon_mass;
         }
 
@@ -457,8 +458,60 @@ namespace BabiesAndChildren
         public static List<ThingDef> GetSortedBeds_RestEffectiveness(Pawn pawn) {
             return (ChildrenUtility.ShouldUseCrib(pawn)) ? ChildrenUtility.AllBedDefBestToWorstCribRest : RestUtility.AllBedDefBestToWorst;
         }
-        
-        
 
+
+        public static float GetPainShockThreshold(Pawn pawn)
+        {
+            float percentage = 1f;
+
+            if (AgeStages.IsYoungerThan(pawn, AgeStages.Teenager))
+            {
+                percentage = 0.75f;
+            }
+
+            return pawn.GetStatValue(StatDefOf.PainShockThreshold, true) * percentage;
+        }
+
+        public static bool ApplyRecoil(Verb_Shoot verb)
+        {
+
+            Pawn pawn = (Pawn) verb?.caster;
+            
+            if (pawn == null || verb.EquipmentSource.def.BaseMass > GetMaxWeaponMass(pawn))
+            {
+                return false;
+            }
+            pawn.equipment.TryDropEquipment(verb.EquipmentSource, out _, pawn.Position, false);
+
+            float recoilForce = verb.EquipmentSource.def.BaseMass - 3;
+
+            if (recoilForce <= 0)
+            {
+                return false;
+            }
+
+            string[] hitPart =
+            {
+                "Torso",
+                "Shoulder",
+                "Arm",
+                "Hand",
+                "Head",
+                "Neck",
+                "Eye",
+                "Nose",
+            };
+            int hits = Rand.Range(1, 4);
+            while (hits > 0)
+            {
+                pawn.TakeDamage(new DamageInfo(DamageDefOf.Blunt,
+                    (int) ((recoilForce + Rand.Range(0f, 3f)) / hits), 0, -1,
+                    verb.EquipmentSource,
+                    HealthUtility.GetPawnBodyPart(pawn, hitPart.RandomElement()), null));
+                hits--;
+            }
+
+            return true;
+        }
     }
 }

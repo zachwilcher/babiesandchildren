@@ -37,7 +37,15 @@ namespace BabiesAndChildren.api
         public const int Child = 2;
         public const int Teenager = 3;
         public const int Adult = 4;
-        
+
+        public static readonly int[] AllChildAgeStages =
+        {
+            Baby,
+            Toddler,
+            Child,
+            Teenager
+        };
+
         //Cache of what race uses what AgeStages instance
         private static Dictionary<ThingDef, AgeStages> thingAgeStagesMap = new Dictionary<ThingDef, AgeStages>();
         

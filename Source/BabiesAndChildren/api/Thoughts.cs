@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 
 namespace BabiesAndChildren.api
@@ -8,41 +9,69 @@ namespace BabiesAndChildren.api
     /// </summary>
     public static class Thoughts
     {
-        private static List<ThoughtDef> thoughtBlacklist = new List<ThoughtDef>
-        {
-                ThoughtDefOf.AteWithoutTable,
-                ThoughtDefOf.KnowPrisonerDiedInnocent,
-                ThoughtDefOf.KnowPrisonerSold,
-                ThoughtDefOf.Naked,
-                ThoughtDefOf.SleepDisturbed,
-                ThoughtDefOf.SleptOnGround,
-                ThoughtDef.Named("NeedOutdoors"),
-                ThoughtDef.Named("SleptInBarracks"),
-                ThoughtDef.Named("Expectations")
-        };
 
-
-        public static bool IsBlacklisted(ThoughtDef thoughtDef)
+        private static Dictionary<ThoughtDef, HashSet<int>> thoughtBlacklist = new Dictionary<ThoughtDef, HashSet<int>>();
+        static Thoughts()
         {
-            return thoughtBlacklist.Contains(thoughtDef);
+            Blacklist(ThoughtDefOf.AteWithoutTable, AgeStages.Baby, AgeStages.Toddler);
+            Blacklist(ThoughtDefOf.KnowPrisonerDiedInnocent, AgeStages.Baby, AgeStages.Toddler);
+            Blacklist(ThoughtDefOf.KnowPrisonerSold, AgeStages.Baby, AgeStages.Toddler);
+            Blacklist(ThoughtDefOf.Naked, AgeStages.Baby, AgeStages.Toddler);
+            Blacklist(ThoughtDefOf.SleepDisturbed, AgeStages.Baby, AgeStages.Toddler);
+            Blacklist(ThoughtDefOf.SleptOnGround, AgeStages.Baby, AgeStages.Toddler);
+            Blacklist(ThoughtDef.Named("NeedOutdoors"), AgeStages.Baby, AgeStages.Toddler);
+            Blacklist(ThoughtDef.Named("SleptInBarracks"), AgeStages.Baby, AgeStages.Toddler);
+            Blacklist(ThoughtDef.Named("Expectations"), AgeStages.Baby, AgeStages.Toddler);
+
         }
-
-        public static bool Blacklist(ThoughtDef thoughtDef)
+        
+        
+        /// <summary>
+        /// determines if thoughtDef is blacklisted for any AgeStage or any of the AgeStages specified
+        /// </summary>
+        /// <param name="thoughtDef">Def that is blacklisted</param>
+        /// <param name="ageStages">optional list of AgeStages to check against</param>
+        /// <returns>Whether thought is blacklisted for any AgeStage</returns>
+        public static bool IsBlacklisted(ThoughtDef thoughtDef, params int[] ageStages)
         {
-            if (IsBlacklisted(thoughtDef))
+            if (!thoughtBlacklist.ContainsKey(thoughtDef))
+            {
                 return false;
+            }
+
+            if (ageStages.Length == 0)
+            {
+                ageStages = AgeStages.AllChildAgeStages;
+            }
+
+            return thoughtBlacklist[thoughtDef].Intersect(ageStages).Any();
             
-            thoughtBlacklist.Add(thoughtDef);
+            
+        }
+        
+
+        public static bool Blacklist(ThoughtDef thoughtDef, params int[] ageStages)
+        {
+
+            if (thoughtDef == null)
+            {
+                return false;
+            }
+            
+            if (ageStages.Length == 0)
+            {
+                ageStages = AgeStages.AllChildAgeStages;
+            }
+            
+            thoughtBlacklist[thoughtDef].UnionWith(ageStages);
+            
             return true;
 
         }
 
-        public static bool UnBlacklist(ThoughtDef thoughtDef)
+        public static bool UnBlacklist(ThoughtDef thoughtDef, params int[] ageStages)
         {
-            if (!IsBlacklisted(thoughtDef))
-                return false;
-            thoughtBlacklist.Remove(thoughtDef);
-            return true;
+            return IsBlacklisted(thoughtDef) && thoughtBlacklist.Remove(thoughtDef);
         }
     }
 }
