@@ -13,7 +13,6 @@ namespace BabiesAndChildren
         public static HediffDef BabyState0;
         public static HediffDef NoManipulationFlag;
 
-
         static BnCHediffDefOf() => DefOfHelper.EnsureInitializedInCtor(typeof(BnCHediffDefOf));
 
     }

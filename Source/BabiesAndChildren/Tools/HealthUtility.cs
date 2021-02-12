@@ -9,7 +9,7 @@ namespace BabiesAndChildren.Tools
     {
         public static bool TryAddHediff(Pawn pawn, HediffDef hediffDef, BodyPartRecord part = null, DamageInfo? damageInfo = null, bool force = false)
         {
-            if (pawn == null )
+            if (pawn == null || hediffDef == null)
                 return false;
 
             if (pawn.health.hediffSet.HasHediff(hediffDef) && !force)
@@ -18,6 +18,13 @@ namespace BabiesAndChildren.Tools
             pawn.health.AddHediff(hediffDef, part, damageInfo);
             return true;
         }
+
+
+        public static HediffDef GetHediffDefNamed(string name)
+        {
+            return DefDatabase<HediffDef>.GetNamed(name);
+        }
+
 
         /// <summary>
         /// Returns a collection of BodyPartRecords based on the part name provided.

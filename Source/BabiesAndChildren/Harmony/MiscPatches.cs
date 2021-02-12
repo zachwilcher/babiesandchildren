@@ -34,16 +34,29 @@ namespace BabiesAndChildren.Harmony
                 }
                 
                 // prevent non-toddlers from equipping toddler clothes
-                else if (thing.def.thingSetMakerTags.Contains("BabyGear") && !AgeStages.IsAgeStage(pawn, AgeStages.Toddler) )
+                if (thing.def.thingSetMakerTags.Contains("BabyGear") && 
+                         !AgeStages.IsAgeStage(pawn, AgeStages.Toddler) )
                 {
+                    //this message probably isn't right but meh
                     cantReason = "OnlyForUprightToddler".Translate();
                     __result = false;
                 }
+                
+                // prevent non-babies from equipping baby clothes
+                if (thing.def.thingSetMakerTags.Contains("BabyGear1") &&
+                         !AgeStages.IsAgeStage(pawn, AgeStages.Baby))
+                {
+                    //probably need a specialized message but meh
+                    cantReason = "OnlyChildrenCanEquip".Translate();
+                    __result = false;
+                }
+                
+                
             }
-            // prevent toddlers from equipping adult clothes
+            // prevent babies and toddlers from equipping adult clothes
             if (RaceUtility.PawnUsesChildren(pawn) && AgeStages.IsYoungerThan(pawn, AgeStages.Child))
             {
-                if (thing.def.thingSetMakerTags == null || !thing.def.thingSetMakerTags.Contains("BabyGear"))
+                if (thing.def.thingSetMakerTags == null || !thing.def.thingSetMakerTags.Contains("BabyGear") || !thing.def.thingSetMakerTags.Contains("BabyGear1"))
                 {
                     cantReason = "BabyCantEquipNormal".Translate();
                     __result = false;

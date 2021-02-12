@@ -69,8 +69,8 @@
     <Compile Include="Harmony\PawnGraphicSetPatches.cs" />
     <Compile Include="Harmony\PawnRendererPatches.cs" />
     <Compile Include="Harmony\RestUtilityPatches.cs" />
-    <Compile Include="Hediffs\Hediff_Baby.cs" />
-    <Compile Include="Hediffs\Hediff_NoFlag.cs" />
+    <Compile Include="Hediffs\Hediffs_BabyInit.cs" />
+    <Compile Include="Hediffs\Hediff_ChildhoodStages.cs" />
     <Compile Include="Initializer.cs" />
     <Compile Include="Jobs\JobDriver_FeedBaby.cs" />
     <Compile Include="Jobs\JobDriver_BabyNuzzle.cs" />

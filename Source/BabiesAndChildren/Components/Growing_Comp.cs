@@ -1,6 +1,5 @@
 ﻿using RimWorld;
 using System;
-using System.Security.Cryptography;
 using BabiesAndChildren.api;
 using Verse;
 using HealthUtility = BabiesAndChildren.Tools.HealthUtility;
@@ -142,6 +141,7 @@ namespace BabiesAndChildren
                 growingHediff.Severity = BnCHediffDefOf.BabyState0.stages[growthStage].minSeverity;
                 pawn.health.AddHediff(growingHediff);
             }
+
         }
 
 
@@ -161,9 +161,9 @@ namespace BabiesAndChildren
         }
         
         /// <summary>
-        /// This method will setup all appropriate hediffs, bodytype and backstories for a give lifestage index
+        /// This method will setup the appropriate bodytype and backstory for a given agestage 
         /// </summary>
-        /// <param name="stage">The new lifestage index</param>
+        /// <param name="stage">The new agestage</param>
         public void GrowToStage(int stage)
         {
             if (parent == null) return;
@@ -183,6 +183,7 @@ namespace BabiesAndChildren
                 case AgeStages.Toddler:
                     pawn.story.childhood = Childhood_Disabled;
                     ChildrenUtility.ChangeBodyType(pawn, false, false);
+                    ChildrenUtility.TryDrop(pawn, "BabyGear1");
                     break;
                 case AgeStages.Child:
                 {
@@ -279,6 +280,7 @@ namespace BabiesAndChildren
                     }
                 }
             }
+            
             
             UpdateMood();
             
