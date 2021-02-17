@@ -117,6 +117,9 @@
       <HintPath>../../../../RimWorldLinux_Data/Managed/Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Assembly-CSharp, Version=1.2.7705.25173, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\..\RimWorldLinux_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
     <Reference Include="HugsLib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
       <HintPath>../packages/UnlimitedHugs.Rimworld.HugsLib.8.0.0/lib/net472/HugsLib.dll</HintPath>
       <Private>False</Private>
