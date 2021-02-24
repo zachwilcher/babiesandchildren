@@ -30,12 +30,29 @@ namespace BabiesAndChildren
         /// </summary>
         public class Fixed_Rand
         {
-            private readonly Random rand;
+            private Random rand;
 
-            public Fixed_Rand(int seed)
+            private void init(long seed)
+            {
+                init((int) seed);
+            }
+            private void init(int seed)
             {
                 rand = new Random(seed);
                 CLog.DevMessage("   Seed = " + seed);
+            }
+            public Fixed_Rand(Pawn pawn)
+            {
+                init(pawn.ageTracker.AgeBiologicalTicks + pawn.ageTracker.AgeChronologicalTicks);
+            }
+
+            public Fixed_Rand(long seed)
+            {
+                init(seed);
+            }
+            public Fixed_Rand(int seed)
+            {
+                init(seed);
             }
 
             public bool Fixed_RandChance(double chance)

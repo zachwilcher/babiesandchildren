@@ -11,6 +11,9 @@ namespace BabiesAndChildren.Tools
     /// </summary>
     public static class StoryUtility
     {
+        private static readonly Backstory Childhood_Disabled = BackstoryDatabase.allBackstories["CustomBackstory_NA_Childhood_Disabled"];
+        private static readonly Backstory Rimchild = BackstoryDatabase.allBackstories["CustomBackstory_Rimchild"];
+        
         /// <summary>
         /// This method will roll for a chance to make the pawn Asexual, Bisexual, or Gay
         /// </summary>
@@ -161,39 +164,100 @@ namespace BabiesAndChildren.Tools
             //pawn's which are not humans or alien races is out of the scope of this mod
             return false;
         }
+        
 
-        public static void ChangeChildBackstory(Pawn pawn)
+        /// <summary>
+        /// Changes a pawn's childhood and if it's childhood is changed it's
+        /// work types and disabled skills will be updated.
+        /// Will also update childhood for children based on AgeStage if no new childhood is provided.
+        /// </summary>
+        /// <returns>Whether the childhood changed</returns>
+        public static bool ChangeChildhood(Pawn pawn, Backstory newChildhood = null)
         {
-            if (pawn == null) return;
-            if (AgeStages.IsAgeStage(pawn, AgeStages.Child) && pawn.story.childhood == BackstoryDatabase.allBackstories["CustomBackstory_NA_Childhood_Disabled"])
+            
+            if (pawn == null) return false;
+
+            Backstory currentChildhood = pawn.story.childhood;
+            
+            var comp = pawn.TryGetComp<Growing_Comp>();
+            if (newChildhood == null)
             {
-                pawn.story.childhood = BackstoryDatabase.allBackstories["CustomBackstory_Rimchild"];
-                pawn.Notify_DisabledWorkTypesChanged();
-                pawn.skills.Notify_SkillDisablesChanged();
-                MeditationFocusTypeAvailabilityCache.ClearFor(pawn);
-
-                if (pawn.TryGetComp<Growing_Comp>() != null)
+                switch (AgeStages.GetAgeStage(pawn))
                 {
-                    Pawn mother = pawn.GetMother();
-                    Pawn father = pawn.GetFather();
-                    if (mother != null)
-                    {
-                        MathTools.Fixed_Rand rand = new MathTools.Fixed_Rand((int)mother.ageTracker.AgeBiologicalTicks);
-                        BabyTools.SetBabySkillsAndPassions(pawn, mother, father, rand);
-                        List<SkillDef> allDefsListForReading = DefDatabase<SkillDef>.AllDefsListForReading;
-                        foreach (var skillDef in allDefsListForReading)
+                    case AgeStages.Baby:
+                        newChildhood = Childhood_Disabled;
+                        break;
+                    case AgeStages.Toddler:
+                        goto case AgeStages.Baby;
+                    case AgeStages.Child:
+                        if (currentChildhood == Childhood_Disabled)
                         {
-                            pawn.skills.Learn(skillDef, 100, true);
-                            CLog.DevMessage("Showbaby skill>> " + pawn.Name + "'s " + skillDef.defName + " Skills set =" + pawn.skills.GetSkill(skillDef));
+                            newChildhood = Rimchild;
                         }
-                        Messages.Message("Successfully changed child's Backstory", MessageTypeDefOf.PositiveEvent);
-                    }
-                    //else Messages.Message("Mother Is Null", MessageTypeDefOf.NeutralEvent);
+                        break;
+                    case AgeStages.Teenager:
+                        goto case AgeStages.Child;
+                    case AgeStages.Adult:
+                        goto case AgeStages.Child;
+                    
                 }
-
-                //else Messages.Message("Choose a child who has a backstory 'Baby'", MessageTypeDefOf.NeutralEvent);
             }
-            //else Messages.Message("Choose a child (Not baby)", MessageTypeDefOf.NeutralEvent);
+
+            if (newChildhood == null || newChildhood == currentChildhood) 
+                return false;
+            
+            pawn.story.childhood = newChildhood;
+            pawn.Notify_DisabledWorkTypesChanged();
+            pawn.skills.Notify_SkillDisablesChanged();
+            MeditationFocusTypeAvailabilityCache.ClearFor(pawn);
+            return true;
+
+        }
+
+        /// <summary>
+        /// Changes pawn's body type based on it's AgeStage
+        /// </summary>
+        /// <param name="pawn">pawn to be altered</param>
+        /// <param name="rand">random number generator</param>
+        public static void ChangeBodyType(Pawn pawn, MathTools.Fixed_Rand rand = null)
+        {
+            
+            
+            BodyTypeDef newBodyType = BodyTypeDefOf.Thin;
+            switch (AgeStages.GetAgeStage(pawn))
+            {
+                case AgeStages.Baby: 
+                    newBodyType = BodyTypeDefOf.Fat;
+                    break;
+                
+                case AgeStages.Toddler:
+                    newBodyType = ChildrenUtility.ToddlerIsUpright(pawn) ? BodyTypeDefOf.Thin : BodyTypeDefOf.Fat;
+                    break;
+                
+                case AgeStages.Child:
+                    newBodyType = BodyTypeDefOf.Thin;
+                    break;
+
+                case AgeStages.Teenager:
+                    if (rand == null)
+                        rand = new MathTools.Fixed_Rand(pawn);
+                    
+                    if (rand.Fixed_RandChance(0.35f))
+                    {
+                        newBodyType = BodyTypeDefOf.Thin;
+                    }
+                    else if(pawn.gender == Gender.Male)
+                    {
+                        newBodyType = BodyTypeDefOf.Male;
+                    }
+                    else if (pawn.gender == Gender.Female)
+                    {
+                        newBodyType= BodyTypeDefOf.Female;
+                    }
+                    break;
+            }
+            
+            TrySetPawnBodyType(pawn, newBodyType);
         }
     }
 }

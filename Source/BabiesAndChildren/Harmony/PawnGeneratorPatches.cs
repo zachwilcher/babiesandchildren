@@ -14,7 +14,7 @@ namespace BabiesAndChildren.Harmony
         {
             if (RaceUtility.PawnUsesChildren(pawn) && AgeStages.IsYoungerThan(pawn, AgeStages.Teenager))
             {
-                ChildrenUtility.ChangeBodyType(pawn, true, true);
+                StoryUtility.ChangeBodyType(pawn);
             }
         }
     }

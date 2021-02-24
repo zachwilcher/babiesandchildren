@@ -68,7 +68,9 @@
       </options>
     </colorGenerator>
     <generateAllowChance>0</generateAllowChance>
-	<thingSetMakerTags><li>BabyGear</li></thingSetMakerTags>
+	<thingSetMakerTags>
+      <li>BabyGear</li>
+    </thingSetMakerTags>
   </ThingDef>
 
   <ThingDef ParentName="ApparelMakeableBase">
@@ -138,6 +140,8 @@
       </options>
     </colorGenerator>
     <generateAllowChance>0</generateAllowChance>
-    <thingSetMakerTags><li>BabyGear1</li></thingSetMakerTags>
+    <thingSetMakerTags>
+      <li>BabyGear1</li>
+    </thingSetMakerTags>
   </ThingDef>
 </Defs>

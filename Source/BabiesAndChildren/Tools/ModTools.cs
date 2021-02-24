@@ -1,4 +1,6 @@
+using System;
 using BabiesAndChildren.api;
+using UnityEngine;
 using Verse;
 
 namespace BabiesAndChildren
@@ -40,74 +42,60 @@ namespace BabiesAndChildren
             return isRobot;
         }
 
-
-        public static Hediff GetVag(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.def.defName.ToLower().Contains("vagina"));
-        public static Hediff GetPen(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.def.defName.ToLower().Contains("penis"));
-        public static Hediff GetBre(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.def.defName.ToLower().Contains("breasts"));
-        public static Hediff GetAnu(Pawn pawn) => pawn.health.hediffSet.hediffs.Find((Hediff hed) => hed.def.defName.ToLower().Contains("anus"));
-
-        public static void ChangeSize(Pawn pawn, float Maxsize, bool Is_SizeInit)
+        public static float getMaxRJWHediffSeverity(Pawn pawn)
         {
-            if (ChildrenBase.ModRimJobWorld_ON)
+            switch (AgeStages.GetAgeStage(pawn))
             {
-                Hediff bodypart = GetAnu(pawn);
-                if (bodypart == null) return;
-                float size = Rand.Range(0.01f, Maxsize);
-                float cursize = bodypart.Severity;
-                if (Is_SizeInit)
-                {
-                    bodypart.Severity = size;
-                }
-                else
-                {
-                    bodypart.Severity = ((cursize > size) ? cursize : size);
-                }
+                case AgeStages.Baby: return 0.07f;
+                case AgeStages.Toddler: return ChildrenUtility.ToddlerIsUpright(pawn) ? 0.10f : 0.08f;
+                case AgeStages.Child: return 0.12f;
+                case AgeStages.Teenager: return 0.80f;
+                default: return 1f;
+            } 
+        }
+        public static void ChangeRJWHediffSeverity(Pawn pawn, bool Is_SizeInit, MathTools.Fixed_Rand rand)
+        {
+            if (!ChildrenBase.ModRimJobWorld_ON) return;
 
-                if (pawn.gender == Gender.Male)
-                {
-                    bodypart = GetPen(pawn);
-                    if (bodypart == null) return;
-                    size = Rand.Range(0.01f, Maxsize);
-                    cursize = bodypart.Severity;
-                    if (Is_SizeInit)
-                    {
-                        bodypart.Severity = size;
-                    }
-                    else
-                    {
-                        bodypart.Severity = ((cursize > size) ? cursize : size);
-                    }
-                }
-                else if (pawn.gender == Gender.Female)
-                {
-                    bodypart = ModTools.GetVag(pawn);
-                    if (bodypart == null) return;
-                    Maxsize = ((Maxsize < 0.35f) ? 0.35f : Maxsize);
-                    size = Rand.Range(0.02f, Maxsize);
-                    cursize = bodypart.Severity;
-                    if (Is_SizeInit)
-                    {
-                        bodypart.Severity = size;
-                    }
-                    else
-                    {
-                        bodypart.Severity = ((cursize > size) ? cursize : size);
-                    }
+            float Maxsize = getMaxRJWHediffSeverity(pawn);
 
-                    bodypart = GetBre(pawn);
-                    if (bodypart == null) return;
-                    if (AgeStages.IsYoungerThan(pawn, AgeStages.Teenager) && Maxsize > 0.07f) Maxsize = 0.07f;
-                    size = Rand.Range(0.01f, Maxsize);
-                    cursize = bodypart.Severity;
-                    if (Is_SizeInit)
-                    {
-                        bodypart.Severity = size;
-                    }
-                    else
-                    {
-                        bodypart.Severity = ((cursize > size) ? cursize : size);
-                    }
+            
+            Hediff anusHediff = Tools.HealthUtility.GetHediffNamed(pawn, "anus");
+            if (anusHediff != null)
+            {
+                float newSize = Rand.Range(0.01f, Maxsize);
+                float oldSize = anusHediff.Severity;
+                anusHediff.Severity = Is_SizeInit ? newSize : Math.Max(oldSize, newSize);
+            }
+            Hediff penisHediff = Tools.HealthUtility.GetHediffNamed(pawn, "penis");
+            if (penisHediff != null)
+            {
+                float newSize = Rand.Range(0.01f, Maxsize);
+                float oldSize = penisHediff.Severity;
+                penisHediff.Severity = Is_SizeInit ? newSize : Math.Max(newSize, oldSize);
+            }
+
+            Hediff vaginaHediff = Tools.HealthUtility.GetHediffNamed(pawn, "vagina");
+            if (vaginaHediff != null)
+            {
+                float maxVaginaSize = Math.Max(0.35f, Maxsize);
+                float newSize = Rand.Range(0.02f, maxVaginaSize);
+                float oldSize = vaginaHediff.Severity;
+                vaginaHediff.Severity = Is_SizeInit ? newSize : Math.Max(newSize, oldSize);
+            }
+
+            Hediff breastsHediff = Tools.HealthUtility.GetHediffNamed(pawn, "breasts");
+            if (breastsHediff != null && vaginaHediff != null)
+            {
+                float maxBreastsSize = Maxsize;
+                if (AgeStages.IsYoungerThan(pawn, AgeStages.Teenager))
+                {
+                    maxBreastsSize = Math.Min(maxBreastsSize, 0.07f);
                 }
+                float newSize = Rand.Range(0.01f, maxBreastsSize);
+                float oldSize = breastsHediff.Severity;
+                breastsHediff.Severity = Is_SizeInit ? newSize : Math.Max(oldSize, newSize);
+                
             }
         }
     }

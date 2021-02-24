@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using Verse;
 
@@ -25,6 +26,12 @@ namespace BabiesAndChildren.Tools
             return DefDatabase<HediffDef>.GetNamed(name);
         }
 
+        public static Hediff GetHediffNamed(Pawn pawn, string name)
+        {
+            name = name.ToLower();
+            List<Hediff> matches = pawn.health.hediffSet.hediffs.FindAll(hediff => hediff.def.defName.ToLower().Contains(name));
+            return matches.Count > 0 ? matches.First() : null;
+        }
 
         /// <summary>
         /// Returns a collection of BodyPartRecords based on the part name provided.
@@ -47,7 +54,7 @@ namespace BabiesAndChildren.Tools
         public static BodyPartRecord GetPawnBodyPart(Pawn pawn, String bodyPart)
         {
             //Get collection of parts matching the def, then get a random left or right
-            return GetPawnBodyParts(pawn, bodyPart).RandomElement();
+            return GetPawnBodyParts(pawn, bodyPart).First();
         }
 
         /// <summary>

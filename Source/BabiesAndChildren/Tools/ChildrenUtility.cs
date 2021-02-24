@@ -217,16 +217,25 @@ namespace BabiesAndChildren
             return thing.def.thingSetMakerTags != null && thing.def.thingSetMakerTags.Contains(tag);
         }
 
-        /// <summary>
-        /// Try's to drop pawn's toy or baby gear if they are too old for it
-        /// </summary>
-        /// <param name="pawn"></param>
-        /// <param name="tag">tag of thing to be dropped (BabyGear or Toy)</param>
-        public static void TryDrop(Pawn pawn, string tag)
+        public static void TryDropInvalidEquipment(Pawn pawn)
         {
-            if (tag == "BabyGear")
-            {
+                ThingWithComps toy = pawn.equipment.Primary;
+                if (toy != null && ChildrenUtility.SetMakerTagCheck(toy, "Toy"))
+                { pawn.equipment.TryDropEquipment(toy, out _, pawn.Position, false);
+                }
+            
+        }
+
+        public static void TryDropInvalidApparel(Pawn pawn)
+        {
                 List<Apparel> wornApparel = pawn.apparel.WornApparel;
+                foreach (var apparel in pawn.apparel.WornApparel)
+                {
+                    if (AgeStages.IsOlderThan(pawn, AgeStages.Baby) && SetMakerTagCheck(apparel, "BabyGear1"))
+                    {
+                        
+                    }
+                }
                 for (int i = wornApparel.Count - 1; i >= 0; i--)
                 {
                     if (ChildrenUtility.SetMakerTagCheck(wornApparel[i], "BabyGear"))
@@ -234,23 +243,31 @@ namespace BabiesAndChildren
                         pawn.apparel.TryDrop(wornApparel[i], out _, pawn.Position, false);
                     }
                 }
-            }
-            if (tag == "Toy")
-            {
-                ThingWithComps toy = pawn.equipment.Primary;
-                if (toy != null && ChildrenUtility.SetMakerTagCheck(toy, "Toy"))
-                {
-                    pawn.equipment.TryDropEquipment(toy, out _, pawn.Position, false);
-                }
-            }
+            
+        }
+
+        /// <summary>
+        /// Try's to drop pawn's toy or baby gear if they are too old for it
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <param name="tag">tag of thing to be dropped (BabyGear or Toy)</param>
+        public static void TryDropInvalidEquipmentAndApparel(Pawn pawn)
+        {
+            TryDropInvalidApparel(pawn);
+            TryDropInvalidEquipment(pawn);
         }
         
         /// <summary>
-        /// Searches for a comp in pawn with matching class name
+        /// Searches for a comp in a ThingWithComps by comp name
         /// </summary>
-        public static ThingComp GetCompByClassName(Pawn pawn, string compClassName)
+        public static ThingComp GetCompByClassName(ThingWithComps thing, string compClassName)
         {
-            foreach (ThingComp comp in pawn.AllComps)
+            if (compClassName == null)
+            {
+                return null;
+            }
+            
+            foreach (ThingComp comp in thing.AllComps)
             {
                 if (comp?.props == null || (comp.props.compClass == null))
                 {
@@ -262,69 +279,8 @@ namespace BabiesAndChildren
                     return comp;
                 }
             }
+            
             return null;
-        }
-
-        /// <summary>
-        /// Changes pawn's body type based on it's AgeStage
-        /// </summary>
-        /// <param name="pawn">pawn to be altered</param>
-        /// <param name="Is_SizeInit">Whether to randomly initialize the size (if appropriate) of the pawn's heDiffs</param>
-        /// <param name="Is_ChangeSize_Skip">Whether to change the size (if appropriate) of the pawn's heDiffs</param>
-        public static void ChangeBodyType(Pawn pawn, bool Is_SizeInit = false, bool Is_ChangeSize_Skip = true)
-        {
-            
-            
-            float size = 0.01f;
-            
-            switch (AgeStages.GetAgeStage(pawn))
-            {
-                case AgeStages.Adult:
-                    size = 1f;
-                    break;
-                
-                case AgeStages.Teenager:
-                    //35% chance of thin body type
-                    if (Rand.Value < 0.35f)
-                    {
-                        StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
-                    }
-                    else if(pawn.gender == Gender.Male)
-                    {
-                        StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Male);
-                    }
-                    else if (pawn.gender == Gender.Female)
-                    {
-                        StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Female);
-                    }
-                    size = 0.8f;
-                    break;
-                case AgeStages.Child:
-                    StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
-                    size = 0.12f;
-                    break;
-
-                case AgeStages.Toddler:
-                    if (ToddlerIsUpright(pawn))
-                    {
-                        StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
-                        size = 0.10f;
-                    }
-                    else
-                    {
-                        StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Fat);
-                        size = 0.08f;
-                    }
-                    break;
-
-                case AgeStages.Baby:
-                    StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Fat);
-                    size = 0.07f;
-                    break;
-
-            }
-            if (!Is_ChangeSize_Skip) 
-                ModTools.ChangeSize(pawn, size, Is_SizeInit);
         }
 
         /// <summary>

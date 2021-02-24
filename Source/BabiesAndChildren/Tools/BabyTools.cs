@@ -166,7 +166,6 @@ namespace BabiesAndChildren
         {
             //clear traits
             pawn.story.traits.allTraits.Clear();
-            CLog.DevMessage("Traits cleared for parent inherit");
             
             if (mother == null || father == null)
             {
@@ -253,28 +252,30 @@ namespace BabiesAndChildren
 
         public static void RemoveChildDiedThought(Pawn pawn, Pawn child)
         {
-            // Does the pawn have a "my child died thought"?
-            MemoryThoughtHandler mems = pawn.needs.mood.thoughts.memories;
-            if (mems.NumMemoriesOfDef(ThoughtDef.Named("MySonDied")) > 0 || mems.NumMemoriesOfDef(ThoughtDef.Named("MyDaughterDied")) > 0)
+            ThoughtDef sonDiedThought = ThoughtDef.Named("MySonDied");
+            ThoughtDef daughterDiedThought = ThoughtDef.Named("MyDaughterDied");
+            ThoughtDef pawnWithGoodOpinionDiedThought = ThoughtDef.Named("PawnWithGoodOpinionDied");
+            ThoughtDef witnessedDeathFamilyThought = ThoughtDef.Named("WitnessedDeathFamily");
+            ThoughtDef witnessedDeathNonAllyThought = ThoughtDef.Named("WitnessedDeathNonAlly");
+            
+            MemoryThoughtHandler memories = pawn.needs.mood.thoughts.memories;
+
+            if (memories.NumMemoriesOfDef(sonDiedThought) <= 0 &&
+                memories.NumMemoriesOfDef(daughterDiedThought) <= 0) return;
+            
+            foreach (Thought_Memory thought in memories.Memories.ToList())
             {
-                // Let's look through the list of memories
-                foreach (Thought_Memory thought in mems.Memories.ToList())
+                if ((thought.def == sonDiedThought || 
+                     thought.def == daughterDiedThought || 
+                     thought.def == pawnWithGoodOpinionDiedThought ) &&
+                    thought.otherPawn == child)
                 {
-                    // Check if it's one of the right defs
-                    if (thought.def == ThoughtDef.Named("MySonDied") || thought.def == ThoughtDef.Named("MyDaughterDied") || thought.def == ThoughtDef.Named("PawnWithGoodOpinionDied"))
-                    {
-                        // We found the thought
-                        if (thought.otherPawn == child)
-                        {
-                            // Let's remove it
-                            mems.Memories.Remove(thought);
-                        }
-                    }
-                    if (thought.def == ThoughtDef.Named("WitnessedDeathFamily") || thought.def == ThoughtDef.Named("WitnessedDeathNonAlly"))
-                    {
-                        // Let's remove it
-                        mems.Memories.Remove(thought);
-                    }
+                    memories.Memories.Remove(thought);
+                }
+                if (thought.def == witnessedDeathFamilyThought || 
+                    thought.def == witnessedDeathNonAllyThought)
+                {
+                    memories.Memories.Remove(thought);
                 }
             }
         }

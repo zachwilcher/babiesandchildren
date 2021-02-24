@@ -66,7 +66,7 @@ namespace BabiesAndChildren
         public static float ShowHairAlienHFLocZ = 0.048f;
         
         //special flag to reinitialize all childeren on all maps (not saves) at map load once per "game"/ once per mod added
-        //TODO make this a world component
+        //TODO make this a game component
         public static bool OncePerGame = false;
 
         private static Vector2 scrollPosition;

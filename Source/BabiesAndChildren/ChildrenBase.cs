@@ -54,8 +54,6 @@ namespace BabiesAndChildren
                             
                             Growing_Comp comp = pawn.TryGetComp<Growing_Comp>();
                             comp?.Initialize(true);
-                            ChildrenUtility.ChangeBodyType(pawn, true, false);
-                            StoryUtility.ChangeChildBackstory(pawn);
                         }
                     }
             
