@@ -145,9 +145,16 @@ namespace BabiesAndChildren.api
             if (!thingAgeStagesMap.ContainsKey(thing))
             { 
                 var ageStages = new AgeStages(thing);
-                CLog.DevMessage("Generated " + (ageStages.IsValid() ? "Valid" : "Invalid") + " AgeStages for: " + thing.defName);
-                if (!ageStages.IsValid())
+                var isValid = ageStages.IsValid();
+                CLog.DevMessage("Generated " + (isValid ? "Valid" : "Invalid") + " AgeStages for: " + thing.defName +
+                                " with minAgeBaby: " + ageStages.minAgeBaby +
+                                " and minAgeAdult: " + ageStages.minAgeAdult);
+
+                if (!isValid)
+                {
                     ageStages = null;
+                }
+                
                 thingAgeStagesMap[thing] = ageStages;
             }
             return thingAgeStagesMap[thing];
@@ -192,7 +199,7 @@ namespace BabiesAndChildren.api
             
             for(var i = 0; i < ageStagePercents.Length; i++)
             {
-                if (total <= progression)
+                if (total >= progression)
                     return i;
                 total += ageStagePercents[i];
             }
@@ -231,7 +238,7 @@ namespace BabiesAndChildren.api
             }
             
             
-            return (total == OneHundredPercent) && (minAgeAdult > minAgeBaby) && (minAgeBaby >= 0);
+            return (total == OneHundredPercent) && (minAgeAdult >= minAgeBaby) && (minAgeBaby >= 0);
         }
         public static int GetAgeStage(Pawn pawn)
         {
@@ -274,5 +281,6 @@ namespace BabiesAndChildren.api
         {
             return new AgeStages(this);
         }
+
     }
 }
