@@ -7,6 +7,7 @@ using Verse.Sound;
 
 namespace BabiesAndChildren
 {
+    //snake_case is used too much here
     public class BnCSettings : ModSettings
     {
         public const int MAX_TRAIT_COUNT = 3;
@@ -16,7 +17,7 @@ namespace BabiesAndChildren
         public const double GET_GAY_SEXUALITY = 0.05;
         public const int MAX_ACCELERATED_GROWTH_FACTOR = 20;
         public const float MAX_CRIB_BODYSIZE = 0.6f;
-
+        
         public static bool accelerated_growth = true;
         public static int accelerated_growth_end_age = 14;
         public static int baby_accelerated_growth = 7;
@@ -43,6 +44,8 @@ namespace BabiesAndChildren
 
         public static bool debug_and_gsetting = false;
         public static bool child_cute_act_enabled = true;
+        
+        //make alien heads be human heads if alien heads are fucked
         public static bool human_like_head_enabled = false;
         public static bool Rabbie_Child_head_enabled = false;
         
@@ -77,6 +80,7 @@ namespace BabiesAndChildren
             Rect viewRect = new Rect(0f, 0f, inRect.width - 16f, inRect.height + height_modifier);
 
             Listing_Standard listingStandard = new Listing_Standard();
+            
             listingStandard.maxOneColumn = true;
             listingStandard.ColumnWidth = viewRect.width / 2.05f;
             listingStandard.BeginScrollView(outRect, ref scrollPosition, ref viewRect);
@@ -107,14 +111,6 @@ namespace BabiesAndChildren
                 listingStandard.Label("TeenagerAcceleratedGrowth_title".Translate() + ": " + teenager_accelerated_growth, -1f, "TeenagerAcceleratedGrowth_desc".Translate());
                 teenager_accelerated_growth = (int)listingStandard.Slider(teenager_accelerated_growth, 1, MAX_ACCELERATED_GROWTH_FACTOR);
             }
-            //else
-            //{
-            //    accelerated_growth_end_age = 14;
-            //    baby_accelerated_growth = 7;
-            //    toddler_accelerated_growth = 7;
-            //    child_accelerated_growth = 7;
-            //    teenager_accelerated_growth = 1;
-            //}
 
             listingStandard.Gap(10f);
             listingStandard.Label("BabyInheritPercentage_Title".Translate() + ": ", -1f, "BabyInheritPercentage_Desc".Translate());

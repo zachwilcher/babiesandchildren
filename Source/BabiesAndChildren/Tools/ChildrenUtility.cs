@@ -417,11 +417,8 @@ namespace BabiesAndChildren
         }
         
         /// <summary>
-        /// Maps a child or teen's current age to a number between .3 and 1 based on
-        /// how far progressed the pawn is into adolescence 
+        /// Magic number between .8 and 1.6 depending on age of pawn
         /// </summary>
-        /// <param name="pawn">Child or Teen</param>
-        /// <returns>1 if baby, toddler, or adult. number between .3 and .9 if child or teen</returns>
         public static float AgeFactor(Pawn pawn)
         {   
             //Age factor only relevant for children and teens
@@ -441,9 +438,11 @@ namespace BabiesAndChildren
             const float offset = 0.8f;
             const float scalar = 0.3f;
             
+            //x = yearsSinceToddler / childLifeStageDuration
             //0 < x < 2
-            //scalar -> 0 < x < 0.6
-            //offset -> 0.3 < x < 0.9
+            //* scalar -> 0 < x < 0.6
+            //+ offset -> 0.8 < x < 1.4
+            
             float agefac = offset + scalar * yearsSinceToddler / childLifeStageDuration;
             
             return agefac;

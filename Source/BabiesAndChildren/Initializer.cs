@@ -13,7 +13,6 @@ namespace BabiesAndChildren
             ChildrenBase.ModRimJobWorld_ON = ModTools.IsModOn("RimJobWorld");
             ChildrenBase.ModAndroid_Tiers_ON = ModTools.IsModOn("Android tiers");
             ChildrenBase.ModDressPatients_ON = ModTools.IsModOn("Dress Patients");
-            ChildrenBase.ModAgeMatters_ON = ModTools.IsModOn("Age Matters 2.0 [1.2]");
             if (ChildrenBase.ModFacialAnimation_ON)
             {
                 CLog.Message("Patching Facial Animation");

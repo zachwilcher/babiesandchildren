@@ -8,7 +8,7 @@ using HealthUtility = BabiesAndChildren.Tools.HealthUtility;
 namespace BabiesAndChildren
 {
     /// <summary>
-    /// No Manipulation Hediff.
+    /// No Manipulation Hediff?
     /// </summary>
     public class Hediff_NoFlag : HediffWithComps
     {
@@ -29,6 +29,7 @@ namespace BabiesAndChildren
     /// class for BabyState HediffDef
     /// Added by Growing_Comp if pawn is a little baby
     /// </summary>
+    // why is this a hediff? if there is no reason it would be cleaner to move this into Growing_Comp
     public class Hediff_BabyState : HediffWithComps
     {
         public override void PostRemoved()

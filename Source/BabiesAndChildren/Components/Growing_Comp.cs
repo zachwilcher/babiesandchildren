@@ -17,7 +17,7 @@ namespace BabiesAndChildren
     class Growing_Comp : ThingComp
     {
         /// <summary>
-        /// AgeStage pawn is currently set to
+        /// AgeStage pawn is currently set to (not necessarily the one it should be)
         /// </summary>
         /// 
         private int growthStage;
@@ -49,19 +49,12 @@ namespace BabiesAndChildren
         {
             if (initialized && !reinitialize) return;
             
-            if (reinitialize)
-            {
-                CLog.DevMessage("Reinitializing: " + pawn.Name.ToStringShort);
-            }
-            else
-            {
-                CLog.DevMessage("Initializing: " + pawn.Name.ToStringShort);
-            }
-
+            CLog.DevMessage((reinitialize ? "Reinitializing: " : "Initializing: ") + pawn.Name.ToStringShort);
             
             if (AgeStages.IsAgeStage(pawn, AgeStages.Baby) && !pawn.health.hediffSet.HasHediff(HediffDef.Named("BabyState")))
             {
                 //basically a call to Hediff_Baby:PostRemoved() in about 5 ticks
+                //why in 5 ticks instead of now? no fucking clue.
                 HealthUtility.TryAddHediff(pawn, HediffDef.Named("BabyState"));
                 //no idea what this hediff is for
                 HealthUtility.TryAddHediff(pawn, HediffDef.Named("NoManipulationFlag"));
@@ -103,6 +96,7 @@ namespace BabiesAndChildren
             //Fixed this by adding a component that does nothing
             //allowing AllComps.Count to stay the same
             //... At least that's what I think is happening
+            //really should just not add the comp to pawns who don't need it or not remove this and just do nothing
             parent.AllComps.Add(new DummyComp());
             CLog.DevMessage("Growing_Comp removed for: " + name);
         }
@@ -268,7 +262,7 @@ namespace BabiesAndChildren
                 return;
             }
 
-            //ugly way to do upright toddlers
+            //ugly way to do upright toddlers... really should just have had another age stage instead of this bs.
             if (ageStage == AgeStages.Toddler)
             {
                 if (pawn.story.bodyType != BodyTypeDefOf.Thin)

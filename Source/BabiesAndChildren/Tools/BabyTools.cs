@@ -249,7 +249,7 @@ namespace BabiesAndChildren
             }
             
         }
-
+        
 
         public static void RemoveChildDiedThought(Pawn pawn, Pawn child)
         {

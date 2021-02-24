@@ -22,8 +22,6 @@ namespace BabiesAndChildren
         public static bool ModAndroid_Tiers_ON = false;
         //Dress Patients
         public static bool ModDressPatients_ON = false;
-        //Age Matters
-        public static bool ModAgeMatters_ON = false;
 
         private ChildrenBase()
         {
