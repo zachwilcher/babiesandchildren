@@ -4,7 +4,7 @@
   <ThingDef ParentName="ApparelMakeableBase">
     <!--Should be Apparel_Toddler_Onesie but i'm scared of changing def names-->
     <defName>Apparel_Baby_Onesie</defName>
-    <label>onesie</label>
+    <label>toddler onesie</label>
     <description>A simple garment worn by a toddler.</description>
     <recipeMaker>
       <researchPrerequisite />
@@ -77,7 +77,7 @@
   <ThingDef ParentName="ApparelMakeableBase">
     <!--Should be Apparel_Baby_Onesie but i'm scared of changing def names -->
     <defName>Apparel_Newborn_Onesie</defName>
-    <label>onesie</label>
+    <label>baby onesie</label>
     <description>A simple garment worn by an baby.</description>
     <recipeMaker>
       <researchPrerequisite />
