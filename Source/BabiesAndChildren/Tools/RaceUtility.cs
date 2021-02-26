@@ -12,7 +12,12 @@ namespace BabiesAndChildren.Tools
     {
 
         private static Dictionary<ThingDef, bool> thingUsesChildrenCache = new Dictionary<ThingDef, bool>();
-        
+
+
+        public static bool ThingUsesChildren(Thing thing)
+        {
+            return ThingUsesChildren(thing?.def);
+        }
         /// <summary>
         /// Whether a thing with race will have it's children handled by this mod.
         /// </summary>
@@ -24,13 +29,12 @@ namespace BabiesAndChildren.Tools
             
             if (thingUsesChildrenCache.ContainsKey(thingDef))
                 return thingUsesChildrenCache[thingDef];
-            
             var usesChildren = 
                    raceProps.Humanlike &&
                    !ModTools.IsRobot(thingDef) &&
-                   raceProps.lifeStageAges.Count >= 5 && //assume first 5 stages are baby, toddler, child, teen, adult
                    !Races.IsBlacklisted(thingDef);
             
+            CLog.DevMessage(thingDef.defName + " cached as " + usesChildren + " in ThingUsesChildren");
             thingUsesChildrenCache[thingDef] = usesChildren;
             return usesChildren;
         }

@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using BabiesAndChildren.api;
+using RimWorld;
 using Verse;
 
 namespace BabiesAndChildren
@@ -9,8 +10,8 @@ namespace BabiesAndChildren
 		{
 			if (initiator.relations.OpinionOf(recipient) >= 50 && 
 			    initiator.needs.mood.CurLevel >= 0.9f && 
-			    !AgeStage.IsOlderThan(initiator, AgeStage.Child) && 
-			    !AgeStage.IsAgeStage(initiator, AgeStage.Baby))
+			    !AgeStages.IsOlderThan(initiator, AgeStages.Child) && 
+			    !AgeStages.IsAgeStage(initiator, AgeStages.Baby))
 			{
 				return 0.2f;
 			}

@@ -3,7 +3,7 @@
   <HediffDef>
     <defName>BabyState0</defName>
     <description>This child is still growing. Encourage them to perform activities that help them develop.</description>
-    <hediffClass>HediffWithComps</hediffClass>
+    <hediffClass>BabiesAndChildren.Hediff_ChildhoodStages</hediffClass>
     <label>child is growing</label>
     <initialSeverity>0.1</initialSeverity>
     <stages>
@@ -21,7 +21,7 @@
           </li>
           <li>
             <capacity>Manipulation</capacity>
-            <setMax>0.0</setMax>
+            <setMax>0</setMax>
           </li>
         </capMods>
       </li>
@@ -66,41 +66,5 @@
         <minSeverity>0.9</minSeverity>
       </li>
     </stages>
-  </HediffDef>
-  <HediffDef>
-    <defName>BabyState</defName>
-    <description>This child is still growing. Encourage them to perform activities that help them develop.</description>
-    <hediffClass>BabiesAndChildren.Hediff_Baby</hediffClass>
-    <label>BabyState</label>
-    <initialSeverity>0.001</initialSeverity>
-    <comps>
-      <li Class="HediffCompProperties_Disappears">
-        <disappearsAfterTicks>
-          <min>5</min>
-          <max>5</max>
-        </disappearsAfterTicks>
-      </li>
-    </comps>
-  </HediffDef>
-  <HediffDef>
-    <defName>NoManipulationFlag</defName>
-    <description>No Manipulation.</description>
-    <hediffClass>BabiesAndChildren.Hediff_NoFlag</hediffClass>
-    <label>disables manipulation</label>
-    <initialSeverity>0.001</initialSeverity>
-    <comps>
-      <li Class="HediffCompProperties_Disappears">
-        <disappearsAfterTicks>
-          <min>7</min>
-          <max>7</max>
-        </disappearsAfterTicks>
-      </li>
-    </comps>
-  </HediffDef>
-  <HediffDef>
-    <defName>UnhappyBaby</defName>
-    <description>Baby is unhappy and needs attention</description>
-    <hediffClass>BabiesAndChildren.Hediff_UnhappyBaby</hediffClass>
-    <label>unhappy baby</label>
   </HediffDef>
 </Defs>

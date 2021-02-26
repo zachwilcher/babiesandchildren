@@ -1,11 +1,9 @@
-using System;
 using System.Collections.Generic;
 using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 using HarmonyLib;
 using RimWorld;
 using Verse;
-using HealthUtility = BabiesAndChildren.Tools.HealthUtility;
 
 namespace BabiesAndChildren.Harmony
 {
@@ -22,65 +20,65 @@ namespace BabiesAndChildren.Harmony
         })]
     internal static class EquipmentUtility_CanEquip_Patch
     {
-        [HarmonyPrefix]
-        static bool Prefix(ref bool __result, Thing thing, Pawn pawn, out string cantReason)
+        [HarmonyPostfix]
+        static void Postfix(ref bool __result, Thing thing, Pawn pawn, out string cantReason)
         {
             cantReason = null;
             if (thing.def.thingSetMakerTags != null)
             {
-                // prevent not a child equip toy
-                if (thing.def.thingSetMakerTags.Contains("Toy") && !AgeStage.IsAgeStage(pawn, AgeStage.Child))
+                // prevent non-children from equipping toys
+                if (thing.def.thingSetMakerTags.Contains("Toy") && !AgeStages.IsAgeStage(pawn, AgeStages.Child))
                 {
                     cantReason = "OnlyChildrenCanEquip".Translate();
                     __result = false;
-                    return false;
                 }
-                // prevent not a toddler equip babysuit
-                else if (thing.def.thingSetMakerTags.Contains("BabyGear") && !AgeStage.IsOlderThan(pawn, AgeStage.Toddler) )
+                
+                // prevent non-toddlers from equipping toddler clothes
+                if (thing.def.thingSetMakerTags.Contains("BabyGear") && 
+                         !AgeStages.IsAgeStage(pawn, AgeStages.Toddler) )
                 {
+                    //this message probably isn't right but meh
                     cantReason = "OnlyForUprightToddler".Translate();
                     __result = false;
-                    return false;
-
                 }
+                
+                // prevent non-babies from equipping baby clothes
+                if (thing.def.thingSetMakerTags.Contains("BabyGear1") &&
+                         !AgeStages.IsAgeStage(pawn, AgeStages.Baby))
+                {
+                    //probably need a specialized message but meh
+                    cantReason = "OnlyChildrenCanEquip".Translate();
+                    __result = false;
+                }
+                
+                
             }
-            // prevent a toddler equip adultsuit
-            if (RaceUtility.PawnUsesChildren(pawn) && AgeStage.IsYoungerThan(pawn, AgeStage.Child))
+            // prevent babies and toddlers from equipping adult clothes
+            if (RaceUtility.PawnUsesChildren(pawn) && AgeStages.IsYoungerThan(pawn, AgeStages.Child))
             {
-                if (thing.def.thingSetMakerTags == null || !thing.def.thingSetMakerTags.Contains("BabyGear"))
+                if (thing.def.thingSetMakerTags == null || !thing.def.thingSetMakerTags.Contains("BabyGear") || !thing.def.thingSetMakerTags.Contains("BabyGear1"))
                 {
                     cantReason = "BabyCantEquipNormal".Translate();
                     __result = false;
-                    return false;
                 }
             }
-            return true;
         }
     }
-
     [HarmonyPatch(typeof(HealthAIUtility), "ShouldSeekMedicalRestUrgent")]
     internal static class HealthAiUtility_ShouldSeekMedicalRestUrgent_Patch
     {
         /// <summary>
         /// Combined with RestUtility patches, this patch ensures that a baby pawn who is not
-        /// truly in need of medical attention will be moved to a crib instead of rescued
+        /// truly in need of medical attention will be moved to a crib instead of "rescued"
         /// to a hospital bed. 
         /// </summary>
-        [HarmonyPrefix]
-        static bool Prefix(Pawn pawn, ref bool __result)
+        [HarmonyPostfix]
+        static void Postfix(Pawn pawn, ref bool __result)
         {
-            if (!ChildrenUtility.ShouldUseCrib(pawn))
+            if (pawn.Downed && !(pawn.health.HasHediffsNeedingTend() || HealthAIUtility.ShouldHaveSurgeryDoneNow(pawn)) && ChildrenUtility.ShouldUseCrib(pawn))
             {
-                return true; //Default back to original flow
+                __result = false;
             }
-
-            __result = true;
-            if (!pawn.health.HasHediffsNeedingTend(false))
-            {
-                __result = HealthAIUtility.ShouldHaveSurgeryDoneNow(pawn);
-            }
-
-            return false;
         }
     }
 
@@ -97,18 +95,47 @@ namespace BabiesAndChildren.Harmony
         }
     }
 
-    // Creates a blacklist of thoughts Toddlers cannot have
+    [HarmonyPatch(typeof(WardenFeedUtility), "ShouldBeFed")]
+    internal static class WardenFeedUtility_ShouldBeFed_Patch
+    {
+        [HarmonyPostfix]
+        static void Postfix(Pawn p, ref bool __result)
+        {
+            if (ChildrenUtility.ShouldBeFed(p))
+            {
+                __result = true;
+            }
+        }
+        
+    }
+
+    [HarmonyPatch(typeof(FeedPatientUtility), "ShouldBeFed")]
+    internal static class FeedPatientUtility_ShouldBeFed_Patch
+    {
+        [HarmonyPostfix]
+        static void Postfix(Pawn p, ref bool __result)
+        {
+            if (ChildrenUtility.ShouldBeFed(p))
+            {
+                __result = true;
+            }
+            
+        }
+    }
+
+    // Implements thoughts blacklist for non-adult pawns
     [HarmonyPatch(typeof(ThoughtUtility), "CanGetThought")]
     internal static class ThoughtUtility_CanGetThought_Patch
     {
         [HarmonyPostfix]
         static void Postfix(ref Pawn pawn, ref ThoughtDef def, ref bool __result)
         {
-            // Toddlers and younger can't get these thoughts
-            if (RaceUtility.PawnUsesChildren(pawn) && !AgeStage.IsOlderThan(pawn, AgeStage.Toddler))
+            if (!RaceUtility.PawnUsesChildren(pawn))
             {
-                __result = __result && !Thoughts.IsBlacklisted(def);
+                return;
             }
+            
+            __result = __result && !Thoughts.IsBlacklisted(def, AgeStages.GetAgeStage(pawn));
         }
     }
 
@@ -118,7 +145,7 @@ namespace BabiesAndChildren.Harmony
         [HarmonyPostfix]
         static void Postfix(ref List<Pawn> __result)
         {
-            __result.RemoveAll(pawn => AgeStage.IsYoungerThan(pawn, AgeStage.Teenager));
+            __result.RemoveAll(pawn => AgeStages.IsYoungerThan(pawn, AgeStages.Teenager));
         }
     }
 
@@ -133,11 +160,11 @@ namespace BabiesAndChildren.Harmony
             if (pawn == null || 
                 eq?.def == null ||
                 !RaceUtility.PawnUsesChildren(pawn) || 
-                AgeStage.IsOlderThan(pawn, AgeStage.Child) ||
+                AgeStages.IsOlderThan(pawn, AgeStages.Child) ||
                 !pawn.Faction.IsPlayer) 
                 return;
             
-            if (eq.def.BaseMass > ChildrenUtility.ChildMaxWeaponMass(pawn))
+            if (eq.def.BaseMass > ChildrenUtility.GetMaxWeaponMass(pawn))
             {
                 Messages.Message(
                     "MessageWeaponTooLarge".Translate(eq.def.label,
@@ -153,40 +180,14 @@ namespace BabiesAndChildren.Harmony
         [HarmonyPostfix]
         static void Postfix(ref Verb_Shoot __instance)
         {
-            Pawn pawn = __instance.CasterPawn;
-            if (pawn == null || !RaceUtility.PawnUsesChildren(pawn) || AgeStage.IsOlderThan(pawn, AgeStage.Child) ||
-                !pawn.Faction.IsPlayer) return;
-            // The weapon is too heavy and the child will (likely) drop it when trying to fire
-            if (__instance.EquipmentSource.def.BaseMass > ChildrenUtility.ChildMaxWeaponMass(pawn))
-            {
-                pawn.equipment.TryDropEquipment(__instance.EquipmentSource, out _, pawn.Position, false);
-
-                float recoilForce = (__instance.EquipmentSource.def.BaseMass - 3);
-
-                if (recoilForce > 0)
-                {
-                    string[] hitPart =
-                    {
-                        "Torso",
-                        "Shoulder",
-                        "Arm",
-                        "Hand",
-                        "Head",
-                        "Neck",
-                        "Eye",
-                        "Nose",
-                    };
-                    int hits = Rand.Range(1, 4);
-                    while (hits > 0)
-                    {
-                        pawn.TakeDamage(new DamageInfo(DamageDefOf.Blunt,
-                            (int) ((recoilForce + Rand.Range(0f, 3f)) / hits), 0, -1,
-                            __instance.EquipmentSource,
-                            HealthUtility.GetPawnBodyPart(pawn, hitPart.RandomElement<String>()), null));
-                        hits--;
-                    }
-                }
-            }
+            Pawn pawn = __instance?.CasterPawn;
+            
+            if (pawn == null || 
+                !RaceUtility.PawnUsesChildren(pawn) || 
+                AgeStages.IsOlderThan(pawn, AgeStages.Child)) 
+                return;
+            
+            ChildrenUtility.ApplyRecoil(__instance);
         }
     }
 
@@ -198,12 +199,13 @@ namespace BabiesAndChildren.Harmony
         static void Postfix(ref Pawn_HealthTracker __instance, ref bool __result)
         {
             Pawn pawn = (Pawn) AccessTools.Field(typeof(Pawn_HealthTracker), "pawn").GetValue(__instance);
-            if (RaceUtility.PawnUsesChildren(pawn) && AgeStage.IsYoungerThan(pawn, AgeStage.Teenager))
+            if (RaceUtility.PawnUsesChildren(pawn) && AgeStages.IsYoungerThan(pawn, AgeStages.Teenager))
             {
+                var painShockThreshold = ChildrenUtility.GetPainShockThreshold(pawn);
                 __result =
-                    __instance.hediffSet.PainTotal >=
-                    pawn.GetStatValue(StatDefOf.PainShockThreshold, true) * 0.75f ||
-                    !__instance.capacities.CanBeAwake || !__instance.capacities.CapableOf(PawnCapacityDefOf.Moving);
+                    __instance.hediffSet.PainTotal >= painShockThreshold ||
+                    !__instance.capacities.CanBeAwake || 
+                    !__instance.capacities.CapableOf(PawnCapacityDefOf.Moving);
             }
         }
     }

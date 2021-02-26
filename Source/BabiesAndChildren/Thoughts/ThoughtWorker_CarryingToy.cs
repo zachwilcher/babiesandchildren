@@ -1,5 +1,6 @@
 ﻿using RimWorld;
 using System;
+using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 using Verse;
 
@@ -15,7 +16,7 @@ namespace BabiesAndChildren
         protected override ThoughtState CurrentStateInternal(Pawn pawn)
         {
             if (!RaceUtility.PawnUsesChildren(pawn) || 
-            !AgeStage.IsAgeStage(pawn, AgeStage.Child) ||
+            !AgeStages.IsAgeStage(pawn, AgeStages.Child) ||
             pawn.story.traits.HasTrait(TraitDefOf.Psychopath) || 
             pawn.WorkTagIsDisabled(WorkTags.Violent) ||
             !pawn.Faction.IsPlayer)

@@ -4,6 +4,7 @@ using Verse.AI;
 using RimWorld;
 using System.Collections.Generic;
 using System.Diagnostics;
+using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 
 namespace BabiesAndChildren
@@ -29,7 +30,7 @@ namespace BabiesAndChildren
 				return false;
 			}
 			//Only perform job if baby is toddler
-			if (!AgeStage.IsAgeStage(baby, AgeStage.Toddler) || !RaceUtility.PawnUsesChildren(baby)) {
+			if (!AgeStages.IsAgeStage(baby, AgeStages.Toddler) || !RaceUtility.PawnUsesChildren(baby)) {
 				return false;
 			}
 			if (!pawn.CanReserveAndReach (t, PathEndMode.ClosestTouch, Danger.Deadly, 1, -1, null, forced)) {

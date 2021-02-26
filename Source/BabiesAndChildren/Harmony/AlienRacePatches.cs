@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using AlienRace;
+using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 using HarmonyLib;
 using UnityEngine;
@@ -92,7 +93,7 @@ namespace BabiesAndChildren.Harmony
             {
                 if (pawn == null ||
                     !RaceUtility.PawnUsesChildren(pawn) ||
-                    !AgeStage.IsAgeStage(pawn, AgeStage.Child))
+                    !AgeStages.IsAgeStage(pawn, AgeStages.Child))
                     return;
 
                 __result = wantsBody ? 
@@ -111,7 +112,7 @@ namespace BabiesAndChildren.Harmony
             {
                 if (pawn == null || 
                     !RaceUtility.PawnUsesChildren(pawn) ||
-                    !AgeStage.IsAgeStage(pawn, AgeStage.Child)) 
+                    !AgeStages.IsAgeStage(pawn, AgeStages.Child)) 
                     return;
                 
                 float hairSizeFactor = ChildrenUtility.GetHairSize(0, pawn);
@@ -137,10 +138,10 @@ namespace BabiesAndChildren.Harmony
                     if (!(pawn.def is ThingDef_AlienRace alienProps) ||
                         invisible ||
                         !RaceUtility.PawnUsesChildren(pawn) || 
-                        AgeStage.IsOlderThan(pawn, AgeStage.Child)) //draw addons normally
+                        AgeStages.IsOlderThan(pawn, AgeStages.Child)) //draw addons normally
                         return true;
 
-                    if (AgeStage.IsYoungerThan(pawn, AgeStage.Child)) //don't draw addons for babies and toddlers
+                    if (AgeStages.IsYoungerThan(pawn, AgeStages.Child)) //don't draw addons for babies and toddlers
                         return false;
                     
                     

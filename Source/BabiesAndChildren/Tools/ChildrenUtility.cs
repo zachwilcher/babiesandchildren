@@ -1,10 +1,13 @@
 ﻿using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
+using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 using UnityEngine;
 using Verse;
 using Verse.AI;
+using HealthUtility = BabiesAndChildren.Tools.HealthUtility;
+using LifeStageUtility = BabiesAndChildren.Tools.LifeStageUtility;
 using StatDefOf = RimWorld.StatDefOf;
 
 namespace BabiesAndChildren
@@ -31,48 +34,37 @@ namespace BabiesAndChildren
             }
         }
 
+        public static bool ShouldBeCaredFor(Pawn p)
+        {
+            if(p == null || 
+               !p.Spawned || 
+               (p.Faction != Faction.OfPlayer && p.HostFaction != Faction.OfPlayer) || 
+               p.playerSettings.medCare == MedicalCareCategory.NoCare)
+                return false;
+            var bed = p.CurrentBed();
+            if (bed == null || bed.Faction != Faction.OfPlayer)
+                return false;
+            
+            var guest = p.guest;
+            if (guest != null && guest.CanBeBroughtFood)
+                return true;
+            
+
+
+            if (HealthAIUtility.ShouldSeekMedicalRest(p))
+                return true;
+            
+            bool goodLayingStatusForTend = p.RaceProps.Humanlike ? p.InBed() : (uint) p.GetPosture() > 0U;
+            var designationSlaughter = p.Map.designationManager.DesignationOn(p, DesignationDefOf.Slaughter);
+
+            return goodLayingStatusForTend && designationSlaughter == null;
+
+        }
+
 
         public static bool ShouldBeFed(Pawn p)
         {
-            if (p.GetPosture() == PawnPosture.Standing)
-            {
-                return false;
-            }
-            if (p.NonHumanlikeOrWildMan())
-            {
-                Building_Bed building_Bed = p.CurrentBed();
-                if (building_Bed == null || building_Bed.Faction != Faction.OfPlayer)
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                if (p.Faction != Faction.OfPlayer && p.HostFaction != Faction.OfPlayer)
-                {
-                    return false;
-                }
-                if (!p.InBed())
-                {
-                    return false;
-                }
-            }
-            if (!p.RaceProps.EatsFood)
-            {
-                return false;
-            }
-            if (p.HostFaction != null)
-            {
-                if (p.HostFaction != Faction.OfPlayer)
-                {
-                    return false;
-                }
-                if (p.guest != null && !p.guest.CanBeBroughtFood)
-                {
-                    return false;
-                }
-            }
-            return true;
+            return p != null && ShouldBeCaredFor(p) && p.RaceProps != null &&p.RaceProps.EatsFood;
         }
 
         /// <summary>
@@ -82,13 +74,13 @@ namespace BabiesAndChildren
         public static bool NearCryingBaby(Pawn pawn)
         {
             // Does not affect babies and toddlers
-            if (AgeStage.IsYoungerThan(pawn, AgeStage.Child) || pawn.health.capacities.GetLevel(PawnCapacityDefOf.Hearing) <= 0.1f) { return false; }
+            if (AgeStages.IsYoungerThan(pawn, AgeStages.Child) || pawn.health.capacities.GetLevel(PawnCapacityDefOf.Hearing) <= 0.1f) { return false; }
 
             // Find any crying babies in the vicinity
             foreach (Pawn mapPawn in pawn.MapHeld.mapPawns.AllPawnsSpawned)
             {
                 if (RaceUtility.PawnUsesChildren(mapPawn) && 
-                    AgeStage.IsAgeStage(pawn, AgeStage.Baby) &&
+                    AgeStages.IsAgeStage(pawn, AgeStages.Baby) &&
                     mapPawn.health.hediffSet.HasHediff(HediffDef.Named("UnhappyBaby")) &&
                     mapPawn.PositionHeld.InHorDistOf(pawn.PositionHeld, 24) &&
                     mapPawn.PositionHeld.GetRoomOrAdjacent(mapPawn.MapHeld).ContainedAndAdjacentThings.Contains(pawn))
@@ -108,18 +100,17 @@ namespace BabiesAndChildren
         {
             //pawn.BodySize;
             //Probably ought to change this based on size at some point, age stages are unreliable
-            return RaceUtility.PawnUsesChildren(pawn) && (AgeStage.IsYoungerThan(pawn, AgeStage.Child));
+            return RaceUtility.PawnUsesChildren(pawn) && (AgeStages.IsYoungerThan(pawn, AgeStages.Child));
         }
 
         /// <summary>
         /// Returns the maximum possible mass of a weapon the specified child can use
         /// </summary>
-        public static float ChildMaxWeaponMass(Pawn pawn)
+        public static float GetMaxWeaponMass(Pawn pawn)
         {
-            if (!AgeStage.IsYoungerThan(pawn, AgeStage.Teenager))
-                return 999;
-            //const float baseMass = 2.5f;
-            //return (pawn.skills.GetSkill(SkillDefOf.Shooting).Level * 0.1f) + baseMass;
+            if (!AgeStages.IsYoungerThan(pawn, AgeStages.Teenager))
+                return float.PositiveInfinity;
+            
             return (pawn.ageTracker.AgeBiologicalYearsFloat * 0.1f) + BnCSettings.option_child_max_weapon_mass;
         }
 
@@ -155,7 +146,7 @@ namespace BabiesAndChildren
             {
                 foreach (var thingDef in RestUtility.AllBedDefBestToWorst)
                 {
-                    if (RestUtility.CanUseBedEver(baby, thingDef) && thingDef.building.bed_maxBodySize <= 0.6f)
+                    if (RestUtility.CanUseBedEver(baby, thingDef) && IsBedCrib(thingDef))
                     {
                         Building_Bed find_crib = (Building_Bed)GenClosest.ClosestThingReachable(
                             baby.Position, 
@@ -201,8 +192,12 @@ namespace BabiesAndChildren
         {
             if (!RaceUtility.PawnUsesChildren(pawn))
                 return false;
-            float a = AgeStage.GetLifeStageAge(pawn, AgeStage.Toddler).minAge + ((AgeStage.GetLifeStageAge(pawn, AgeStage.Child).minAge - AgeStage.GetLifeStageAge(pawn, AgeStage.Toddler).minAge) / 2);
-            return pawn.ageTracker.AgeBiologicalYearsFloat > a;
+            float childAge = LifeStageUtility.GetLifeStageAge(pawn, AgeStages.Child).minAge;
+            float toddlerAge = LifeStageUtility.GetLifeStageAge(pawn, AgeStages.Toddler).minAge;
+            float toddlerDuration = childAge - toddlerAge;
+
+            //second half of toddler agestage is upright
+            return pawn.ageTracker.AgeBiologicalYearsFloat >= toddlerAge + toddlerDuration / 2;
         }
 
         public static bool SetMakerTagCheck(Thing thing, string tag)
@@ -210,16 +205,25 @@ namespace BabiesAndChildren
             return thing.def.thingSetMakerTags != null && thing.def.thingSetMakerTags.Contains(tag);
         }
 
-        /// <summary>
-        /// Try's to drop pawn's toy or baby gear if they are too old for it
-        /// </summary>
-        /// <param name="pawn"></param>
-        /// <param name="tag">tag of thing to be dropped (BabyGear or Toy)</param>
-        public static void TryDrop(Pawn pawn, string tag)
+        public static void TryDropInvalidEquipment(Pawn pawn)
         {
-            if (tag == "BabyGear")
-            {
+                ThingWithComps toy = pawn.equipment.Primary;
+                if (toy != null && ChildrenUtility.SetMakerTagCheck(toy, "Toy"))
+                { pawn.equipment.TryDropEquipment(toy, out _, pawn.Position, false);
+                }
+            
+        }
+
+        public static void TryDropInvalidApparel(Pawn pawn)
+        {
                 List<Apparel> wornApparel = pawn.apparel.WornApparel;
+                foreach (var apparel in pawn.apparel.WornApparel)
+                {
+                    if (AgeStages.IsOlderThan(pawn, AgeStages.Baby) && SetMakerTagCheck(apparel, "BabyGear1"))
+                    {
+                        
+                    }
+                }
                 for (int i = wornApparel.Count - 1; i >= 0; i--)
                 {
                     if (ChildrenUtility.SetMakerTagCheck(wornApparel[i], "BabyGear"))
@@ -227,23 +231,31 @@ namespace BabiesAndChildren
                         pawn.apparel.TryDrop(wornApparel[i], out _, pawn.Position, false);
                     }
                 }
-            }
-            if (tag == "Toy")
-            {
-                ThingWithComps toy = pawn.equipment.Primary;
-                if (toy != null && ChildrenUtility.SetMakerTagCheck(toy, "Toy"))
-                {
-                    pawn.equipment.TryDropEquipment(toy, out _, pawn.Position, false);
-                }
-            }
+            
+        }
+
+        /// <summary>
+        /// Try's to drop pawn's toy or baby gear if they are too old for it
+        /// </summary>
+        /// <param name="pawn"></param>
+        /// <param name="tag">tag of thing to be dropped (BabyGear or Toy)</param>
+        public static void TryDropInvalidEquipmentAndApparel(Pawn pawn)
+        {
+            TryDropInvalidApparel(pawn);
+            TryDropInvalidEquipment(pawn);
         }
         
         /// <summary>
-        /// Searches for a comp in pawn with matching class name
+        /// Searches for a comp in a ThingWithComps by comp name
         /// </summary>
-        public static ThingComp GetCompByClassName(Pawn pawn, string compClassName)
+        public static ThingComp GetCompByClassName(ThingWithComps thing, string compClassName)
         {
-            foreach (ThingComp comp in pawn.AllComps)
+            if (compClassName == null)
+            {
+                return null;
+            }
+            
+            foreach (ThingComp comp in thing.AllComps)
             {
                 if (comp?.props == null || (comp.props.compClass == null))
                 {
@@ -255,69 +267,8 @@ namespace BabiesAndChildren
                     return comp;
                 }
             }
+            
             return null;
-        }
-
-        /// <summary>
-        /// Changes pawn's body type based on it's AgeStage
-        /// </summary>
-        /// <param name="pawn">pawn to be altered</param>
-        /// <param name="Is_SizeInit">Whether to randomly initialize the size (if appropriate) of the pawn's heDiffs</param>
-        /// <param name="Is_ChangeSize_Skip">Whether to change the size (if appropriate) of the pawn's heDiffs</param>
-        public static void ChangeBodyType(Pawn pawn, bool Is_SizeInit = false, bool Is_ChangeSize_Skip = true)
-        {
-            
-            
-            float size = 0.01f;
-            
-            switch (AgeStage.GetAgeStage(pawn))
-            {
-                case AgeStage.Adult:
-                    size = 1f;
-                    break;
-                
-                case AgeStage.Teenager:
-                    //35% chance of thin body type
-                    if (Rand.Value < 0.35f)
-                    {
-                        StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
-                    }
-                    else if(pawn.gender == Gender.Male)
-                    {
-                        StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Male);
-                    }
-                    else if (pawn.gender == Gender.Female)
-                    {
-                        StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Female);
-                    }
-                    size = 0.8f;
-                    break;
-                case AgeStage.Child:
-                    StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
-                    size = 0.12f;
-                    break;
-
-                case AgeStage.Toddler:
-                    if (ToddlerIsUpright(pawn))
-                    {
-                        StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Thin);
-                        size = 0.10f;
-                    }
-                    else
-                    {
-                        StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Fat);
-                        size = 0.08f;
-                    }
-                    break;
-
-                case AgeStage.Baby:
-                    StoryUtility.TrySetPawnBodyType(pawn, BodyTypeDefOf.Fat);
-                    size = 0.07f;
-                    break;
-
-            }
-            if (!Is_ChangeSize_Skip) 
-                ModTools.ChangeSize(pawn, size, Is_SizeInit);
         }
 
         /// <summary>
@@ -331,16 +282,16 @@ namespace BabiesAndChildren
         {
             NameTriple NameTriple = null;
             if (mother != null)
-                NameTriple = (NameTriple) mother.Name;
+                NameTriple = NameTriple.FromString(mother.Name.ToStringFull);
             if (father != null)
-                NameTriple = (NameTriple)father.Name;
+                NameTriple = NameTriple.FromString(father.Name.ToStringFull);
             pawn.Name = PawnBioAndNameGenerator.GeneratePawnName(pawn, NameStyle.Full, NameTriple?.Last);
         }
 
         //Modified version of Children.PawnRenderer_RenderPawnInternal_Patch:GetBodysizeScaling
         public static float GetHairSize(float n, Pawn pawn)
         {
-            if (pawn.ageTracker.CurLifeStageIndex > AgeStage.Child) return 1f;
+            if (AgeStages.GetAgeStage(pawn) > AgeStages.Child) return 1f;
             if (n != 0)
             {
                 if (RaceUtility.IsHuman(pawn))
@@ -388,7 +339,7 @@ namespace BabiesAndChildren
         public static Vector3 ModifiedHairLoc(Vector3 pos, Pawn pawn)
         {
             Vector3 newPos = new Vector3(pos.x, pos.y, pos.z);
-            if (!AgeStage.IsAgeStage(pawn, AgeStage.Child)) return newPos;
+            if (!AgeStages.IsAgeStage(pawn, AgeStages.Child)) return newPos;
             newPos.y += BnCSettings.ShowHairLocY;
 
             if (RaceUtility.IsHuman(pawn))
@@ -410,20 +361,17 @@ namespace BabiesAndChildren
         }
         
         /// <summary>
-        /// Maps a child or teen's current age to a number between .3 and 1 based on
-        /// how far progressed the pawn is into adolescence 
+        /// Magic number between .8 and 1.6 depending on age of pawn
         /// </summary>
-        /// <param name="pawn">Child or Teen</param>
-        /// <returns>1 if baby, toddler, or adult. number between .3 and .9 if child or teen</returns>
         public static float AgeFactor(Pawn pawn)
         {   
             //Age factor only relevant for children and teens
-            if (!RaceUtility.PawnUsesChildren(pawn) || AgeStage.IsYoungerThan(pawn, AgeStage.Child) || AgeStage.IsOlderThan(pawn, AgeStage.Teenager))
+            if (!RaceUtility.PawnUsesChildren(pawn) || AgeStages.IsYoungerThan(pawn, AgeStages.Child) || AgeStages.IsOlderThan(pawn, AgeStages.Teenager))
                 return 1f; 
             
             
-            float agechild = AgeStage.GetLifeStageAge(pawn, AgeStage.Child).minAge;
-            float ageteen = AgeStage.GetLifeStageAge(pawn, AgeStage.Teenager).minAge;
+            float agechild = LifeStageUtility.GetLifeStageAge(pawn, AgeStages.Child).minAge;
+            float ageteen = LifeStageUtility.GetLifeStageAge(pawn, AgeStages.Teenager).minAge;
 
             float childLifeStageDuration = ageteen - agechild;
             
@@ -434,16 +382,18 @@ namespace BabiesAndChildren
             const float offset = 0.8f;
             const float scalar = 0.3f;
             
+            //x = yearsSinceToddler / childLifeStageDuration
             //0 < x < 2
-            //scalar -> 0 < x < 0.6
-            //offset -> 0.3 < x < 0.9
+            //* scalar -> 0 < x < 0.6
+            //+ offset -> 0.8 < x < 1.4
+            
             float agefac = offset + scalar * yearsSinceToddler / childLifeStageDuration;
             
             return agefac;
         }
 
         /// <summary>
-        /// Get the most appropriate bed list for a pawn. Child pawns will recieve 
+        /// Get the most appropriate bed list for a pawn. Child pawns will receive 
         /// a bed list sorted to prioritize cribs
         /// </summary>
         /// <param name="pawn">The pawn being evaluated</param>
@@ -451,8 +401,60 @@ namespace BabiesAndChildren
         public static List<ThingDef> GetSortedBeds_RestEffectiveness(Pawn pawn) {
             return (ChildrenUtility.ShouldUseCrib(pawn)) ? ChildrenUtility.AllBedDefBestToWorstCribRest : RestUtility.AllBedDefBestToWorst;
         }
-        
-        
 
+
+        public static float GetPainShockThreshold(Pawn pawn)
+        {
+            float percentage = 1f;
+
+            if (AgeStages.IsYoungerThan(pawn, AgeStages.Teenager))
+            {
+                percentage = 0.75f;
+            }
+
+            return pawn.GetStatValue(StatDefOf.PainShockThreshold, true) * percentage;
+        }
+
+        public static bool ApplyRecoil(Verb_Shoot verb)
+        {
+
+            Pawn pawn = (Pawn) verb?.caster;
+            
+            if (pawn == null || verb.EquipmentSource.def.BaseMass > GetMaxWeaponMass(pawn))
+            {
+                return false;
+            }
+            pawn.equipment.TryDropEquipment(verb.EquipmentSource, out _, pawn.Position, false);
+
+            float recoilForce = verb.EquipmentSource.def.BaseMass - 3;
+
+            if (recoilForce <= 0)
+            {
+                return false;
+            }
+
+            string[] hitPart =
+            {
+                "Torso",
+                "Shoulder",
+                "Arm",
+                "Hand",
+                "Head",
+                "Neck",
+                "Eye",
+                "Nose",
+            };
+            int hits = Rand.Range(1, 4);
+            while (hits > 0)
+            {
+                pawn.TakeDamage(new DamageInfo(DamageDefOf.Blunt,
+                    (int) ((recoilForce + Rand.Range(0f, 3f)) / hits), 0, -1,
+                    verb.EquipmentSource,
+                    HealthUtility.GetPawnBodyPart(pawn, hitPart.RandomElement()), null));
+                hits--;
+            }
+
+            return true;
+        }
     }
 }

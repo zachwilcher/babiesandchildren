@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using Verse;
 
@@ -9,7 +10,7 @@ namespace BabiesAndChildren.Tools
     {
         public static bool TryAddHediff(Pawn pawn, HediffDef hediffDef, BodyPartRecord part = null, DamageInfo? damageInfo = null, bool force = false)
         {
-            if (pawn == null )
+            if (pawn == null || hediffDef == null)
                 return false;
 
             if (pawn.health.hediffSet.HasHediff(hediffDef) && !force)
@@ -17,6 +18,19 @@ namespace BabiesAndChildren.Tools
 
             pawn.health.AddHediff(hediffDef, part, damageInfo);
             return true;
+        }
+
+
+        public static HediffDef GetHediffDefNamed(string name)
+        {
+            return DefDatabase<HediffDef>.GetNamed(name);
+        }
+
+        public static Hediff GetHediffNamed(Pawn pawn, string name)
+        {
+            name = name.ToLower();
+            List<Hediff> matches = pawn.health.hediffSet.hediffs.FindAll(hediff => hediff.def.defName.ToLower().Contains(name));
+            return matches.Count > 0 ? matches.First() : null;
         }
 
         /// <summary>
@@ -40,7 +54,7 @@ namespace BabiesAndChildren.Tools
         public static BodyPartRecord GetPawnBodyPart(Pawn pawn, String bodyPart)
         {
             //Get collection of parts matching the def, then get a random left or right
-            return GetPawnBodyParts(pawn, bodyPart).RandomElement();
+            return GetPawnBodyParts(pawn, bodyPart).First();
         }
 
         /// <summary>

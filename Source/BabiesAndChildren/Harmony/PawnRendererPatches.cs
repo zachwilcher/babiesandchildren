@@ -1,4 +1,5 @@
 using System;
+using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 using HarmonyLib;
 using UnityEngine;
@@ -42,13 +43,13 @@ namespace BabiesAndChildren.Harmony
         {
             if (!RaceUtility.PawnUsesChildren(___pawn)) return;
             
-            if (AgeStage.IsYoungerThan(___pawn, AgeStage.Teenager))
+            if (AgeStages.IsYoungerThan(___pawn, AgeStages.Teenager))
             {
                 // Change the root location of the child's draw position
                 rootLoc = GraphicTools.ModifyChildYPosOffset(rootLoc, ___pawn, portrait);
             }
 
-            if (AgeStage.IsYoungerThan(___pawn, AgeStage.Child))
+            if (AgeStages.IsYoungerThan(___pawn, AgeStages.Child))
                 // Remove Face drawing comp from facial animation for toddlers and babies
                 if (ChildrenBase.ModFacialAnimation_ON)
                 {
@@ -84,7 +85,7 @@ namespace BabiesAndChildren.Harmony
 
             if (pawn == null || 
                 !RaceUtility.PawnUsesChildren(pawn) ||
-                !AgeStage.IsAgeStage(pawn, AgeStage.Child)) return;
+                !AgeStages.IsAgeStage(pawn, AgeStages.Child)) return;
             
             float bodySizeFactor = ChildrenUtility.GetBodySize(pawn);
             float num2 = 1f;

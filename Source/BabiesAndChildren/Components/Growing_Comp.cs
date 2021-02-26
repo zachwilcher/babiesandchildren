@@ -1,6 +1,7 @@
 ﻿using RimWorld;
 using System;
 using BabiesAndChildren.api;
+using BabiesAndChildren.Tools;
 using Verse;
 using HealthUtility = BabiesAndChildren.Tools.HealthUtility;
 
@@ -16,8 +17,17 @@ namespace BabiesAndChildren
     /// </summary>
     class Growing_Comp : ThingComp
     {
+        /// <summary>
+        /// AgeStage pawn is currently set to (not necessarily the one it should be)
+        /// </summary>
+        /// 
         private int growthStage;
+        
+        /// <summary>
+        /// Whether or not comp has been initialized 
+        /// </summary>
         private bool initialized;
+        
         public Pawn pawn => (Pawn) parent;
         public CompProperties_Growing Props => (CompProperties_Growing) props;
 
@@ -40,41 +50,28 @@ namespace BabiesAndChildren
         {
             if (initialized && !reinitialize) return;
             
-            if (reinitialize)
-            {
-                CLog.DevMessage("Reinitializing: " + pawn.Name.ToStringShort);
-            }
-            else
-            {
-                CLog.DevMessage("Initializing: " + pawn.Name.ToStringShort);
-            }
+            if (parent == null)
+                Destroy();
             
+            CLog.DevMessage((reinitialize ? "Reinitializing: " : "Initializing: ") + pawn.Name.ToStringShort);
             
-            if (pawn.ageTracker.AgeBiologicalTicks < 10000 && !pawn.health.hediffSet.HasHediff(HediffDef.Named("BabyState")))
+            if (AgeStages.IsAgeStage(pawn, AgeStages.Baby) && !pawn.health.hediffSet.HasHediff(HediffDef.Named("BabyState")))
             {
                 //basically a call to Hediff_Baby:PostRemoved() in about 5 ticks
+                //why in 5 ticks instead of now? no fucking clue.
                 HealthUtility.TryAddHediff(pawn, HediffDef.Named("BabyState"));
-                HealthUtility.TryAddHediff(pawn, HediffDef.Named("NoManipulationFlag"));
             }
+
+            MathTools.Fixed_Rand rand = new MathTools.Fixed_Rand(pawn);
+            StoryUtility.ChangeChildhood(pawn);
+            ModTools.ChangeRJWHediffSeverity(pawn, true, rand);
+            StoryUtility.ChangeBodyType(pawn, rand);
 
             initialized = true;
 
         }
 
 
-        /// <summary>
-        /// This method will handle all routine mood/hediff updates for this pawn.
-        /// </summary>
-        public void UpdateMood()
-        {
-            if(parent == null) return;
-            
-            if ((growthStage <= AgeStage.Toddler) &&
-                Hediff_UnhappyBaby.CheckUnhappy(pawn))
-            {
-                HealthUtility.TryAddHediff(pawn, ChildHediffDefOf.UnhappyBaby);
-            }
-        }
 
         /// <summary>
         /// When this child has grown fully, we no longer need this component and may therefor
@@ -92,6 +89,7 @@ namespace BabiesAndChildren
             //Fixed this by adding a component that does nothing
             //allowing AllComps.Count to stay the same
             //... At least that's what I think is happening
+            //really should just not add the comp to pawns who don't need it or not remove this and just do nothing
             parent.AllComps.Add(new DummyComp());
             CLog.DevMessage("Growing_Comp removed for: " + name);
         }
@@ -103,110 +101,91 @@ namespace BabiesAndChildren
         {
             if (parent == null) return;
             
-            if (pawn.health.hediffSet.HasHediff(ChildHediffDefOf.BabyState0))
+            if (pawn.health.hediffSet.HasHediff(BnCHediffDefOf.BabyState0))
             {
-                pawn.health.hediffSet.hediffs.Remove(pawn.health.hediffSet.GetFirstHediffOfDef(ChildHediffDefOf.BabyState0));
+                pawn.health.hediffSet.hediffs.Remove(pawn.health.hediffSet.GetFirstHediffOfDef(BnCHediffDefOf.BabyState0));
             }
-            if (pawn.health.hediffSet.HasHediff(ChildHediffDefOf.UnhappyBaby))
+            if (pawn.health.hediffSet.HasHediff(BnCHediffDefOf.UnhappyBaby))
             {
-                pawn.health.hediffSet.hediffs.Remove(pawn.health.hediffSet.GetFirstHediffOfDef(ChildHediffDefOf.UnhappyBaby));
+                pawn.health.hediffSet.hediffs.Remove(pawn.health.hediffSet.GetFirstHediffOfDef(BnCHediffDefOf.UnhappyBaby));
             }
 
-            if (pawn.health.hediffSet.HasHediff(ChildHediffDefOf.NoManipulationFlag))
+        }
+
+        public void UpdateHediffs()
+        {
+            if (parent == null) return;
+            //only toddlers and babies cry
+            if ((growthStage <= AgeStages.Toddler) &&
+                Hediff_UnhappyBaby.CheckUnhappy(pawn))
             {
-                pawn.health.hediffSet.hediffs.Remove(
-                    pawn.health.hediffSet.GetFirstHediffOfDef(ChildHediffDefOf.NoManipulationFlag));
+                HealthUtility.TryAddHediff(pawn, BnCHediffDefOf.UnhappyBaby);
             }
+            
+            var currentBabyStateHediff = pawn.health.hediffSet.GetFirstHediffOfDef(BnCHediffDefOf.BabyState0);
+            if (currentBabyStateHediff == null || currentBabyStateHediff.CurStageIndex != growthStage)
+            {
+                pawn.health.hediffSet.hediffs.Remove(currentBabyStateHediff);
+                var growingHediff = HediffMaker.MakeHediff(BnCHediffDefOf.BabyState0, pawn);
+                growingHediff.Severity = BnCHediffDefOf.BabyState0.stages[growthStage].minSeverity;
+                pawn.health.AddHediff(growingHediff);
+            }
+
         }
 
 
+        public void UpdateAge()
+        {
+            if (parent == null) return;
+            
+            int age = pawn.ageTracker.AgeBiologicalYears;
+            
+            //Accelerated Growth Factor
+            if (BnCSettings.accelerated_growth && (age < BnCSettings.accelerated_growth_end_age))
+            {
+                long acceleratedFactor = ChildrenUtility.SettingAcceleratedFactor(growthStage);
+                //Can the biological age be greater than the chronological age?
+                pawn.ageTracker.AgeBiologicalTicks += (acceleratedFactor) * 250;
+                pawn.ageTracker.AgeChronologicalTicks += (acceleratedFactor) * 250;
+            }
+        }
         
         /// <summary>
-        /// This method will setup all appropriate hediffs, bodytype and backstories for a give lifestage index
+        /// This method will setup the appropriate bodytype and backstory for a given agestage 
         /// </summary>
-        /// <param name="stage">The new lifestage index</param>
+        /// <param name="stage">The new agestage</param>
         public void GrowToStage(int stage)
         {
             if (parent == null) return;
              
             growthStage = stage;
             
-            Backstory currentBackstory = pawn.story.childhood;
+            StoryUtility.ChangeChildhood(pawn);
             
-            //If we are still a child, we will find the most appropriate hediff stage and update the severity to match
-            if (growthStage < AgeStage.Adult)
-            {
-                DestroyHediffs();
-                var growingHediff = HediffMaker.MakeHediff(ChildHediffDefOf.BabyState0, pawn);
-                growingHediff.Severity = ChildHediffDefOf.BabyState0.stages[growthStage].minSeverity;
-                pawn.health.AddHediff(growingHediff);
-            }
+            MathTools.Fixed_Rand rand = new MathTools.Fixed_Rand(pawn);
+            
+            StoryUtility.ChangeBodyType(pawn, rand);
 
+            bool initSize = false;
+
+            ChildrenUtility.TryDropInvalidEquipmentAndApparel(pawn);
             //update bodytype and backstory
             switch (growthStage)
             {
-                case AgeStage.Baby:
-                    pawn.story.childhood = Childhood_Disabled;
-                    ChildrenUtility.ChangeBodyType(pawn, true, false);
+                case AgeStages.Baby: 
+                    initSize = true;
                     break;
-                case AgeStage.Toddler:
-                    pawn.story.childhood = Childhood_Disabled;
-                    ChildrenUtility.ChangeBodyType(pawn, false, false);
+                case AgeStages.Child:
+                    if (pawn.Faction.IsPlayer)
+                        Messages.Message("MessageGrewUpChild".Translate(pawn.Name.ToStringShort), MessageTypeDefOf.PositiveEvent);
                     break;
-                case AgeStage.Child:
-                {
-                    if (currentBackstory == Childhood_Disabled)
-                    {
-                        pawn.story.childhood = Rimchild;
-                        
-                        pawn.Notify_DisabledWorkTypesChanged();
-                        pawn.skills.Notify_SkillDisablesChanged();
-                        
-                        MeditationFocusTypeAvailabilityCache.ClearFor(pawn);
-                        
-                        if (pawn.Faction.IsPlayer)
-                            Messages.Message("MessageGrewUpChild".Translate(pawn.Name.ToStringShort), MessageTypeDefOf.PositiveEvent);
-                        ChildrenUtility.ChangeBodyType(pawn, false, false);
-                    }
-                    else ChildrenUtility.ChangeBodyType(pawn, true, false);
+                case AgeStages.Teenager:
 
-                    ChildrenUtility.TryDrop(pawn, "BabyGear");
-                    break;
-                }
-                case AgeStage.Teenager:
-                {
-                    if (currentBackstory == Childhood_Disabled)
-                    {
-                        pawn.story.childhood = Rimchild;
-                        pawn.Notify_DisabledWorkTypesChanged();
-                        pawn.skills.Notify_SkillDisablesChanged();
-                        
-                        MeditationFocusTypeAvailabilityCache.ClearFor(pawn);
-                        
-                    }
-
-                    if (currentBackstory == Rimchild)
-                    {
-                        ChildrenUtility.ChangeBodyType(pawn, false, false);
-                        if (pawn.Faction.IsPlayer)
-                            Messages.Message("MessageGrewUpTeenager".Translate(pawn.Name.ToStringShort),
-                                MessageTypeDefOf.PositiveEvent);
-                    }
-
-                    ChildrenUtility.TryDrop(pawn, "Toy");
-                    break;
-                }
-                //>= AgeStage.Adult
-                default:
-                    
-                    if (currentBackstory == Rimchild)
-                    {
-                        ChildrenUtility.ChangeBodyType(pawn, false, false);
-                    }
-                    
-                    Destroy();
+                    if (pawn.Faction.IsPlayer)
+                        Messages.Message("MessageGrewUpTeenager".Translate(pawn.Name.ToStringShort), MessageTypeDefOf.PositiveEvent);
                     break;
             }
+            ModTools.ChangeRJWHediffSeverity(pawn, initSize, rand);
         }
 
 
@@ -219,12 +198,10 @@ namespace BabiesAndChildren
             //Doing this here instead of PostSpawnSetup due to an odd null reference in MakeDowned when adding a hediff during setup
             //This is one way to ensure this only executes once the pawn is truly spawned
             Initialize();
-
+            
             bool graphicsDirty = false;
             
-            int age = pawn.ageTracker.AgeBiologicalYears;
-            
-            int ageStage = AgeStage.GetAgeStage(pawn);
+            int ageStage = AgeStages.GetAgeStage(pawn);
             
             if (growthStage != ageStage)
             {
@@ -233,29 +210,28 @@ namespace BabiesAndChildren
                 GrowToStage(ageStage);
             }
 
-            if (ageStage == AgeStage.Toddler)
+            if (growthStage >= AgeStages.Adult)
+            {
+                Destroy();
+                return;
+            }
+
+            //ugly way to do upright toddlers... really should just have had another age stage instead of this bs.
+            if (ageStage == AgeStages.Toddler)
             {
                 if (pawn.story.bodyType != BodyTypeDefOf.Thin)
                 {
                     if (ChildrenUtility.ToddlerIsUpright(pawn))
                     {
-                        ChildrenUtility.ChangeBodyType(pawn);
+                        StoryUtility.ChangeBodyType(pawn);
                         graphicsDirty = true;
                     }
                 }
             }
             
-            UpdateMood();
+            UpdateHediffs();
             
-
-            //Accelerated Growth Factor
-            if (BnCSettings.accelerated_growth && (age < BnCSettings.accelerated_growth_end_age))
-            {
-                long acceleratedFactor = ChildrenUtility.SettingAcceleratedFactor(growthStage);
-                //Can the biological age be greater than the chronological age?
-                pawn.ageTracker.AgeBiologicalTicks += (acceleratedFactor) * 250;
-                pawn.ageTracker.AgeChronologicalTicks += (acceleratedFactor) * 250;
-            }
+            UpdateAge();
             
 
             if (graphicsDirty)
