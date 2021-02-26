@@ -25,7 +25,7 @@ namespace BabiesAndChildren.Harmony
 
         private static void ShouldBeWashedBySomeonePostfix(Pawn pawn, ref bool __result) 
         {
-            if (AgeStages.IsYoungerThan(pawn, AgeStages.Child))
+            if (AgeStages.IsYoungerThan(pawn, AgeStages.Child) && ChildrenUtility.ShouldBeCaredFor(pawn))
             {
                 __result = true;
             }

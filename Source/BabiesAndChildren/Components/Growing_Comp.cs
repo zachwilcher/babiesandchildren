@@ -60,8 +60,6 @@ namespace BabiesAndChildren
                 //basically a call to Hediff_Baby:PostRemoved() in about 5 ticks
                 //why in 5 ticks instead of now? no fucking clue.
                 HealthUtility.TryAddHediff(pawn, HediffDef.Named("BabyState"));
-                //no idea what this hediff is for
-                HealthUtility.TryAddHediff(pawn, HediffDef.Named("NoManipulationFlag"));
             }
 
             MathTools.Fixed_Rand rand = new MathTools.Fixed_Rand(pawn);

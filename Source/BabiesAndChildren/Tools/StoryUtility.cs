@@ -135,6 +135,7 @@ namespace BabiesAndChildren.Tools
 
         public static bool TrySetPawnBodyType(Pawn pawn, BodyTypeDef bodyTypeDef, bool force = false)
         {
+            
             if (RaceUtility.IsHuman(pawn) || force)
             {
                 pawn.story.bodyType = bodyTypeDef;
@@ -221,17 +222,20 @@ namespace BabiesAndChildren.Tools
         /// <param name="rand">random number generator</param>
         public static void ChangeBodyType(Pawn pawn, MathTools.Fixed_Rand rand = null)
         {
-            
+            if (pawn == null) return;
+            bool force = false;
             
             BodyTypeDef newBodyType = BodyTypeDefOf.Thin;
             switch (AgeStages.GetAgeStage(pawn))
             {
                 case AgeStages.Baby: 
                     newBodyType = BodyTypeDefOf.Fat;
+                    force = true;
                     break;
                 
                 case AgeStages.Toddler:
                     newBodyType = ChildrenUtility.ToddlerIsUpright(pawn) ? BodyTypeDefOf.Thin : BodyTypeDefOf.Fat;
+                    force = true;
                     break;
                 
                 case AgeStages.Child:
@@ -256,8 +260,13 @@ namespace BabiesAndChildren.Tools
                     }
                     break;
             }
-            
-            TrySetPawnBodyType(pawn, newBodyType);
+
+            if (force && !RaceUtility.ThingUsesChildren(pawn.def))
+            {
+                force = false;
+            }
+
+            TrySetPawnBodyType(pawn, newBodyType, force);
         }
     }
 }

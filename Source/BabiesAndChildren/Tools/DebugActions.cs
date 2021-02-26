@@ -56,41 +56,5 @@ namespace BabiesAndChildren
             }
         }
 
-        [DebugAction(debugCategory, "Should dubs fail", actionType = DebugActionType.ToolMap, allowedGameStates = AllowedGameStates.PlayingOnMap)]
-        private static void ShouldEverReceiveMedicalCareFromPlayer()
-        {
-            foreach (Thing thing in UI.MouseCell().GetThingList(Find.CurrentMap).ToList<Thing>())
-            {
-                Pawn pawn = thing as Pawn;
-                if (pawn != null)
-                {
-                    {
-                        var result = HealthAIUtility.ShouldEverReceiveMedicalCareFromPlayer(pawn);
-                        var playerSettings = pawn.playerSettings;
-                        var medCare = playerSettings?.medCare;
-                        var guest = pawn.guest;
-                        var guestInteractionMode = guest?.interactionMode;
-                        var designation =
-                            pawn.Map?.designationManager.DesignationOn((Thing) pawn, DesignationDefOf.Slaughter);
-                        CLog.Message("CareFromPlayer: " + result + ", " + playerSettings + ", " + medCare + ", " +
-                                     guest + ", " + guestInteractionMode + ", " + designation);
-                    }
-
-
-                    {
-                        var humanlike = pawn.RaceProps.Humanlike;
-          var inbed = pawn.InBed();
-          var posture = (uint) pawn.GetPosture();
-          var result = humanlike ? inbed : posture > 0U;
-          
-          CLog.DevMessage("Good Laying Status: " + result + ", " + humanlike + ", " + inbed + ", " + posture);
-
-                    }
-
-                }
-            }
-            
-        }
-
     }
 }

@@ -34,48 +34,37 @@ namespace BabiesAndChildren
             }
         }
 
+        public static bool ShouldBeCaredFor(Pawn p)
+        {
+            if(p == null || 
+               !p.Spawned || 
+               (p.Faction != Faction.OfPlayer && p.HostFaction != Faction.OfPlayer) || 
+               p.playerSettings.medCare == MedicalCareCategory.NoCare)
+                return false;
+            var bed = p.CurrentBed();
+            if (bed == null || bed.Faction != Faction.OfPlayer)
+                return false;
+            
+            var guest = p.guest;
+            if (guest != null && guest.CanBeBroughtFood)
+                return true;
+            
+
+
+            if (HealthAIUtility.ShouldSeekMedicalRest(p))
+                return true;
+            
+            bool goodLayingStatusForTend = p.RaceProps.Humanlike ? p.InBed() : (uint) p.GetPosture() > 0U;
+            var designationSlaughter = p.Map.designationManager.DesignationOn(p, DesignationDefOf.Slaughter);
+
+            return goodLayingStatusForTend && designationSlaughter == null;
+
+        }
+
 
         public static bool ShouldBeFed(Pawn p)
         {
-            if (p.GetPosture() == PawnPosture.Standing)
-            {
-                return false;
-            }
-            if (p.NonHumanlikeOrWildMan())
-            {
-                Building_Bed building_Bed = p.CurrentBed();
-                if (building_Bed == null || building_Bed.Faction != Faction.OfPlayer)
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                if (p.Faction != Faction.OfPlayer && p.HostFaction != Faction.OfPlayer)
-                {
-                    return false;
-                }
-                if (!p.InBed())
-                {
-                    return false;
-                }
-            }
-            if (!p.RaceProps.EatsFood)
-            {
-                return false;
-            }
-            if (p.HostFaction != null)
-            {
-                if (p.HostFaction != Faction.OfPlayer)
-                {
-                    return false;
-                }
-                if (p.guest != null && !p.guest.CanBeBroughtFood)
-                {
-                    return false;
-                }
-            }
-            return true;
+            return p != null && ShouldBeCaredFor(p) && p.RaceProps != null &&p.RaceProps.EatsFood;
         }
 
         /// <summary>

@@ -13,6 +13,11 @@ namespace BabiesAndChildren.Tools
 
         private static Dictionary<ThingDef, bool> thingUsesChildrenCache = new Dictionary<ThingDef, bool>();
 
+
+        public static bool ThingUsesChildren(Thing thing)
+        {
+            return ThingUsesChildren(thing?.def);
+        }
         /// <summary>
         /// Whether a thing with race will have it's children handled by this mod.
         /// </summary>
