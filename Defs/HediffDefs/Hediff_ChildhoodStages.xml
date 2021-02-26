@@ -21,7 +21,7 @@
           </li>
           <li>
             <capacity>Manipulation</capacity>
-            <setMax>0.0</setMax>
+            <setMax>0</setMax>
           </li>
         </capMods>
       </li>

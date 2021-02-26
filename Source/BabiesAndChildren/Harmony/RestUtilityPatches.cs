@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using BabiesAndChildren.api;
@@ -32,7 +33,8 @@ namespace BabiesAndChildren.Harmony {
         /// </summary>
         [HarmonyPostfix]
         static void Postfix(Pawn sleeper, Thing bedThing, bool __result) {
-            if (ChildrenUtility.IsBedCrib((Building_Bed)bedThing) && !ChildrenUtility.ShouldUseCrib(sleeper)) {
+            if (ChildrenUtility.IsBedCrib((Building_Bed)bedThing) && !ChildrenUtility.ShouldUseCrib(sleeper))
+            {
                 __result = false;
             } 
         }
@@ -46,10 +48,10 @@ namespace BabiesAndChildren.Harmony {
         typeof(bool))]
     internal static class RestUtility_FindBedFor_Patch
     {
-        private static MethodInfo GetSortedBeds_MethodInfo = AccessTools.Method(typeof(ChildrenUtility), "GetSortedBeds_RestEffectiveness");
 
-        private static FieldInfo bedDefsBestToWorst_RestEffectivenessInfo =
-            AccessTools.Field(typeof(RestUtility), "bedDefsBestToWorst_RestEffectiveness");
+        private static MethodInfo GetSortedBeds_MethodInfo = SymbolExtensions.GetMethodInfo((Pawn p) => ChildrenUtility.GetSortedBeds_RestEffectiveness(p));
+
+        private static FieldInfo bedDefsBestToWorst_RestEffectivenessInfo = AccessTools.Field(typeof(RestUtility), "bedDefsBestToWorst_RestEffectiveness");
         /// <summary>
         /// Modify FindBedFor to pass in a different order for bedDefs when looking
         /// for the best bed for a pawn. We do not touch the order of beds for

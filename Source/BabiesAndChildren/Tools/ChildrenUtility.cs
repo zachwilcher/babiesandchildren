@@ -1,5 +1,4 @@
-﻿using System;
-using RimWorld;
+﻿using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
 using BabiesAndChildren.api;
@@ -294,9 +293,9 @@ namespace BabiesAndChildren
         {
             NameTriple NameTriple = null;
             if (mother != null)
-                NameTriple = (NameTriple) mother.Name;
+                NameTriple = NameTriple.FromString(mother.Name.ToStringFull);
             if (father != null)
-                NameTriple = (NameTriple)father.Name;
+                NameTriple = NameTriple.FromString(father.Name.ToStringFull);
             pawn.Name = PawnBioAndNameGenerator.GeneratePawnName(pawn, NameStyle.Full, NameTriple?.Last);
         }
 

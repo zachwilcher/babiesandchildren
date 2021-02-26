@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using BabiesAndChildren.api;
 using RimWorld;
 using Verse;
@@ -7,23 +6,6 @@ using HealthUtility = BabiesAndChildren.Tools.HealthUtility;
 
 namespace BabiesAndChildren
 {
-    /// <summary>
-    /// No Manipulation Hediff?
-    /// </summary>
-    public class Hediff_NoFlag : HediffWithComps
-    {
-        public override void PostRemoved()
-        {
-            
-            List<SkillDef> allDefsListForReading = DefDatabase<SkillDef>.AllDefsListForReading;
-            foreach (var skillDef in allDefsListForReading)
-            {
-                pawn.skills.Learn(skillDef, 100, true);
-                CLog.DevMessage("Showbaby skill>> " + pawn.Name + "'s " + skillDef.defName + " Skills set =" + pawn.skills.GetSkill(skillDef));
-            }
-            base.PostRemoved();
-        }
-    }
 
     /// <summary>
     /// class for BabyState HediffDef

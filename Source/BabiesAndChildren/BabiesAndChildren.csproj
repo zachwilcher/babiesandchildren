@@ -60,6 +60,7 @@
     <Compile Include="Defs\AgeStageExtensions.cs" />
     <Compile Include="Defs\BnCHediffDefOf.cs" />
     <Compile Include="Harmony\DressPatientsPatches.cs" />
+    <Compile Include="Harmony\DubsBadHygienePatches.cs" />
     <Compile Include="Harmony\FacialAnimationPatches.cs" />
     <Compile Include="Harmony\JobGiverPatches.cs" />
     <Compile Include="Harmony\PawnGeneratorPatches.cs" />

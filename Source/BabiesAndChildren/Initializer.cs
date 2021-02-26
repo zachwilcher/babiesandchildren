@@ -13,6 +13,7 @@ namespace BabiesAndChildren
             ChildrenBase.ModRimJobWorld_ON = ModTools.IsModOn("RimJobWorld");
             ChildrenBase.ModAndroid_Tiers_ON = ModTools.IsModOn("Android tiers");
             ChildrenBase.ModDressPatients_ON = ModTools.IsModOn("Dress Patients");
+            ChildrenBase.ModDubsBadHygiene_ON = ModTools.IsModOn("Dubs Bad Hygiene");
             if (ChildrenBase.ModFacialAnimation_ON)
             {
                 CLog.Message("Patching Facial Animation");
@@ -23,6 +24,12 @@ namespace BabiesAndChildren
             {
                 CLog.Message("Patching Dress Patients");
                 DressPatientsPatches.Patch();
+            }
+
+            if (ChildrenBase.ModDubsBadHygiene_ON)
+            {
+                CLog.Message("Patching Dubs Bad Hygiene");
+                DubsBadHygienePatches.Patch();
             }
         }
     }

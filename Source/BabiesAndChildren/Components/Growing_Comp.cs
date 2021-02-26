@@ -112,11 +112,6 @@ namespace BabiesAndChildren
                 pawn.health.hediffSet.hediffs.Remove(pawn.health.hediffSet.GetFirstHediffOfDef(BnCHediffDefOf.UnhappyBaby));
             }
 
-            if (pawn.health.hediffSet.HasHediff(BnCHediffDefOf.NoManipulationFlag))
-            {
-                pawn.health.hediffSet.hediffs.Remove(
-                    pawn.health.hediffSet.GetFirstHediffOfDef(BnCHediffDefOf.NoManipulationFlag));
-            }
         }
 
         public void UpdateHediffs()

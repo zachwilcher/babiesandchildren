@@ -64,7 +64,6 @@ namespace BabiesAndChildren.Harmony
             }
         }
     }
-
     [HarmonyPatch(typeof(HealthAIUtility), "ShouldSeekMedicalRestUrgent")]
     internal static class HealthAiUtility_ShouldSeekMedicalRestUrgent_Patch
     {
@@ -76,16 +75,10 @@ namespace BabiesAndChildren.Harmony
         [HarmonyPostfix]
         static void Postfix(Pawn pawn, ref bool __result)
         {
-            if (ChildrenUtility.ShouldUseCrib(pawn))
+            if (pawn.Downed && !(pawn.health.HasHediffsNeedingTend() || HealthAIUtility.ShouldHaveSurgeryDoneNow(pawn)) && ChildrenUtility.ShouldUseCrib(pawn))
             {
                 __result = false;
             }
-
-            if (!pawn.health.HasHediffsNeedingTend(false))
-            {
-                __result = HealthAIUtility.ShouldHaveSurgeryDoneNow(pawn);
-            }
-
         }
     }
 
@@ -99,6 +92,34 @@ namespace BabiesAndChildren.Harmony
             {
                 __result = true;
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(WardenFeedUtility), "ShouldBeFed")]
+    internal static class WardenFeedUtility_ShouldBeFed_Patch
+    {
+        [HarmonyPostfix]
+        static void Postfix(Pawn p, ref bool __result)
+        {
+            if (ChildrenUtility.ShouldBeFed(p))
+            {
+                __result = true;
+            }
+        }
+        
+    }
+
+    [HarmonyPatch(typeof(FeedPatientUtility), "ShouldBeFed")]
+    internal static class FeedPatientUtility_ShouldBeFed_Patch
+    {
+        [HarmonyPostfix]
+        static void Postfix(Pawn p, ref bool __result)
+        {
+            if (ChildrenUtility.ShouldBeFed(p))
+            {
+                __result = true;
+            }
+            
         }
     }
 
