@@ -15,6 +15,8 @@
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
     <TargetFrameworkProfile />
   </PropertyGroup>
+  
+  <!--Build configurations-->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <Optimize>True</Optimize>
@@ -50,6 +52,48 @@
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
     <FileAlignment>4096</FileAlignment>
   </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  
+  
+  <!--Nuget packages-->
+  <ItemDefinitionGroup>
+    <!--Prevent nuget packages from having their dlls copied to Assemblies-->
+    <PackageReference ExcludeAssets="runtime"/>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony" Version="2.0.4" />
+    <PackageReference Include="UnlimitedHugs.Rimworld.HugsLib" Version="8.0.0"/>
+  </ItemGroup>
+    
+  <!--References-->
+  <ItemDefinitionGroup>
+    <!--Prevent References from being copied to Assemblies-->
+    <Reference>
+      <Private>False</Private>
+    </Reference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Reference Include="AlienRace, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>../../../../../../workshop/content/294100/839005762/1.2/Assemblies/AlienRace.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp, Version=1.2.7705.25173, Culture=neutral, PublicKeyToken=null">
+      <HintPath>../../../../RimWorldLinux_Data/Managed/Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+      <HintPath>../../../../RimWorldLinux_Data/Managed/System.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>../../../../RimWorldLinux_Data/Managed/UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>../../../../RimWorldLinux_Data/Managed/UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>../../../../RimWorldLinux_Data/Managed/UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <!--Source files-->
   <ItemGroup>
     <Compile Include="api\AgeStages.cs" />
     <Compile Include="api\Traits.cs" />
@@ -97,7 +141,6 @@
     <Compile Include="Tools\LifeStageUtility.cs" />
     <Compile Include="Tools\StoryUtility.cs" />
     <Compile Include="Tools\VerseExposed.cs" />
-    <None Include="packages.config" />
     <Compile Include="Thoughts\ThoughtWorker_CarryingToy.cs" />
     <Compile Include="Tools\ChildrenUtility.cs" />
     <Compile Include="Tools\BnCLog.cs" />
@@ -107,43 +150,5 @@
     <Compile Include="Tools\ModTools.cs" />
     <Compile Include="Tools\RaceUtility.cs" />
     <Compile Include="Tools\Tweaks.cs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <Reference Include="0Harmony, Version=2.0.4.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>../packages/Lib.Harmony.2.0.4/lib/net472/0Harmony.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="AlienRace">
-      <HintPath>../../../../../../workshop/content/294100/839005762/1.1/Assemblies/AlienRace.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Assembly-CSharp, Version=1.2.7705.25173, Culture=neutral, PublicKeyToken=null">
-      <HintPath>../../../../RimWorldLinux_Data/Managed/Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Assembly-CSharp, Version=1.2.7705.25173, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\..\..\..\RimWorldLinux_Data\Managed\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="HugsLib, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>../packages/UnlimitedHugs.Rimworld.HugsLib.8.0.0/lib/net472/HugsLib.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="System">
-      <HintPath>../../../../RimWorld2150Win64_Data/Managed/System.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>../../../../RimWorldLinux_Data/Managed/UnityEngine.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>../../../../RimWorldLinux_Data/Managed/UnityEngine.CoreModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>../../../../RimWorldLinux_Data/Managed/UnityEngine.IMGUIModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
 </Project>
