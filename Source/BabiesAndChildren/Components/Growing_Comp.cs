@@ -62,10 +62,10 @@ namespace BabiesAndChildren
                 HealthUtility.TryAddHediff(pawn, HediffDef.Named("BabyState"));
             }
 
-            MathTools.Fixed_Rand rand = new MathTools.Fixed_Rand(pawn);
-            StoryUtility.ChangeChildhood(pawn);
-            ModTools.ChangeRJWHediffSeverity(pawn, true, rand);
-            StoryUtility.ChangeBodyType(pawn, rand);
+            if (AgeStages.IsYoungerThan(pawn, AgeStages.Adult))
+            {
+                GrowToStage(AgeStages.GetAgeStage(pawn));
+            }
 
             initialized = true;
 
@@ -80,18 +80,8 @@ namespace BabiesAndChildren
         public void Destroy()
         {
             if (parent == null) return;
-            string name = pawn.Name.ToStringShort;
-            CLog.DevMessage("Growing_Comp:GrowToStage attempting to destroy itself for: " + name);
+            growthStage = AgeStages.Adult;
             DestroyHediffs();
-            parent.AllComps.Remove(this);
-            //By removing this comp from AllComps
-            //JecTools causes an out of bounds exception
-            //Fixed this by adding a component that does nothing
-            //allowing AllComps.Count to stay the same
-            //... At least that's what I think is happening
-            //really should just not add the comp to pawns who don't need it or not remove this and just do nothing
-            parent.AllComps.Add(new DummyComp());
-            CLog.DevMessage("Growing_Comp removed for: " + name);
         }
 
         /// <summary>
@@ -156,14 +146,14 @@ namespace BabiesAndChildren
         /// <param name="stage">The new agestage</param>
         public void GrowToStage(int stage)
         {
-            if (parent == null) return;
-             
+            if (parent == null || growthStage == stage) return;
+
             growthStage = stage;
+            
             
             StoryUtility.ChangeChildhood(pawn);
             
             MathTools.Fixed_Rand rand = new MathTools.Fixed_Rand(pawn);
-            
             StoryUtility.ChangeBodyType(pawn, rand);
 
             bool initSize = false;
@@ -193,7 +183,7 @@ namespace BabiesAndChildren
         {
             if(parent == null) return;
             
-            if (!pawn.Spawned || pawn.Dead) return;
+            if (!pawn.Spawned || pawn.Dead || growthStage == AgeStages.Adult) return;
             
             //Doing this here instead of PostSpawnSetup due to an odd null reference in MakeDowned when adding a hediff during setup
             //This is one way to ensure this only executes once the pawn is truly spawned

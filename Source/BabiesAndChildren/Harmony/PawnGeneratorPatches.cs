@@ -1,4 +1,5 @@
-﻿using BabiesAndChildren.api;
+﻿using System;
+using BabiesAndChildren.api;
 using BabiesAndChildren.Tools;
 using HarmonyLib;
 using Verse;
@@ -6,7 +7,7 @@ using Verse;
 namespace BabiesAndChildren.Harmony
 {
 
-    [HarmonyPatch(typeof(PawnGenerator), "GenerateBodyType")]
+    [HarmonyPatch(typeof(PawnGenerator), "GenerateBodyType_NewTemp")]
     internal static class PawnGenerator_GenerateBodyType_Patch
     {
         [HarmonyPostfix]
@@ -18,4 +19,5 @@ namespace BabiesAndChildren.Harmony
             }
         }
     }
+    
 }

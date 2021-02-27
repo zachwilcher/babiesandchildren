@@ -49,6 +49,8 @@ namespace BabiesAndChildren
                 CLog.Message("Resetting body types of all children.");
                     foreach (Pawn pawn in map.mapPawns.AllPawnsSpawned)
                     {
+                        if (pawn?.story == null)
+                            continue;
                         if (RaceUtility.PawnUsesChildren(pawn) && AgeStages.IsYoungerThan(pawn ,AgeStages.Teenager))
                         {
                             if(pawn.story.bodyType == null)

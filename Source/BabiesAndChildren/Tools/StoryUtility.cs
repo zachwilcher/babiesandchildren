@@ -225,6 +225,7 @@ namespace BabiesAndChildren.Tools
             if (pawn == null) return;
             bool force = false;
             
+            
             BodyTypeDef newBodyType = BodyTypeDefOf.Thin;
             switch (AgeStages.GetAgeStage(pawn))
             {
@@ -259,6 +260,8 @@ namespace BabiesAndChildren.Tools
                         newBodyType= BodyTypeDefOf.Female;
                     }
                     break;
+                case AgeStages.Adult:
+                    return;
             }
 
             if (force && !RaceUtility.ThingUsesChildren(pawn.def))
@@ -266,7 +269,11 @@ namespace BabiesAndChildren.Tools
                 force = false;
             }
 
-            TrySetPawnBodyType(pawn, newBodyType, force);
+            bool result = TrySetPawnBodyType(pawn, newBodyType, force);
+            if (result)
+                CLog.DevMessage(pawn.Name.ToStringShort + " bodyType was changed to: " + newBodyType);
+            else
+                CLog.DevMessage(pawn.Name.ToStringShort + " bodyType failed to change to: " + newBodyType);
         }
     }
 }

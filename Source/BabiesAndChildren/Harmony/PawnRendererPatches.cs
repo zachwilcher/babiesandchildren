@@ -38,29 +38,20 @@ namespace BabiesAndChildren.Harmony
     {
         [HarmonyPrefix]
         [HarmonyBefore(new string[] {"rimworld.Nals.FacialAnimation"})]
-        internal static void Prefix(ref PawnGraphicSet __instance, ref Vector3 rootLoc,
+        internal static bool Prefix(ref PawnGraphicSet __instance, ref Vector3 rootLoc,
             ref Pawn ___pawn, bool portrait)
         {
-            if (!RaceUtility.PawnUsesChildren(___pawn)) return;
+            if (!RaceUtility.PawnUsesChildren(___pawn)) return true;
             
+            // Change the root location of the child's draw position
             if (AgeStages.IsYoungerThan(___pawn, AgeStages.Teenager))
-            {
-                // Change the root location of the child's draw position
                 rootLoc = GraphicTools.ModifyChildYPosOffset(rootLoc, ___pawn, portrait);
-            }
+            
+            //facial animation compatibility for babies and toddlers
+            if (ChildrenBase.ModFacialAnimation_ON && AgeStages.IsYoungerThan(___pawn, AgeStages.Child)) 
+                ModTools.RemoveFacialAnimationComps(___pawn);
 
-            if (AgeStages.IsYoungerThan(___pawn, AgeStages.Child))
-                // Remove Face drawing comp from facial animation for toddlers and babies
-                if (ChildrenBase.ModFacialAnimation_ON)
-                {
-                    ThingComp WIPcomp =
-                        ChildrenUtility.GetCompByClassName(___pawn, "FacialAnimation.DrawFaceGraphicsComp");
-                    if (WIPcomp != null)
-                    {
-                        ___pawn.AllComps.Remove(WIPcomp);
-                    }
-                }
-
+            return true;
             // The rest of the child Pawn renderering is done by alienrace mod.
         }
     }

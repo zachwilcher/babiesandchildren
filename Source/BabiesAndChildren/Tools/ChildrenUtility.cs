@@ -257,12 +257,14 @@ namespace BabiesAndChildren
             
             foreach (ThingComp comp in thing.AllComps)
             {
-                if (comp?.props == null || (comp.props.compClass == null))
+                if (comp?.props?.compClass == null)
                 {
                     continue;
                 }
 
-                if (comp.props.compClass.ToString() == compClassName)
+                var compClass = comp.props.compClass;
+                
+                if (compClass.ToString() == compClassName)
                 {
                     return comp;
                 }

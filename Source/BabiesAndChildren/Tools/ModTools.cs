@@ -98,5 +98,12 @@ namespace BabiesAndChildren
                 
             }
         }
+
+        public static bool RemoveFacialAnimationComps(ThingWithComps thing)
+        {
+            ThingComp comp = ChildrenUtility.GetCompByClassName(thing, "FacialAnimation.DrawFaceGraphicsComp");
+            return comp != null && thing.AllComps.Remove(comp);
+        }
+        
     }
 }
