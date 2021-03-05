@@ -24,7 +24,7 @@ namespace BabiesAndChildren.Harmony
 
         private static void IsPatientPostfix(ref bool __result, Pawn pawn)
         {
-            if (RaceUtility.PawnUsesChildren(pawn) && AgeStages.IsAgeStage(pawn, AgeStages.Baby))
+            if (!__result && RaceUtility.PawnUsesChildren(pawn) && AgeStages.IsAgeStage(pawn, AgeStages.Baby))
                 __result = true;
         }
     }

@@ -36,35 +36,46 @@ namespace BabiesAndChildren
 
         public static bool ShouldBeCaredFor(Pawn p)
         {
+            
             if(p == null || 
                !p.Spawned || 
-               (p.Faction != Faction.OfPlayer && p.HostFaction != Faction.OfPlayer) || 
-               p.playerSettings.medCare == MedicalCareCategory.NoCare)
+               p.GetPosture() == PawnPosture.Standing) 
                 return false;
+
+            if (p.playerSettings?.medCare != null && p.playerSettings.medCare == MedicalCareCategory.NoCare)
+                return false;
+
             var bed = p.CurrentBed();
+            
+            //not in a valid bed
             if (bed == null || bed.Faction != Faction.OfPlayer)
                 return false;
             
+            //not a valid guest
+            if (!p.NonHumanlikeOrWildMan() && p.Faction != Faction.OfPlayer && p.HostFaction != Faction.OfPlayer)
+                return false;
+            
+            //pawn is guest but can't be brought food
             var guest = p.guest;
-            if (guest != null && guest.CanBeBroughtFood)
-                return true;
+            if (guest != null && !guest.CanBeBroughtFood)
+                return false;
             
+            //pawn is designated to be slaughtered
+            if (p.Map.designationManager.DesignationOn(p, DesignationDefOf.Slaughter) != null)
+                return false;
 
-
-            if (HealthAIUtility.ShouldSeekMedicalRest(p))
-                return true;
-            
-            bool goodLayingStatusForTend = p.RaceProps.Humanlike ? p.InBed() : (uint) p.GetPosture() > 0U;
-            var designationSlaughter = p.Map.designationManager.DesignationOn(p, DesignationDefOf.Slaughter);
-
-            return goodLayingStatusForTend && designationSlaughter == null;
+            return HealthAIUtility.ShouldSeekMedicalRest(p);
 
         }
 
+        public static bool IsHungry(Pawn p)
+        {
+            return FeedPatientUtility.IsHungry(p);
+        }
 
         public static bool ShouldBeFed(Pawn p)
         {
-            return p != null && ShouldBeCaredFor(p) && p.RaceProps != null &&p.RaceProps.EatsFood;
+            return p?.RaceProps != null && p.RaceProps.EatsFood && ShouldBeCaredFor(p);
         }
 
         /// <summary>
@@ -207,30 +218,30 @@ namespace BabiesAndChildren
 
         public static void TryDropInvalidEquipment(Pawn pawn)
         {
-                ThingWithComps toy = pawn.equipment.Primary;
-                if (toy != null && ChildrenUtility.SetMakerTagCheck(toy, "Toy"))
-                { pawn.equipment.TryDropEquipment(toy, out _, pawn.Position, false);
-                }
+            ThingWithComps toy = pawn.equipment.Primary;
+            if (toy != null && ChildrenUtility.SetMakerTagCheck(toy, "Toy"))
+            { pawn.equipment.TryDropEquipment(toy, out _, pawn.Position, false);
+            }
             
         }
 
         public static void TryDropInvalidApparel(Pawn pawn)
         {
-                List<Apparel> wornApparel = pawn.apparel.WornApparel;
-                foreach (var apparel in pawn.apparel.WornApparel)
+            List<Apparel> wornApparel = pawn.apparel.WornApparel;
+            foreach (var apparel in pawn.apparel.WornApparel)
+            {
+                if (AgeStages.IsOlderThan(pawn, AgeStages.Baby) && SetMakerTagCheck(apparel, "BabyGear1"))
                 {
-                    if (AgeStages.IsOlderThan(pawn, AgeStages.Baby) && SetMakerTagCheck(apparel, "BabyGear1"))
-                    {
                         
-                    }
                 }
-                for (int i = wornApparel.Count - 1; i >= 0; i--)
+            }
+            for (int i = wornApparel.Count - 1; i >= 0; i--)
+            {
+                if (ChildrenUtility.SetMakerTagCheck(wornApparel[i], "BabyGear"))
                 {
-                    if (ChildrenUtility.SetMakerTagCheck(wornApparel[i], "BabyGear"))
-                    {
-                        pawn.apparel.TryDrop(wornApparel[i], out _, pawn.Position, false);
-                    }
+                    pawn.apparel.TryDrop(wornApparel[i], out _, pawn.Position, false);
                 }
+            }
             
         }
 

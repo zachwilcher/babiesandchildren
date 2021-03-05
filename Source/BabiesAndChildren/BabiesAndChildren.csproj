@@ -1,5 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    
+  
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -52,17 +54,17 @@
     <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
     <FileAlignment>4096</FileAlignment>
   </PropertyGroup>
+
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  
   
   <!--Nuget packages-->
   <ItemDefinitionGroup>
     <!--Prevent nuget packages from having their dlls copied to Assemblies-->
-    <PackageReference ExcludeAssets="runtime"/>
+    <PackageReference ExcludeAssets="runtime" />
   </ItemDefinitionGroup>
   <ItemGroup>
     <PackageReference Include="Lib.Harmony" Version="2.0.4" />
-    <PackageReference Include="UnlimitedHugs.Rimworld.HugsLib" Version="8.0.0"/>
+    <PackageReference Include="UnlimitedHugs.Rimworld.HugsLib" Version="8.0.0" />
   </ItemGroup>
     
   <!--References-->
@@ -99,7 +101,6 @@
     <Compile Include="api\Traits.cs" />
     <Compile Include="api\Races.cs" />
     <Compile Include="api\Thoughts.cs" />
-    <Compile Include="Components\DummyComp.cs" />
     <Compile Include="Components\Growing_Comp.cs" />
     <Compile Include="Defs\AgeStageExtensions.cs" />
     <Compile Include="Defs\BnCHediffDefOf.cs" />

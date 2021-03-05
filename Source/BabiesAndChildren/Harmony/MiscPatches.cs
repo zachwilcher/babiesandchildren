@@ -23,7 +23,12 @@ namespace BabiesAndChildren.Harmony
         [HarmonyPostfix]
         static void Postfix(ref bool __result, Thing thing, Pawn pawn, out string cantReason)
         {
+            
             cantReason = null;
+            
+            if(!__result)
+                return;
+            
             if (thing.def.thingSetMakerTags != null)
             {
                 // prevent non-children from equipping toys
@@ -65,7 +70,7 @@ namespace BabiesAndChildren.Harmony
         }
     }
     [HarmonyPatch(typeof(HealthAIUtility), "ShouldSeekMedicalRestUrgent")]
-    internal static class HealthAiUtility_ShouldSeekMedicalRestUrgent_Patch
+    internal static class HealthAIUtility_ShouldSeekMedicalRestUrgent_Patch
     {
         /// <summary>
         /// Combined with RestUtility patches, this patch ensures that a baby pawn who is not
@@ -75,12 +80,16 @@ namespace BabiesAndChildren.Harmony
         [HarmonyPostfix]
         static void Postfix(Pawn pawn, ref bool __result)
         {
-            if (pawn.Downed && !(pawn.health.HasHediffsNeedingTend() || HealthAIUtility.ShouldHaveSurgeryDoneNow(pawn)) && ChildrenUtility.ShouldUseCrib(pawn))
+            if (__result && 
+                RaceUtility.ThingUsesChildren(pawn) && 
+                ChildrenUtility.ShouldUseCrib(pawn) && 
+                pawn.Downed && !(pawn.health.HasHediffsNeedingTend() || HealthAIUtility.ShouldHaveSurgeryDoneNow(pawn)))
             {
                 __result = false;
             }
         }
     }
+    //original => WardenFeedUtility.ShouldBeFed || FeedPatientUtility.ShouldBeFed
 
     [HarmonyPatch(typeof(FoodUtility), "ShouldBeFedBySomeone")]
     internal static class FoodUtility_ShouldBeFedBySomeone_Patch
@@ -88,7 +97,7 @@ namespace BabiesAndChildren.Harmony
         [HarmonyPostfix]
         static void Postfix(Pawn pawn, ref bool __result)
         {
-            if (ChildrenUtility.ShouldBeFed(pawn))
+            if (!__result && ChildrenUtility.ShouldBeFed(pawn))
             {
                 __result = true;
             }
@@ -101,7 +110,7 @@ namespace BabiesAndChildren.Harmony
         [HarmonyPostfix]
         static void Postfix(Pawn p, ref bool __result)
         {
-            if (ChildrenUtility.ShouldBeFed(p))
+            if (!__result && p.IsPrisonerOfColony && ChildrenUtility.ShouldBeFed(p))
             {
                 __result = true;
             }
@@ -115,7 +124,7 @@ namespace BabiesAndChildren.Harmony
         [HarmonyPostfix]
         static void Postfix(Pawn p, ref bool __result)
         {
-            if (ChildrenUtility.ShouldBeFed(p))
+            if (!__result && ChildrenUtility.ShouldBeFed(p))
             {
                 __result = true;
             }

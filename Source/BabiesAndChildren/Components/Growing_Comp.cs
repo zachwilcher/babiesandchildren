@@ -70,13 +70,7 @@ namespace BabiesAndChildren
             initialized = true;
 
         }
-
-
-
-        /// <summary>
-        /// When this child has grown fully, we no longer need this component and may therefor
-        /// destroy it forever. This cleanup step will remove unnecessary ticks as well.
-        /// </summary>
+        
         public void Destroy()
         {
             if (parent == null) return;

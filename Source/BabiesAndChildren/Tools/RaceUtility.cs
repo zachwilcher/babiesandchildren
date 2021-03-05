@@ -24,13 +24,12 @@ namespace BabiesAndChildren.Tools
         public static bool ThingUsesChildren(ThingDef thingDef)
         {
             var raceProps = thingDef?.race;
-            if (raceProps == null)
+            if (raceProps == null || !raceProps.Humanlike)
                 return false;
             
             if (thingUsesChildrenCache.ContainsKey(thingDef))
                 return thingUsesChildrenCache[thingDef];
             var usesChildren = 
-                   raceProps.Humanlike &&
                    !ModTools.IsRobot(thingDef) &&
                    !Races.IsBlacklisted(thingDef);
             

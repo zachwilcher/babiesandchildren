@@ -12,17 +12,9 @@ namespace BabiesAndChildren
 
 	public class WorkGiver_TakeBabyToBedAndFeed : WorkGiver_Scanner
 	{
-		public override PathEndMode PathEndMode {
-			get {
-				return PathEndMode.Touch;
-			}
-		}
-		public override ThingRequest PotentialWorkThingRequest {
-			get {
-				return ThingRequest.ForGroup (ThingRequestGroup.Pawn);
-			}
-		}
-        
+		public override PathEndMode PathEndMode => PathEndMode.Touch;
+		public override ThingRequest PotentialWorkThingRequest => ThingRequest.ForGroup (ThingRequestGroup.Pawn);
+
 		public override bool HasJobOnThing (Pawn pawn, Thing t, bool forced = false)
 		{
 			Pawn baby = (Pawn) t;
@@ -41,17 +33,15 @@ namespace BabiesAndChildren
 				JobFailReason.Is("NoCrib".Translate());
 				return false;
 			}
-			// Is baby hungry?
-			if (baby.needs.food == null || baby.needs.food.CurLevelPercentage > baby.needs.food.PercentageThreshHungry + 0.05f){
+			if (!FeedPatientUtility.IsHungry(baby)){
 				return false;
 			}
 			LocalTargetInfo target = t;
 			if (!pawn.CanReserve(target, 1, -1, null, forced)){
 				return false;
 			}
-			Thing thing;
-			ThingDef thingDef;
-			if (!FoodUtility.TryFindBestFoodSourceFor(pawn, baby, baby.needs.food.CurCategory == HungerCategory.Starving, out thing, out thingDef, false)){
+
+			if (!FoodUtility.TryFindBestFoodSourceFor(pawn, baby, baby.needs.food.CurCategory == HungerCategory.Starving, out var thing, out var thingDef, false)){
 				JobFailReason.Is("NoFood".Translate(), null);
 				return false;
 			}
