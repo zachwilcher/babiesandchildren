@@ -1,6 +1,5 @@
 using System;
 using System.Reflection;
-using BabiesAndChildren.api;
 using HarmonyLib;
 using Verse;
 
@@ -25,7 +24,7 @@ namespace BabiesAndChildren.Harmony
 
         private static void ShouldBeWashedBySomeonePostfix(Pawn pawn, ref bool __result) 
         {
-            if (!__result && AgeStages.IsYoungerThan(pawn, AgeStages.Child) && ChildrenUtility.ShouldBeCaredFor(pawn))
+            if (!__result && ChildrenUtility.ShouldBeCaredFor(pawn))
             {
                 __result = true;
             }

@@ -34,6 +34,9 @@ namespace BabiesAndChildren
             }
         }
 
+        /// <summary>
+        /// Whether a pawn should be assisted by other pawns for anything
+        /// </summary>
         public static bool ShouldBeCaredFor(Pawn p)
         {
             
@@ -45,37 +48,30 @@ namespace BabiesAndChildren
             if (p.playerSettings?.medCare != null && p.playerSettings.medCare == MedicalCareCategory.NoCare)
                 return false;
 
-            var bed = p.CurrentBed();
-            
-            //not in a valid bed
-            if (bed == null || bed.Faction != Faction.OfPlayer)
-                return false;
-            
             //not a valid guest
             if (!p.NonHumanlikeOrWildMan() && p.Faction != Faction.OfPlayer && p.HostFaction != Faction.OfPlayer)
-                return false;
-            
-            //pawn is guest but can't be brought food
-            var guest = p.guest;
-            if (guest != null && !guest.CanBeBroughtFood)
                 return false;
             
             //pawn is designated to be slaughtered
             if (p.Map.designationManager.DesignationOn(p, DesignationDefOf.Slaughter) != null)
                 return false;
 
+            //Babies and toddlers always have things they need help with
+            if (RaceUtility.PawnUsesChildren(p) && AgeStages.IsYoungerThan(p, AgeStages.Child))
+                return true;
+            
+            //not in a valid bed
+            var bed = p.CurrentBed();
+            if (bed == null || bed.Faction != Faction.OfPlayer)
+                return false;
+
             return HealthAIUtility.ShouldSeekMedicalRest(p);
 
         }
 
-        public static bool IsHungry(Pawn p)
-        {
-            return FeedPatientUtility.IsHungry(p);
-        }
-
         public static bool ShouldBeFed(Pawn p)
         {
-            return p?.RaceProps != null && p.RaceProps.EatsFood && ShouldBeCaredFor(p);
+            return p?.RaceProps != null && p.RaceProps.EatsFood && ShouldBeCaredFor(p) && (p.guest == null || p.guest.CanBeBroughtFood);
         }
 
         /// <summary>

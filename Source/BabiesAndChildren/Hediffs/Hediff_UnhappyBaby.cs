@@ -4,6 +4,10 @@ using Verse.Sound;
 
 namespace BabiesAndChildren
 {
+    
+    /// <summary>
+    /// Whether a pawn should cry
+    /// </summary>
     public class Hediff_UnhappyBaby : HediffWithComps
     {
         
