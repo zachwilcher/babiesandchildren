@@ -28,16 +28,20 @@ namespace BabiesAndChildren
             if (thingDef?.race == null)
                 return false;
 
-            bool isRobot = false;
-            
-            if (ChildrenBase.ModAndroid_Tiers_ON)
+            bool isRobot = thingDef.race.IsMechanoid;
+
+            if (!isRobot && ChildrenBase.ModAndroid_Tiers_ON)
             {
                 string defName = thingDef.defName.ToLower();
-                isRobot =  defName.Contains("robot") || defName.Contains("android");
+                isRobot = defName.Contains("robot") || defName.Contains("android");
             }
 
-            if (thingDef.race.IsMechanoid)
-                isRobot = true;
+            if (!isRobot && ChildrenBase.ModRimsecSecurity_ON)
+            {
+                string defName = thingDef.defName;
+                isRobot = defName.Contains("RSPeacekeeperDefender");
+                
+            }
 
             return isRobot;
         }

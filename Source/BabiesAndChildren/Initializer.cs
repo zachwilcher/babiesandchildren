@@ -14,6 +14,7 @@ namespace BabiesAndChildren
             ChildrenBase.ModAndroid_Tiers_ON = ModTools.IsModOn("Android tiers");
             ChildrenBase.ModDressPatients_ON = ModTools.IsModOn("Dress Patients");
             ChildrenBase.ModDubsBadHygiene_ON = ModTools.IsModOn("Dubs Bad Hygiene");
+            ChildrenBase.ModRimsecSecurity_ON = ModTools.IsModOn("Rimsec Security");
             if (ChildrenBase.ModFacialAnimation_ON)
             {
                 CLog.Message("Patching Facial Animation");

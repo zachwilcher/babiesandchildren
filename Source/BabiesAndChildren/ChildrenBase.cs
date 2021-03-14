@@ -24,6 +24,8 @@ namespace BabiesAndChildren
         public static bool ModDressPatients_ON = false;
         //Dubs Bad Hygiene
         public static bool ModDubsBadHygiene_ON;
+        //Rimsec Security
+        public static bool ModRimsecSecurity_ON;
 
         private ChildrenBase()
         {
