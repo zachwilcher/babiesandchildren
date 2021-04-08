@@ -173,7 +173,7 @@ namespace BabiesAndChildren.Harmony
                 !pawn.Faction.IsPlayer) 
                 return;
             
-            if (eq.def.BaseMass > ChildrenUtility.GetMaxWeaponMass(pawn))
+            if (BnCSettings.OptionChildrenDropWeapons && (eq.def.BaseMass > ChildrenUtility.GetMaxWeaponMass(pawn)))
             {
                 Messages.Message(
                     "MessageWeaponTooLarge".Translate(eq.def.label,
@@ -195,8 +195,11 @@ namespace BabiesAndChildren.Harmony
                 !RaceUtility.PawnUsesChildren(pawn) || 
                 AgeStages.IsOlderThan(pawn, AgeStages.Child)) 
                 return;
-            
-            ChildrenUtility.ApplyRecoil(__instance);
+
+            if (BnCSettings.OptionChildrenDropWeapons)
+            {
+                ChildrenUtility.ApplyRecoil(__instance);
+            }
         }
     }
 

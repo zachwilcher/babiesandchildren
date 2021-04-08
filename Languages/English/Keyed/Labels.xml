@@ -24,6 +24,8 @@
   <BabyInheritPercentage_Desc_75>75%</BabyInheritPercentage_Desc_75>
   <BabyInheritPercentage_Desc_90>90%</BabyInheritPercentage_Desc_90>
   <BabyInheritPercentage_Desc_Random>Random</BabyInheritPercentage_Desc_Random>
+  <OptionChildrenDropWeapons>Children drop weapons</OptionChildrenDropWeapons>
+  <OptionChildrenDropWeaponsDesc>Children drop weapons when they fire to simulate their lack of recoil control and strength to hold the weapon.</OptionChildrenDropWeaponsDesc>
   <OptionChildMaxWeaponMass>Children's max weapon mass</OptionChildMaxWeaponMass>
   <OptionChildMaxWeaponMass_desc>Children's max weapon mass\n Default: 2</OptionChildMaxWeaponMass_desc>
   <GestationPeriodDays_Enable>Enable gestation period setting</GestationPeriodDays_Enable>

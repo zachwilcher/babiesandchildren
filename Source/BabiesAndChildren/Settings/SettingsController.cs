@@ -3,9 +3,9 @@ using Verse;
 
 namespace BabiesAndChildren.Settings
 {
-    public class RJWSettingsController : Mod
+    public class BnCSettingsController : Mod
     {
-        public RJWSettingsController(ModContentPack content) : base(content)
+        public BnCSettingsController(ModContentPack content) : base(content)
         {
             GetSettings<BnCSettings>();
         }

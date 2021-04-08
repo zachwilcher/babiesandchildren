@@ -426,7 +426,10 @@ namespace BabiesAndChildren
 
         public static bool ApplyRecoil(Verb_Shoot verb)
         {
-
+            if (!BnCSettings.OptionChildrenDropWeapons)
+            {
+                return false;
+            }
             Pawn pawn = (Pawn) verb?.caster;
             
             if (pawn == null || verb.EquipmentSource.def.BaseMass > GetMaxWeaponMass(pawn))

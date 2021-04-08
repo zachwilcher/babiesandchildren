@@ -122,6 +122,7 @@ namespace BabiesAndChildren
         {
             if (parent == null) return;
             
+            //TODO use percentages instead of years to allow for unique AgeStages 
             int age = pawn.ageTracker.AgeBiologicalYears;
             
             //Accelerated Growth Factor

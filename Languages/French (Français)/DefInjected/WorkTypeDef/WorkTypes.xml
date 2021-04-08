@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LanguageData>
+
+  <Childcare.label>Garde d'enfants</Childcare.label>
+  <Childcare.description>Prendre soin des bébés et gère les enfants.</Childcare.description>
+  <Childcare.labelShort>Childcare</Childcare.labelShort>
+  <Childcare.pawnLabel>Garde d'enfants</Childcare.pawnLabel>
+  <Childcare.gerundLabel>Garde des enfants</Childcare.gerundLabel>
+  <Childcare.verb>S'occuper de</Childcare.verb>
+
+
+</LanguageData>
