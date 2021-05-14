@@ -13,13 +13,10 @@ namespace BabiesAndChildren.Harmony
         [HarmonyPostfix]
         public static void Postfix(ref PawnGraphicSet __instance, ref bool __result)
         {
-            if (ChildrenUtility.SetMakerTagCheck(__instance.pawn.equipment.Primary, "Toy"))
+if (__instance.pawn.equipment.Primary != null && ChildrenUtility.SetMakerTagCheck(__instance.pawn.equipment.Primary, "Toy"))
             {
                 __result = true;
             }
-
-        }
-    }
 
 
     [HarmonyPatch(typeof(PawnRenderer), "RenderPawnInternal", new[]
