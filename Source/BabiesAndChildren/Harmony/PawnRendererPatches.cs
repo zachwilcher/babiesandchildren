@@ -8,16 +8,19 @@ using Verse;
 namespace BabiesAndChildren.Harmony
 {
     [HarmonyPatch(typeof(PawnRenderer), "CarryWeaponOpenly")]
-    internal static class PawnRenderer_CarryWeaponOpenly_Patch
+    public static class PawnRenderer_CarryWeaponOpenly_Patch
     {
         [HarmonyPostfix]
         public static void Postfix(ref PawnGraphicSet __instance, ref bool __result)
         {
-if (__instance.pawn.equipment.Primary != null && ChildrenUtility.SetMakerTagCheck(__instance.pawn.equipment.Primary, "Toy"))
+            if (__instance.pawn.equipment.Primary != null &&
+                ChildrenUtility.SetMakerTagCheck(__instance.pawn.equipment.Primary, "Toy"))
             {
                 __result = true;
             }
 
+        }
+    }
 
     [HarmonyPatch(typeof(PawnRenderer), "RenderPawnInternal", new[]
     {
