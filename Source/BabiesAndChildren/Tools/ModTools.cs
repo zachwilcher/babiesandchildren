@@ -39,7 +39,7 @@ namespace BabiesAndChildren
             if (!isRobot && ChildrenBase.ModRimsecSecurity_ON)
             {
                 string defName = thingDef.defName;
-                isRobot = defName.Contains("RSPeacekeeperDefender");
+                isRobot = defName.Contains("RSPeacekeeperDefender") || defName.Contains("RSPeacekeeperEnforcer") || defName.Contains("RSPeacekeeperSentinel");
                 
             }
 
